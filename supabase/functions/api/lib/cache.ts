@@ -1,3 +1,5 @@
+import { createClient } from 'jsr:@supabase/supabase-js@2'
+
 export type CacheRow = {
   payload: unknown
   expiresAt: number
@@ -57,4 +59,33 @@ export function createCache(store: CacheStore, now: () => number = Date.now) {
   }
 
   return { resolve }
+}
+
+export function createPostgresStore(url: string, serviceKey: string): CacheStore {
+  const db = createClient(url, serviceKey)
+
+  return {
+    async read(key) {
+      const { data, error } = await db
+        .from('cache_entries')
+        .select('payload, expires_at')
+        .eq('key', key)
+        .maybeSingle()
+
+      if (error || !data) return null
+
+      return {
+        payload: data.payload,
+        expiresAt: new Date(data.expires_at).getTime(),
+      }
+    },
+
+    async write(key, payload, expiresAt) {
+      await db.from('cache_entries').upsert({
+        key,
+        payload,
+        expires_at: new Date(expiresAt).toISOString(),
+      })
+    },
+  }
 }

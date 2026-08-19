@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:api": "deno test --config supabase/functions/deno.json --allow-env supabase/functions/api/tests/"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
