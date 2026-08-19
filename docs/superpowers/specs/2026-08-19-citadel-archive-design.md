@@ -773,7 +773,7 @@ The known-issues section gets filled in honestly. An empty one reads worse than 
 
 1. Project scaffold, Supabase setup, **a working deployment of both halves**
 2. Backend: router, `rmClient`, cache, the three list endpoints, `/api/stats`
-3. Design system in Claude Design, then port tokens into Tailwind
+3. Design tokens and shared components in code, then `/design-sync` to publish the system
 4. List sections: grid, filters, pagination, skeletons
 5. Detail pages with relations
 6. Settings panel and the three dimensions

@@ -24,6 +24,16 @@ This is plan 1 of 5. Each plan leaves working, deployed software.
 | 4 — Intelligence | Global search, `/search` page, AI dossiers, grounded `/api/ask`, spend controls | §6.2 (search/ask/dossier), §6.5, §10.1, §10.2 |
 | 5 — Finish | Speech, the detail and microcopy layer, responsive adaptation, README | §10.3, §11.3, §15 |
 
+### Why the code comes before the screen designs
+
+Claude Design publishes a design system by reading **code** — `/design-sync` ingests tokens and React components from the repository, not an exported mockup. Nothing can be synced until the token layer and the shared components exist.
+
+The order is therefore inverted from the original intent. Tasks 1–4 and 16–21 produce the token set and nine components; running `/design-sync` at that point publishes the system, and the remaining screens are then designed against components that genuinely exist rather than against a picture that has yet to be translated into code.
+
+The approved mockup is not discarded. It validated the system by eye and surfaced a real defect — muted text failing AA on raised surfaces — and it remains the visual reference while the components are built.
+
+`/design-sync` must be typed by the user at the prompt; it cannot be invoked on their behalf.
+
 **Do not start plan 2 until plan 1 is deployed and verified.** Spec §13.1 makes this non-negotiable: a deferred deployment becomes CORS and environment debugging under deadline pressure.
 
 ---
