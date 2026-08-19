@@ -1,6 +1,6 @@
 # Start Here
 
-Handoff note for a fresh session. Written 2026-08-20, after design and planning, before any code exists.
+Handoff note for a fresh session. Last updated 2026-08-20, after plan 1 tasks 1-12 shipped.
 
 ## What this project is
 
@@ -20,18 +20,47 @@ The assignment requires a public GitHub repository, a thorough README, and that 
 
 ## Current state
 
-Nothing is built. The repository holds documents, references, and a design brief. Three commits on `main`.
+**Plan 1 is half done: tasks 1-12 are complete, 13-23 are not.** Both halves are deployed and talking to each other. Fifteen commits on `main`, pushed.
 
-- **No `src/`.** The Vite project has not been scaffolded
-- **No Supabase project.** Not created, not linked
-- **No GitHub remote.** `git init` was run locally; nothing has been pushed
-- **No `.env`.** No keys obtained yet
+| | |
+|---|---|
+| Frontend | https://dossier-c137.vercel.app |
+| Backend | https://coeupddmmjnjotarlnwg.supabase.co/functions/v1/api |
+| Repository | https://github.com/Ba5bit/dossier-c137 |
+| Supabase project ref | `coeupddmmjnjotarlnwg` (region ap-northeast-2) |
+
+What exists:
+
+- **Backend, complete for characters.** `router -> handler -> service -> client/cache`, deployed with `--no-verify-jwt`. 33 Deno tests
+- **Cache.** `cache_entries` migrated and live, 24 h TTL, stale-on-failure fallback. RLS on with no policies, verified: the anon key reads `[]`, the service role reads rows
+- **Frontend.** Scaffold, Tailwind v4 wired to all three dimension palettes, Vitest, and the `Skeleton` primitive. 2 tests. Everything else in `src/` is still the placeholder `App.tsx`
+- **`.env.local`** holds real values and is gitignored. `.env.example` records the contract
 
 ## Immediate next step
 
-Execute plan 1 starting at task 1. It scaffolds the project, builds the backend, and deploys both halves.
+Resume plan 1 at **task 13** (the frontend API client). Tasks 13-22 are pure frontend against MSW mocks and need nothing from the user. Task 23 re-verifies the deployed slice and tags `plan-1-foundation`.
 
-**Task 12 is a hard gate.** It deploys the Edge Function and the frontend, and nothing past it proceeds until a public URL answers. This is deliberate: a deferred deployment turns into CORS and environment debugging under deadline pressure.
+Vercel rebuilds on every push to `main`, so no deploy step is needed until task 23.
+
+## Commands that are not obvious
+
+```bash
+npm test          # frontend, Vitest
+npm run test:api  # backend, Deno - needs the --config flag baked into the script
+npm run lint      # ESLint, replaces the template's oxlint
+npm run build
+```
+
+## Deviations from the plan as written, already made
+
+- **ESLint replaced oxlint.** `create-vite` now ships oxlint, but the task 15 boundary rule needs `no-restricted-syntax` with AST selectors, which oxlint lacks
+- **`supabase/functions/deno.json` added.** Without it Deno resolved JSR imports through the frontend's `node_modules` and failed
+- **`vite.config.ts` imports `defineConfig` from `vitest/config`.** Vitest 4 dropped the triple-slash augmentation the plan uses, and `tsc` rejected the `test` key
+- **The project was renamed** from Citadel Archive to Dossier C-137, after the deploy. The `citadel` dimension token is unrelated and unchanged
+
+## Still needed from the user, later
+
+Plan 4 needs Grok and ElevenLabs API keys, set via `supabase secrets set`. Nothing before that.
 
 ## Decisions already made — do not relitigate
 
