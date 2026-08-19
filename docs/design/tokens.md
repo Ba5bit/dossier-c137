@@ -48,7 +48,7 @@ The canonical look. The palette above works here essentially unmodified.
 | `--surface-raised` | `#414F3D` | — | — |
 | `--border` | `#4E5C4A` | 1.4:1 | decorative |
 | `--text-primary` | `#EAE9EA` | **9.75:1** | AAA |
-| `--text-secondary` | `#A6ADA0` | **5.12:1** | AA |
+| `--text-secondary` | `#BAC1B4` | **6.40:1** | AA — 4.72:1 on `--surface-raised`, the worst case |
 | `--accent` | `#A7CB56` | **6.37:1** | AA |
 | `--accent-hover` | `#B8D96D` | 7.4:1 | AAA |
 | `--accent-deep` | `#228D44` | 2.6:1 | decorative — fills and glows only |
@@ -90,7 +90,7 @@ The moss green from the source is too light to serve as a background — it work
 | `--surface-raised` | `#3A4430` | — | — |
 | `--border` | `#49573D` | 1.8:1 | decorative |
 | `--text-primary` | `#E4E2DA` | **11.5:1** | AAA |
-| `--text-secondary` | `#A39F92` | **5.4:1** | AA |
+| `--text-secondary` | `#B4B0A3` | **6.89:1** | AA — 4.72:1 on `--surface-raised`, the worst case |
 | `--accent` | `#C07E72` | **4.60:1** | AA — the diseased flesh, lightened to pass |
 | `--accent-hover` | `#D29387` | 5.6:1 | AA |
 | `--link` | `#A2D0E4` | **9.9:1** | AAA |
@@ -105,7 +105,7 @@ Character status must never be conveyed by color alone (spec §12.1) — a text 
 |---|---|---|---|---|
 | `--status-alive` | `#A7CB56` | `#4C6520` | `#A7CB56` | Portal green — living |
 | `--status-dead` | `#DB958C` | `#8E4A42` | `#C07E72` | Diseased red — terminated |
-| `--status-unknown` | `#A6ADA0` | `#6B7370` | `#A39F92` | Muted — unrecorded |
+| `--status-unknown` | `#BAC1B4` | `#6B7370` | `#B4B0A3` | Muted — unrecorded |
 
 `--status-dead` in `c-137` is the Cronenberg flesh lightened to `#DB958C`, reaching 4.89:1. The raw `#A7635B` sits at 2.57:1 on the dark background and is unusable for text or for a status dot.
 
@@ -116,6 +116,26 @@ Character status must never be conveyed by color alone (spec §12.1) — a text 
 No hue outside the ten source colors may be introduced. Borders, muted text, hover states, elevated surfaces, and glows are all produced by mixing a source color with `--bg` or `--text-primary`.
 
 This constraint is what keeps the design coherent as it grows, and it is the single most useful instruction to hand to a design tool.
+
+---
+
+## Surface-aware contrast
+
+Muted text sits on cards and raised panels, not only on the page background. Validating it against `--bg` alone is insufficient — the earlier `#A6ADA0` and `#A39F92` values measured 5.12:1 and 5.40:1 on the background but fell to **3.78:1** and **3.87:1** on `--surface-raised`, failing AA where they are most often used.
+
+The current values are chosen so the **worst** case across all three surfaces still passes:
+
+| Dimension | `--text-secondary` | on `--bg` | on `--surface` | on `--surface-raised` |
+|---|---|---|---|---|
+| `c-137` | `#BAC1B4` | 6.40 | 5.26 | 4.72 |
+| `citadel` | `#5A6663` | 4.95 | 5.37 | 5.77 |
+| `cronenberg` | `#B4B0A3` | 6.89 | 5.71 | 4.72 |
+
+**Rule for any new color:** validate against every surface it can land on, not just the page background.
+
+### `citadel-cool` as a fill
+
+`#577B80` carrying `#EAE9EA` text measures **3.81:1** and fails AA. When the teal must be a fill behind text, use `#3E5A5E` instead, which reaches 6.13:1. `#577B80` is otherwise limited to borders, icons, and decorative panels.
 
 ---
 

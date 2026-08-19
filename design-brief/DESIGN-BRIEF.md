@@ -108,7 +108,7 @@ Three dimensions. Contrast ratios are computed and must be preserved.
 --surface-raised   #414F3D
 --border           #4E5C4A
 --text-primary     #EAE9EA    9.75:1  AAA
---text-secondary   #A6ADA0    5.12:1  AA
+--text-secondary   #BAC1B4    6.40:1  AA (4.72:1 on surface-raised)
 --accent           #A7CB56    6.37:1  AA
 --accent-hover     #B8D96D    7.40:1  AAA
 --accent-deep      #228D44    2.60:1  fills and glows only, never text
@@ -134,6 +134,13 @@ Three dimensions. Contrast ratios are computed and must be preserved.
 
 Bright portal green **cannot carry text** on this background. Use `--fill-portal` as a background with `--text-primary` over it, or `--accent-portal` when green text is genuinely required.
 
+### Contrast is surface-aware
+
+Validate every color against the surface it actually lands on, not only against `--bg`. Muted text on a raised panel is the case that fails most often. The `--text-secondary` values above already pass on all three surfaces; anything you derive must do the same.
+
+`citadel-cool` `#577B80` carrying off-white text measures 3.81:1 and fails. When the teal must sit behind text, use `#3E5A5E` (6.13:1). Otherwise restrict `#577B80` to borders, icons, and decorative panels.
+
+
 ### `cronenberg` — dark, easter egg
 
 ```
@@ -142,7 +149,7 @@ Bright portal green **cannot carry text** on this background. Use `--fill-portal
 --surface-raised   #3A4430
 --border           #49573D
 --text-primary     #E4E2DA   11.50:1  AAA
---text-secondary   #A39F92    5.40:1  AA
+--text-secondary   #B4B0A3    6.89:1  AA (4.72:1 on surface-raised)
 --accent           #C07E72    4.60:1  AA
 --accent-hover     #D29387    5.60:1  AA
 --link             #A2D0E4    9.90:1  AAA
@@ -156,7 +163,7 @@ Status is **never conveyed by color alone** — a text label always accompanies 
 |---|---|---|---|
 | status-alive | `#A7CB56` | `#4C6520` | `#A7CB56` |
 | status-dead | `#DB958C` | `#8E4A42` | `#C07E72` |
-| status-unknown | `#A6ADA0` | `#6B7370` | `#A39F92` |
+| status-unknown | `#BAC1B4` | `#6B7370` | `#B4B0A3` |
 
 ---
 
