@@ -45,3 +45,6 @@ coverage/
 
 # Vite
 .vite/
+
+# Playwright MCP scratch
+.playwright-mcp/
