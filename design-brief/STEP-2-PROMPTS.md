@@ -51,7 +51,7 @@ The brief lists screens in narrative order. Build them in this order instead.
 Design the character list screen.
 
 Layout, top to bottom:
-- Header: the CITADEL ARCHIVE // CLEARANCE: UNRESTRICTED stamp line, the
+- Header: the DOSSIER C-137 // CLEARANCE: UNRESTRICTED stamp line, the
   page title, and the live count from the data (826 entities, 42 pages)
 - Filter bar: name search, status select, species input, gender select,
   and a clear control that appears only when a filter is active
@@ -229,7 +229,7 @@ delivering bad news in a specific voice.
 ```
 Design the boot sequence shown on first visit.
 
-A terminal types CITADEL ARCHIVE v1.37 // INITIALIZING... line by line
+A terminal types DOSSIER C-137 v1.37 // INITIALIZING... line by line
 before the hub assembles. Show three frames: early, mid-typing, and the
 moment before the hub resolves.
 

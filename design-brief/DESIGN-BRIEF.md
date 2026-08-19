@@ -1,4 +1,4 @@
-# Citadel Archive — Design Brief
+# Dossier C-137 — Design Brief
 
 ## How to use this brief
 
@@ -274,7 +274,7 @@ Show each in the `c-137` dimension, then show the card and the button in all thr
 5. **Location list and detail**
 6. **Episode list and detail**
 7. **404** — "This dimension doesn't exist"
-8. **Boot sequence** — terminal typing `CITADEL ARCHIVE v1.37 // INITIALIZING…`
+8. **Boot sequence** — terminal typing `DOSSIER C-137 v1.37 // INITIALIZING…`
 
 ---
 
@@ -314,7 +314,7 @@ No photographs. No starfields.
 
 The voice is a bureaucratic archive terminal that has absorbed the show's cynicism. Dry where it is functional, sharp where it has room.
 
-- Header stamp: `CITADEL ARCHIVE // CLEARANCE: UNRESTRICTED`
+- Header stamp: `DOSSIER C-137 // CLEARANCE: UNRESTRICTED`
 - IDs: `REGISTRY #001 · C-137`
 - Pagination: `DIMENSION 3 / 42`, with `← JUMP` and `JUMP →`
 - Episode lists: `PERSONNEL PRESENT`

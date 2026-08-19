@@ -66,11 +66,11 @@ The awkward cases matter most: long names, `unknown` origins, `Poopybutthole` as
 
 ## 4. Typeface findings
 
-`references/font-size-11px.png` renders *Citadel Archive* in Get Schwifty at 11px, and the result is barely legible — confirming the rule in spec §11.1. This specimen ships with the design prompt specifically so the tool sees the failure for itself rather than being told about it.
+`references/font-size-11px.png` renders *Dossier C-137* in Get Schwifty at 11px, and the result is barely legible — confirming the rule in spec §11.1. This specimen ships with the design prompt specifically so the tool sees the failure for itself rather than being told about it.
 
-`references/title_font_example-1.png` shows the same words at display size with the show's characteristic treatment: blue fill, green outer glow, soft pink drop shadow. This is the wordmark direction for the `CITADEL ARCHIVE` lockup.
+`references/title_font_example-1.png` shows the same words at display size with the show's characteristic treatment: blue fill, green outer glow, soft pink drop shadow. This is the wordmark direction for the `DOSSIER C-137` lockup.
 
-The application is named **Citadel Archive**, not *Rick and Morty*. The show's own logo is deliberately not used — the wordmark is typeset in Get Schwifty instead, which avoids shipping a trademarked lockup and yields something that belongs to the project.
+The application is named **Dossier C-137**, not *Rick and Morty*. The show's own logo is deliberately not used — the wordmark is typeset in Get Schwifty instead, which avoids shipping a trademarked lockup and yields something that belongs to the project.
 
 ---
 

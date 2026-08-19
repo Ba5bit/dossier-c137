@@ -1,14 +1,14 @@
-# Citadel Archive — Foundation Implementation Plan
+# Dossier C-137 — Foundation Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build and deploy a working vertical slice of Citadel Archive — a Supabase Edge Function backend that proxies and caches the Rick and Morty API, plus a React frontend rendering the character list with URL-driven filters, pagination, and skeletons.
+**Goal:** Build and deploy a working vertical slice of Dossier C-137 — a Supabase Edge Function backend that proxies and caches the Rick and Morty API, plus a React frontend rendering the character list with URL-driven filters, pagination, and skeletons.
 
 **Architecture:** A React SPA (Vite) calls exactly one backend: a Supabase Edge Function written in Deno. That function is the sole egress point to `rickandmortyapi.com`, enforced by a lint rule. Inside the function, layers flow one way — `router → handler → service → client/cache` — with each layer tested by stubbing the layer beneath it. Responses are cached in Supabase Postgres with a 24-hour TTL.
 
 **Tech Stack:** React 19, Vite, TypeScript, React Router v7, TanStack Query, Tailwind v4, Vitest, React Testing Library, MSW, Supabase Edge Functions (Deno), Supabase Postgres.
 
-**Source spec:** `docs/superpowers/specs/2026-08-19-citadel-archive-design.md`
+**Source spec:** `docs/superpowers/specs/2026-08-19-dossier-c137-design.md`
 
 ---
 
@@ -306,7 +306,7 @@ Replace `index.html` entirely:
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Citadel Archive</title>
+    <title>Dossier C-137</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -329,7 +329,7 @@ Replace `src/App.tsx` with a temporary check:
 export default function App() {
   return (
     <div className="min-h-screen bg-bg p-8">
-      <h1 className="text-fg font-mono text-2xl">CITADEL ARCHIVE</h1>
+      <h1 className="text-fg font-mono text-2xl">DOSSIER C-137</h1>
       <p className="text-muted mt-2">Tailwind is reading the dimension tokens.</p>
       <span className="text-accent mt-4 block">Portal accent</span>
     </div>
@@ -3376,7 +3376,7 @@ export function CharactersPage() {
     <main className="mx-auto max-w-[1280px] space-y-6 px-6 py-10">
       <header className="space-y-1">
         <p className="font-mono text-xs text-muted">
-          CITADEL ARCHIVE // CLEARANCE: UNRESTRICTED
+          DOSSIER C-137 // CLEARANCE: UNRESTRICTED
         </p>
         <h1 className="text-fg text-3xl font-bold">Characters</h1>
       </header>

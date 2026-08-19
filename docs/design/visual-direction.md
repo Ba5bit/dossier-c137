@@ -44,7 +44,7 @@ Considered and turned down for three reasons.
 
 **Pixel art breaks on real data.** Names like *Armothy*, long species strings, and fifty-one-episode lists do not survive pixel fonts and single-pixel borders.
 
-**One idea is retained:** the monochrome green windowed terminal. Not the pixels — the phosphor CRT principle, which maps onto the Citadel archive terminal exactly. The principle, not the execution.
+**One idea is retained:** the monochrome green windowed terminal. Not the pixels — the phosphor CRT principle, which maps onto the Dossier C-137 terminal exactly. The principle, not the execution.
 
 ---
 

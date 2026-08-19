@@ -1,4 +1,4 @@
-# Citadel Archive — Design Specification
+# Dossier C-137 — Design Specification
 
 **Date:** 2026-08-19
 **Status:** Approved, ready for implementation planning
@@ -600,7 +600,7 @@ This is the only animation that runs on a card at rest.
 - IDs set in monospace: `REGISTRY #001 · C-137`
 
 **Dossiers (detail pages)**
-- Header stamp: `CITADEL ARCHIVE // CLEARANCE: UNRESTRICTED`
+- Header stamp: `DOSSIER C-137 // CLEARANCE: UNRESTRICTED`
 - A dead character receives a red `TERMINATED` stamp over the photo, rotated −12°
 - `origin: unknown` renders as a line struck through by a redaction bar
 - An episode's character list is labeled `PERSONNEL PRESENT`
@@ -624,12 +624,12 @@ This is the only animation that runs on a card at rest.
 - Typing `wubbalubbadubdub` anywhere switches the dimension to `cronenberg`
 - A portal favicon
 - A crosshair cursor on the hub page
-- Document titles of the form `Morty Smith — Citadel Archive`
+- Document titles of the form `Morty Smith — Dossier C-137`
 - A back-to-top control shaped as a miniature portal
 - The AI input placeholder: `Ask Rick. He won't be nice about it.`
 
 **Boot Sequence**
-- On the first visit of a session, a terminal types `CITADEL ARCHIVE v1.37 // INITIALIZING…` before the hub assembles
+- On the first visit of a session, a terminal types `DOSSIER C-137 v1.37 // INITIALIZING…` before the hub assembles
 - Skippable by click, disabled by the transitions toggle, never plays under `REDUCED MOTION`
 - The flag lives in `sessionStorage`, not `localStorage`: someone demoing the project must be able to replay the effect in a new tab
 

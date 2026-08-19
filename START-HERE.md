@@ -4,7 +4,7 @@ Handoff note for a fresh session. Written 2026-08-20, after design and planning,
 
 ## What this project is
 
-**Citadel Archive** — a Rick and Morty archive browser, submitted as a course-entry test assignment. Characters, locations, and episodes, searchable and browsable, presented as an internal terminal of the Citadel of Ricks.
+**Dossier C-137** — a Rick and Morty archive browser, submitted as a course-entry test assignment. Characters, locations, and episodes, searchable and browsable, presented as an internal terminal of the Citadel of Ricks.
 
 The assignment requires a public GitHub repository, a thorough README, and that **every external API is called from the server**. Bonus credit for a light/dark theme with persistence, an AI integration, and skeleton loading states. All are in scope.
 
@@ -12,8 +12,8 @@ The assignment requires a public GitHub repository, a thorough README, and that 
 
 | Document | What it settles |
 |---|---|
-| `docs/superpowers/specs/2026-08-19-citadel-archive-design.md` | The full design. Architecture, endpoints, component tree, error handling, deployment. Includes a requirements traceability table mapping every assignment requirement to a section |
-| `docs/superpowers/plans/2026-08-20-citadel-archive-foundation.md` | Plan 1 of 5. Twenty-three TDD tasks with complete code in every step |
+| `docs/superpowers/specs/2026-08-19-dossier-c137-design.md` | The full design. Architecture, endpoints, component tree, error handling, deployment. Includes a requirements traceability table mapping every assignment requirement to a section |
+| `docs/superpowers/plans/2026-08-20-dossier-c137-foundation.md` | Plan 1 of 5. Twenty-three TDD tasks with complete code in every step |
 | `docs/design/tokens.md` | Ten source colors expanded into three palettes, every pair contrast-checked |
 | `docs/design/visual-direction.md` | The direction, the rejected alternatives, and why each reference was weighted as it was |
 | `design-brief/STEP-2-PROMPTS.md` | Per-screen layout descriptions, detailed enough to build from directly |
