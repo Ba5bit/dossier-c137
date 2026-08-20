@@ -3,6 +3,7 @@ import {
   askSystemPrompt,
   dossierSystemPrompt,
   parsePersona,
+  PERSONAS,
   PROMPT_VERSION,
 } from '../lib/persona.ts'
 
@@ -40,4 +41,19 @@ Deno.test('the two voices are actually different', () => {
 
 Deno.test('the prompt version is an integer the store can key on', () => {
   assertEquals(Number.isInteger(PROMPT_VERSION), true)
+})
+
+Deno.test('the prompt version moved with the reword', () => {
+  assertEquals(PROMPT_VERSION, 2)
+})
+
+Deno.test('the ask prompt forbids mirroring an earlier voice', () => {
+  for (const persona of PERSONAS) {
+    assertStringIncludes(askSystemPrompt(persona), 'answer in yours')
+  }
+})
+
+Deno.test('each ask voice carries its own opening instruction', () => {
+  assertStringIncludes(askSystemPrompt('rick'), 'dismiss')
+  assertStringIncludes(askSystemPrompt('morty'), 'aw jeez')
 })
