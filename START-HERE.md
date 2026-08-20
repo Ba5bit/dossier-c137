@@ -1,6 +1,6 @@
 # Start Here
 
-Handoff note for a fresh session. Last updated 2026-08-20, after plan 1 shipped in full and plan 2 was written. Plan 2 is written but not started.
+Handoff note for a fresh session. Last updated 2026-08-20, after plans 1 and 2 shipped in full. Plan 3 has not been written yet.
 
 ## What this project is
 
@@ -14,7 +14,7 @@ The assignment requires a public GitHub repository, a thorough README, and that 
 |---|---|
 | `docs/superpowers/specs/2026-08-19-dossier-c137-design.md` | The full design. Architecture, endpoints, component tree, error handling, deployment. Includes a requirements traceability table mapping every assignment requirement to a section |
 | `docs/superpowers/plans/2026-08-20-dossier-c137-foundation.md` | Plan 1 of 5, complete. Twenty-three TDD tasks with complete code in every step |
-| `docs/superpowers/plans/2026-08-20-dossier-c137-entities.md` | **Plan 2 of 5, the one to execute now.** Twenty TDD tasks: locations, episodes, and all three detail pages |
+| `docs/superpowers/plans/2026-08-20-dossier-c137-entities.md` | Plan 2 of 5, complete. Twenty TDD tasks: locations, episodes, and all three detail pages |
 | `docs/design/tokens.md` | Ten source colors expanded into three palettes, every pair contrast-checked |
 | `docs/design/visual-direction.md` | The direction, the rejected alternatives, and why each reference was weighted as it was |
 | `design-brief/STEP-2-PROMPTS.md` | Per-screen layout descriptions, detailed enough to build from directly |
@@ -23,7 +23,7 @@ The approved Claude Design mockup lives outside the repository, at `Downloads/de
 
 ## Current state
 
-**Plan 1 is complete: tasks 1-23 are done, deployed, and tagged `plan-1-foundation`.** Twenty-one commits on `main`, pushed.
+**Plans 1 and 2 are complete, deployed, and tagged `plan-1-foundation` and `plan-2-entities`.** All commits are on `main` and pushed.
 
 | | |
 |---|---|
@@ -34,36 +34,35 @@ The approved Claude Design mockup lives outside the repository, at `Downloads/de
 
 What exists:
 
-- **Backend, complete for characters.** `router -> handler -> service -> client/cache`, deployed with `--no-verify-jwt`. 33 Deno tests
-- **Cache.** `cache_entries` migrated and live, 24 h TTL, stale-on-failure fallback. RLS on with no policies, verified: the anon key reads `[]`, the service role reads rows
-- **Frontend, the whole characters slice.** API client, URL filter state, filter bar, grid, card, status indicator, pagination, empty and error states, skeletons, the 404 page, router and query provider. 61 Vitest tests, plus an MSW-backed integration test on the page
+- **Backend, complete for all three entities.** `router -> handler -> service -> client/cache`, one service per entity over a shared `services/refs.ts`, deployed with `--no-verify-jwt`. Seven endpoints: `/health`, `/characters`, `/characters/:id`, `/locations`, `/locations/:id`, `/episodes`, `/episodes/:id`. 79 Deno tests
+- **Relation expansion is server-side.** A detail response arrives whole — the character dossier carries its origin, location, and every episode; a location carries its resident roster; an episode carries its cast. The frontend never fans out
+- **Cache.** `cache_entries` migrated and live, 24 h TTL, stale-on-failure fallback. List keys sort their parameters; detail keys are `character/7`, `location/3`, `episode/5`. RLS on with no policies, verified: the anon key reads `[]`, the service role reads rows
+- **Frontend, all three entity slices.** List and detail pages for characters, locations, and episodes, behind a nav shell at `src/app/AppLayout.tsx`. Shared detail primitives in `src/shared/ui/`: `RedactionBar`, `Stamp`, `DimensionNotFound`, `DetailSkeleton`, `TextFilter`. `RosterGrid` lives in `features/characters/` and is reused by the location and episode dossiers. 124 Vitest tests, with MSW-backed integration tests on every page
+- **`useUrlFilters` is generic over a key set.** Each filter bar exports its own `*_FILTER_KEYS` constant; the page passes it in
 - **The boundary lint rule** fires on any `rickandmortyapi.com` reference in `src/`, and the shipped bundle is clean
 - **`.env.local`** holds real values and is gitignored. `.env.example` records the contract
 
-Verified against the live deployment: real data and images, shareable filtered URLs, back button, pagination, page reset on filter change, empty state, redaction bars, 404 page.
+Verified against the live deployment: all seven endpoints return real data; the nav highlights the active section; the locations and episodes lists load with real fields; filtering locations by dimension narrows to three results and writes `?dimension=Fantasy`; `?episode=S03` returns that season only; a dead character's dossier carries the `TERMINATED` stamp and a redaction bar for its unknown origin; resolved origins, residents, and cast members all link through; `/characters/99999` shows the dimension-not-found body and `/characters/rick` shows the error state with retry, neither blank.
 
 ## Immediate next step
 
-**Execute plan 2**, `docs/superpowers/plans/2026-08-20-dossier-c137-entities.md`, starting at task 1. Nothing in it needs anything from the user.
-
-Open the session with the superpowers `executing-plans` skill (or `subagent-driven-development` if subagents are available), then work task by task in order. Each task ends in a commit; do not batch them.
+**Write plan 3**, then execute it. It does not exist yet. Plan 3 owns the hub page, the portal transitions, the header with the mini portal gun, the settings panel, and the dimensions — spec §8, §9, and §11.5. Use the superpowers `writing-plans` skill against the spec, matching the shape of plans 1 and 2: bite-sized TDD tasks, complete code in every step, one commit per task, an expected test count after each.
 
 Before touching anything, confirm the inherited state is green:
 
 ```bash
 git status                # expect a clean tree on main
-npm test                  # expect 61 passing
-npm run test:api          # expect 33 passing
+npm test                  # expect 124 passing
+npm run test:api          # expect 79 passing
 npm run lint && npm run build
 ```
 
-If those four are green, the handoff is intact and plan 2's task 1 can start. If they are not, stop and say so — plan 2 assumes plan 1's numbers as its baseline, and every task in it states the expected test count after that task.
+If those four are green, the handoff is intact. If they are not, stop and say so — plan 3 will assume plan 2's numbers as its baseline.
 
-Three things about plan 2 worth reading before the first commit:
+Two things plan 3 inherits and should not fight:
 
-- **Task 2 renames `services/rickMorty.ts` to `services/characters.ts`.** It is a pure refactor with the existing tests as the safety net; the count must be identical before and after.
-- **Task 10 deploys the Edge Function mid-plan** and verifies the five new endpoints with curl. That is deliberate — spec §13.1 forbids saving deployment for the end.
-- **Task 20 tags `plan-2-entities`** and updates this file.
+- **`AppLayout` is a placeholder.** `src/app/AppLayout.tsx` is a plain nav bar, written so the sections were reachable before the hub existed. Plan 3 replaces it with the real header; its three tests go with it.
+- **The lint carries three `react-refresh/only-export-components` warnings**, one per filter bar, because each exports its `*_FILTER_KEYS` constant alongside its component. They are warnings, not errors, and the lint still exits 0. Moving the constants to their own module would silence them if plan 3 wants that.
 
 Vercel rebuilds on every push to `main`. The Edge Function does not: it needs `npx supabase functions deploy api --no-verify-jwt`.
 
@@ -84,13 +83,16 @@ npm run build
 - **The project was renamed** from Citadel Archive to Dossier C-137, after the deploy. The `citadel` dimension token is unrelated and unchanged
 - **`ApiError` declares `code` as a field, not a constructor parameter property.** `tsconfig` runs with `erasableSyntaxOnly`, which rejects the shorthand
 - **`vercel.json` added** with a catch-all rewrite to `index.html`. Without it Vercel resolved `/characters` against the filesystem and returned its own 404, so no deep link or shared filtered URL worked
-- **Text filters are debounced and hold a local draft.** The plan bound the name and species inputs straight to the URL, which dropped keystrokes on the deployed build: typing `morty` produced `?name=moy`, because the router round trip is asynchronous and React restored the stale value into the DOM mid-typing. The commit delay is 300 ms, and external changes (clear, back button, pasted URL) are still adopted. Plan 2 task 5 of the entities plan moves this component to `src/shared/ui/TextFilter.tsx` so that all three filter bars share it
+- **Text filters are debounced and hold a local draft.** The plan bound the name and species inputs straight to the URL, which dropped keystrokes on the deployed build: typing `morty` produced `?name=moy`, because the router round trip is asynchronous and React restored the stale value into the DOM mid-typing. The commit delay is 300 ms, and external changes (clear, back button, pasted URL) are still adopted. Plan 2 task 15 moved this component to `src/shared/ui/TextFilter.tsx`, and all three filter bars now share it
+- **`stubClient` in `characters_test.ts` gained two no-op methods.** Plan 2 task 4 widened the `CharacterClient` contract with `getCharacter` and `getEpisodesByIds`, which broke the six existing list tests at type-check time; the plan did not mention the helper. It now returns both alongside `listCharacters`, unused by the list tests
 
-## Conventions plan 2 relies on
+## Conventions now established in the code
 
 - **New UI copy stays inline**, in the same voice as plan 1. Spec §7.3 wants it all in `src/shared/lore/copy.ts`; plan 5 owns that move. Introducing it mid-flight would leave three places to reconcile instead of one
 - **`shared/` knows nothing about specific entity types.** That is why `RosterGrid` lives in `features/characters/` even though the location and episode dossiers both use it
 - **Every list page follows the same shape:** `useUrlFilters(KEYS) -> use<Entity>(filters) -> <Filters/> <Grid/> <Pagination/>`, with the page composing only
+- **Every detail page follows the same shape too:** `useParams -> use<Entity>(id) -> DetailSkeleton while pending, DimensionNotFound on a `NOT_FOUND` code, ErrorState otherwise, the dossier when data lands`. The detail query hooks refuse to retry a 404 — a missing record stays missing
+- **A 404 means two different things upstream**, and the client keeps them apart: `getList` normalizes it to an empty array because a filter matching nothing is routine, `getOne` raises `NotFoundError` because a missing record is real. The batch endpoint also returns a bare object for a single id, which `getMany` wraps
 
 ## Still needed from the user, later
 
