@@ -179,7 +179,7 @@ into something automatically verified rather than a matter of trust.
 - **AI daily quotas.** 30 questions and 10 dossier generations per caller per day, plus a global ceiling of 500. Exhausting one returns a portal-gun-out-of-fluid message, not an error page.
 - **No SSR**, so the first paint waits for JavaScript.
 - **The first `Ctrl+K` after typing a URL** can be swallowed by the browser's address bar, which still holds focus. Click once in the page, or use the `⌕ SEARCH` button. The listener itself is attached above every lazy route boundary — there is a test for that.
-- **The two AI voices are more distinct on dossiers than in chat.** A dossier has no conversation history to mirror and a more evaluative instruction; a narrow factual question in chat pulls both voices toward the same plain sentence. The prompt now forbids imitating an earlier turn, which narrows the gap without closing it.
+- **The AI voices can converge over a long conversation.** Each question carries the last six turns back to the model, and a model reads its own earlier prose as a style guide. The prompt now forbids imitating an earlier turn, and on a fresh question the two are plainly distinct — Rick opens "Who cares, another Birdperson," Morty opens "Aw jeez, um…" — but the pull is still there deep into a thread. Switching voice mid-conversation is the workaround.
 - **Half of all origins are `unknown`** upstream. The redaction bar is a routine field state here, not a flourish.
 
 ## Testing

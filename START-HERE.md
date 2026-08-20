@@ -1,6 +1,6 @@
 # Start Here
 
-Handoff note for a fresh session. Last updated 2026-08-20, after plans 1–4 shipped in full. **Plan 5 has not been written yet** — writing it, then executing it, is the next step. No API key is outstanding.
+Handoff note for a fresh session. Last updated 2026-08-20, after **all five plans shipped in full**. Nothing is outstanding except one thing only the user can do: rotate the exposed xAI key.
 
 ## What this project is
 
@@ -17,15 +17,19 @@ The assignment requires a public GitHub repository, a thorough README, and that 
 | `docs/superpowers/plans/2026-08-20-dossier-c137-entities.md` | Plan 2 of 5, complete. Twenty TDD tasks: locations, episodes, and all three detail pages |
 | `docs/superpowers/plans/2026-08-20-dossier-c137-portal.md` | Plan 3 of 5, complete. Twenty-two TDD tasks: `/api/stats`, the settings layer, the three dimensions, the portal transition system, the hub, and the real header |
 | `docs/superpowers/plans/2026-08-20-dossier-c137-ai.md` | Plan 4 of 5, complete. Twenty-four TDD tasks: `/api/search`, `/api/dossier`, `/api/ask`, AI storage, spend ceilings, the search overlay and page, the hub input, the persona setting, the dossier block, and the grounded chat |
-| `docs/design/tokens.md` | Ten source colors expanded into three palettes, every pair contrast-checked |
+| `docs/superpowers/plans/2026-08-20-dossier-c137-polish.md` | Plan 5 of 5, complete. Twenty tasks: the four defects, the two prompts, the copy registry, the Konami egg, the contrast test, the mobile pass, the README |
+| `docs/superpowers/plans/2026-08-20-walkthrough-notes.md` | The plan 3, 4 and 5 walkthrough, run against the live deployment |
+| `README.md` | The graded document. Setup, architecture, trade-offs, known issues, screenshots |
+| `docs/design/tokens.md` | Ten source colors expanded into three palettes, every pair contrast-checked. Plan 5 appended the corrections it made |
 | `docs/design/visual-direction.md` | The direction, the rejected alternatives, and why each reference was weighted as it was |
 | `design-brief/STEP-2-PROMPTS.md` | Per-screen layout descriptions, detailed enough to build from directly |
 
 The approved Claude Design mockup lives outside the repository, at `Downloads/design-system-approved.html`. It is the visual reference for the whole site, and its palette and typefaces already match `src/index.css` exactly. Its empty-state copy differs from the shipped copy; the plan's wording won, because the tests assert it.
 
+
 ## Current state
 
-**Plans 1–4 are complete, deployed, and tagged `plan-1-foundation`, `plan-2-entities`, `plan-3-portal`, and `plan-4-ai`.** All commits are on `main` and pushed.
+**Plans 1–5 are complete, deployed, and tagged `plan-1-foundation`, `plan-2-entities`, `plan-3-portal`, `plan-4-ai` and `plan-5-polish`.** All commits are on `main` and pushed. The project is submittable as it stands.
 
 | | |
 |---|---|
@@ -36,94 +40,42 @@ The approved Claude Design mockup lives outside the repository, at `Downloads/de
 
 | Suite | Count |
 |---|---|
-| Frontend (Vitest) | 252 |
-| Backend (Deno) | 149 |
+| Frontend (Vitest) | 272 |
+| Backend (Deno) | 156 |
 
-What exists:
+What exists, on top of everything plans 1–4 built (eleven endpoints, the Postgres cache, server-side relation expansion, the hub with live figures, the portal transition system, three dimensions, code-split routes, the API-boundary lint rule, `/api/search`, the write-once dossiers, the SSE-streamed grounded chat, the spend ceilings):
 
-- **Backend, eleven endpoints.** `router -> handler -> service -> client/cache`, one service per entity over a shared `services/refs.ts`, deployed with `--no-verify-jwt`. `/health`, `/characters`, `/characters/:id`, `/locations`, `/locations/:id`, `/episodes`, `/episodes/:id`, `/stats`, `/search`, `POST /dossier`, `POST /ask`
-- **`/api/stats` aggregates five upstream `info.count` values** behind the single cache key `stats`, 24 h TTL. Nothing in it is hardcoded, which is what spec §6.2 asks for. Live figures: 826 characters, 126 locations, 51 episodes, 107 Ricks, 68 Mortys
-- **Relation expansion is server-side.** A detail response arrives whole — the character dossier carries its origin, location, and every episode; a location carries its resident roster; an episode carries its cast. The frontend never fans out
-- **Cache.** `cache_entries` migrated and live, 24 h TTL, stale-on-failure fallback. List keys sort their parameters; detail keys are `character/7`, `location/3`, `episode/5`; the stats aggregate is the bare key `stats`. RLS on with no policies
-- **The hub is at `/`.** `HubPage` carries the resting portal gun, three destinations with live counts, and a five-figure statistics strip. The `Navigate` redirect from `/` to `/characters` is gone
-- **The portal transition system.** `usePortalMachine` is the state machine — four phases, a 300 ms floor, an 8 s ceiling, a quote after 1.5 s. `PortalProvider` binds `traversing` to `useIsFetching`, so the traversal lasts exactly as long as the request. `PortalCanvas` draws the vortex; `PortalLink` routes navigation through it and degrades to an ordinary link when the portal is off or absent
-- **Three dimensions.** `c-137` dark, `citadel` light, `cronenberg` dark, written to `data-dimension` on the document element and to one `localStorage` object under `citadel-settings`. An inline script in `index.html` applies the stored dimension before first paint, so a light-dimension visitor never sees a dark flash
-- **The portal gun settings panel** carries four rows: dimension, `PORTAL SFX`, `PORTAL TRANSITIONS`, and a three-state `REDUCED MOTION`. It opens from the header mini gun and from the hub, closes on `Esc`, and returns focus to its trigger
-- **Every route is code-split** through `React.lazy`, with a `DetailSkeleton` as the Suspense fallback. The build emits a chunk per page
-- **The refresh bar** marks a background refetch without replacing content, and stays away on a first load, where skeletons already do the job
-- **The boundary lint rule** fires on any `rickandmortyapi.com` reference in `src/`, and every emitted chunk is clean
-- **`/api/search` is one cached aggregate.** Three parallel name queries against characters, locations and episodes behind the single key `search?q=<lowercased>`, 24 h TTL, twenty items per group. `q` must be 2–100 characters or the endpoint answers 400
-- **`POST /api/dossier` is write-once.** A stored dossier is returned without touching the provider; a miss generates one, stores it and returns `cached: false`. The primary key is `(entity_type, entity_id, persona, prompt_version)`, so a reworded prompt writes new rows beside the old ones rather than destroying them — **bump `PROMPT_VERSION` in `lib/persona.ts`, never edit a stored row**. Characters only; any other `entityType` is a 400
-- **`POST /api/ask` streams Server-Sent Events.** `sources` is emitted **first**, then a run of `token` frames. Everything that can produce an HTTP status — validation, the quota — happens before the `Response` is constructed; a failure after the first byte travels in-band as an `error` event, because the status is already sent
-- **AI answers are grounded.** `services/ask.ts` searches the literal question first and only widens to extracted terms when that finds nothing, caps at six sources, and hands the model a `CONTEXT` block as its only permitted knowledge. When nothing matched, the context says `no records matched` rather than skipping the call. Verified live: "who is Gandalf the Grey?" returns empty sources and invents nobody
-- **Two AI tables.** `ai_dossiers` and `ai_usage`, migrated and live, RLS on with no policies. `ai_usage_bump()` counts in the database so two concurrent requests cannot both read the same figure
-- **Spend ceilings.** 30 `ask` calls and 10 `dossier` calls per caller per day, plus a global 500 under the reserved `ip_hash` `__global__`. Addresses are never stored — the key is a salted SHA-256 digest, salted from `IP_HASH_SALT`. A counter that cannot be written lets the request through rather than becoming an outage
-- **A missing `XAI_API_KEY` does not take the archive down.** `index.ts` substitutes a stand-in client that raises `AiError`, so the three read sections keep working and only the AI endpoints answer 502
-- **Search reaches the visitor three ways.** The `⌘K` / `Ctrl+K` overlay, the `⌕ SEARCH` button in the header, and the coordinate input on the hub — all the same `PortalSearch`, debounced 300 ms with a local draft, arrow keys and Enter, and an `ASK ▸` button. A bare name goes to `/search`; a question goes to `/ask`
-- **The chat is at `/ask`, and it is stateless on the server.** The browser sends the last six turns with each question; nothing about a conversation reaches Postgres. Only dossiers are stored
-- **The persona is a setting, not a per-message toggle.** `rick` or `morty`, in the same `citadel-settings` object as the dimension, switchable in the portal gun panel and in the chat header, and part of the dossier primary key
-- **`.env.local`** holds real values and is gitignored. `.env.example` records the contract
+- **`README.md`**, the document the assignment grades. Setup from a clean clone, both environment tables, the server-side-API guarantee with the command that proves it, an architecture diagram, the endpoint table, four things done differently, six trade-offs, seven known issues, and five screenshots under `docs/screenshots/`
+- **Every user-facing string lives in `src/shared/lore/copy.ts`**, which closes spec §7.3. `src/shared/lore/quotes.ts` stays where it is — a random data set, not microcopy. `src/features/ai/persona.ts` was merged in and deleted
+- **The dossier quota counts generations, not views.** `getDossier` takes an `onGenerate` callback and runs it only on the miss path, so reading a stored dossier costs nothing. Verified live: first call `cached: false`, second `cached: true` in 0.8 s
+- **`PROMPT_VERSION` is 2.** Both voices were sharpened — Rick opens by dismissing the question, Morty by hesitating — and both prompts forbid imitating the voice of an earlier turn, which was what pulled the two together. Verified live on "who is Birdperson?": the two answers now open completely differently
+- **The search overlay takes the page out of the tab order and the accessibility tree** through `inert` on the page shell. That closed both the missing focus trap and the two inputs sharing the name "Search the archive" — the hub's is `Archive coordinates` now
+- **`/search` explains a one-character query** instead of rendering skeletons forever, **prefills its box from the URL**, and drops its suggestion dropdown there: the full result groups are already below it
+- **The contrast grid is a test.** `src/shared/design/contrast.test.ts` parses `src/index.css` and checks seven foreground tokens against three surfaces in three dimensions — 63 ratios, all at 4.5:1 or better. Three tokens genuinely failed and were lifted: `c-137 --dead`, and `cronenberg --accent`/`--accent-hover`/`--dead`
+- **Every page works at 375 px**, verified in a real browser: nothing overflows, the header wraps, the filter bar becomes a 2×2 grid, the source cards wrap
+- **The Konami easter egg.** Typing `wubbalubbadubdub` anywhere switches to `cronenberg` and persists
+- **A portal favicon**, which had never existed — its absence was a 404 on every page load
 
-Verified against the live deployment after plan 4, in a real browser: `Ctrl+K` opens the overlay, `rick` returns fifteen grouped results, arrow-plus-Enter fires the portal into the character page, `GENERATE DOSSIER` returns the stored text instantly, `/ask?q=…` asks once and renders four clickable source cards before the answer, the Morty voice survives a reload, and the Gandalf question refuses to invent. `grep` over `dist/assets` finds neither `rickandmortyapi` nor `xai-`.
-
-Nine things were found and deliberately not fixed. They are listed with their evidence under **Open observations**, below the plan 5 agenda; four of them are confirmed defects.
+The plan-3 walkthrough, unrun since plan 3, was finally run against the live deployment. Sixteen of eighteen checks pass; the two that cannot be checked headlessly — the 1.5 s portal quote and the interface whoosh — are covered by unit tests and named as such. Full results in `docs/superpowers/plans/2026-08-20-walkthrough-notes.md`.
 
 ## Immediate next step
 
-**Write plan 5**, then execute it — inline in the session, using the superpowers `writing-plans` and `executing-plans` skills. Not subagent-driven: the user chose inline deliberately, because a fresh subagent per task re-reads the whole context and costs far more tokens than this project is worth.
+**There isn't one.** All five plans are done and the project is submittable.
 
-Plan 5 owns, in this order. The **Open observations** section below carries the evidence for every row marked with a number.
+If more work is wanted, these are the honest candidates, none of them blocking:
 
-| # | Item | What it covers |
-|---|---|---|
-| 1 | The README | The assignment grades it. Setup, architecture, the server-side-API guarantee, the bonus features, and an honest known-issues list: speech cut, Edge Function cold starts, the AI daily quotas, no SSR |
-| 2 | Four confirmed defects | Observations 1–4 below. All small, all reproducible, all found during the plan 4 walkthrough |
-| 3 | The microcopy move | Spec §7.3 wants every string in `src/shared/lore/copy.ts`. Plan 1 deliberately deferred it and every plan since has added inline copy. `src/shared/lore/quotes.ts` is a data file and stays where it is |
-| 4 | The mobile pass | Narrow-window behaviour of the search overlay, the chat input, the source cards, the filter bars and the grids |
-| 5 | The contrast pass | Muted text on `--surface-raised` in `citadel` and `cronenberg`, over the new chat and dossier surfaces |
-| 6 | The persona prompt | Observation 6. Sharpen `askSystemPrompt`, and **bump `PROMPT_VERSION`** so stored dossiers survive |
-| 7 | Accessibility | Observations 5 and 7 |
-| 8 | The Konami easter egg | `shared/hooks/useKonami.ts` |
-| 9 | The plan-3 walkthrough | Still unrun: the portal animation, the dimension repaint, the absence of a flash on reload, `prefers-reduced-motion`. Checklist is in plan 3, task 22, steps 4 and 5 |
+| Candidate | Why it was not done |
+|---|---|
+| The boot sequence (spec §11.3) | A terminal typing `DOSSIER C-137 v1.37 // INITIALIZING…` on the first visit of a session. Never planned into any of the five plans; pure flourish |
+| The remaining §11.3 details | The 42-characters caption, the Poopybutthole badge, the crosshair cursor on the hub, per-record document titles, the back-to-top portal |
+| Speech | Cut deliberately, and the README says so. Reversing that decision means a second paid provider |
+| The thirteen lint warnings | All `react-refresh/only-export-components`, all accepted by plans 2 and 4. Chasing them buys nothing |
 
 ## Open observations
 
-Everything found during plan 4 that was **not** fixed inline, because it was imperfect rather than broken, or because fixing it needed a decision. Each one states how it was confirmed.
+**All eight closed by plan 5**, each with a test or a live verification behind it. The ninth was never a code problem:
 
-**1. A stored dossier still spends a day's allowance.** `handlers/dossier.ts` calls `quota.check` **before** `service.getDossier`, and the store read happens inside the service. So the 10-per-day dossier ceiling counts *views*, not *generations* — an eleventh visitor reading a dossier that was written last week is refused, having cost nothing. Confirmed by reading the handler. The fix is to move the quota behind the store lookup, which means the service has to tell the handler whether it is about to call the provider; the cleanest shape is for `getDossier` to take the quota and check it only on the miss path.
-
-**2. `/search?q=<one character>` renders skeletons forever.** `useSearch` disables the query below two characters, and a disabled TanStack query reports `status: 'pending'`, so `SearchPage`'s `query.trim() !== '' && isPending` branch is true with nothing on the way. Confirmed live at `https://dossier-c137.vercel.app/search?q=r` — two `Loading` statuses and no explanation. The page should show the same "two characters minimum" line `PortalSearch` already uses.
-
-**3. The `/search` input does not prefill from the URL.** Landing on `/search?q=rick` shows the results but an empty search box, so refining the query means retyping it. Confirmed in the same live check. `PortalSearch` needs an optional initial draft.
-
-**4. The first `Ctrl+K` after a cold page load does nothing.** Reproduced once on the live site: the very first press right after navigation did not open the overlay, and the second did. Most likely the press landed before the lazy route chunk hydrated and `useSearchHotkey` attached its listener. Worth confirming and, if real, worth attaching the listener above the lazy boundary.
-
-**5. The search overlay has no focus trap.** `SearchOverlay` sets `aria-modal="true"` and closes on `Escape`, but nothing stops `Tab` from walking into the page behind it. Confirmed by reading the component.
-
-**6. The two voices barely differ in the chat.** In `/ask`, a narrow factual question produces near-identical prose from Rick and from Morty — confirmed live, asking "who is Birdperson?" in both voices. Two causes: the previous answer travels back as history and the model mirrors it, and `askSystemPrompt`'s "plain prose, under 120 words" pulls hard against characterisation. Morty's voice does come through when the archive has nothing — "Aw jeez, no records matched this question. Sorry." The dossiers, which have no history and a more evaluative instruction, are clearly distinct. **Any reword must bump `PROMPT_VERSION`**, or stored dossiers will silently disagree with the prompt that supposedly wrote them.
-
-**7. Two elements share the label "Search the archive".** When the overlay opens over the hub, the hub's own coordinate input is still in the accessibility tree under the same name. Confirmed in a live accessibility snapshot.
-
-**8. The `citadel` and `cronenberg` contrast check was not run** over the chat and the dossier block, and neither was the narrow-window pass. Both are in the plan 4 walkthrough as steps 10 and 11 and were deliberately left — they are visual judgement, and the mobile pass was already plan 5's scope.
-
-**9. The xAI key was pasted into a session transcript on 2026-08-20 and should be treated as compromised.** It is still live. Rotate it at `console.x.ai`, put the new value in `supabase/functions/.env`, then re-run `secrets set --env-file` and the function deploy. Nothing in the repository holds it — the exposure is the transcript on disk.
-
-**Nothing is needed from the user to start.** Both secrets are set and both deploys are done.
-
-**Claude cannot run any `supabase` command** — the permission classifier blocks every invocation. If plan 5 touches the function or the database, each such command is a checkpoint where the user runs it with a `!` prefix.
-
-Before touching anything, confirm the inherited state is green:
-
-```bash
-git status                # expect a clean tree on main
-npm test                  # expect 252 passing
-npm run test:api          # expect 149 passing
-npm run lint && npm run build
-```
-
-All four were run and were green at the end of plan 4: 252 frontend, 149 backend, 0 lint errors with 13 warnings, build clean, tree clean on `main`. If a fresh session sees anything else, something changed outside these commits.
-
-Run them one at a time. Chaining all four in a single command has produced one run where Vitest reported fifteen errors with the tests themselves executing in 191 ms — workers failing to start under load on this machine, not assertions failing. Re-running alone gave a clean pass twice. If you see that shape — a pile of errors and a suspiciously short test duration — re-run before believing it.
+**9. The xAI key was pasted into a session transcript on 2026-08-20 and should be treated as compromised.** It is still live. Rotate it at `console.x.ai`, put the new value in `supabase/functions/.env`, then re-run `secrets set --env-file` and the function deploy. Nothing in the repository holds it — the exposure is the transcript on disk. **Only the user can run those commands.**
 
 ## Deploying
 
@@ -184,7 +136,7 @@ From plan 4, all of them defects in the plan's test code rather than in its desi
 
 ## Conventions now established in the code
 
-- **New UI copy stays inline**, in the same voice as plan 1. Spec §7.3 wants it all in `src/shared/lore/copy.ts`; plan 5 owns that move. `src/shared/lore/quotes.ts` is the one exception plan 3 created — it is a data file, not a microcopy registry
+- **Every user-facing string goes in `src/shared/lore/copy.ts`.** Plan 5 finished the move spec §7.3 asked for; an inline string in a component is now a regression, not a shortcut. `src/shared/lore/quotes.ts` is the one exception — a random data set, not microcopy
 - **`shared/` knows nothing about specific entity types.** That is why `RosterGrid` lives in `features/characters/` even though the location and episode dossiers both use it
 - **Context objects live in their own `.ts` files.** `SettingsContext.ts` and `PortalContext.ts` hold nothing but a `createContext` call, which keeps every `.tsx` file exporting components and only components
 - **Every internal link in `features/` is a `PortalLink`, with `variant="short"`.** `src/shared/ui/DimensionNotFound.tsx` keeps a plain `Link` on purpose — a portal on the way out of a dead end is theatre
@@ -195,7 +147,7 @@ From plan 4, all of them defects in the plan's test code rather than in its desi
 
 ## The lint baseline
 
-`npm run lint` exits 0 with **13 warnings and no errors**. All thirteen are `react-refresh/only-export-components`:
+`npm run lint` exits 0 with **13 warnings and no errors**. Plan 5 added a second error-level rule beside the API boundary one: `no-restricted-imports` forbids `node:*` anywhere under `src/` except test files. Node types are on for the app project so `contrast.test.ts` can read `src/index.css` from disk — `?raw` returns an empty string under Vitest — and that rule is what stops a Node builtin from following them into the bundle. All thirteen are `react-refresh/only-export-components`:
 
 - Three from the filter bars, each exporting its `*_FILTER_KEYS` constant beside its component. Plan 2 accepted these
 - Ten from `src/app/routes.tsx`, one per `lazy()` binding, because the file also exports the non-component `router`. Plan 4 added two, for `/search` and `/ask`
@@ -204,7 +156,7 @@ None of them are worth chasing. What matters is that the count of **errors** sta
 
 ## Still needed from the user
 
-**One thing, and it is not blocking: rotate the xAI key.** It was pasted into a session transcript on 2026-08-20 and is still live — observation 9. New key into `supabase/functions/.env`, then `secrets set --env-file` and a function deploy, both of which only the user can run.
+**One thing, and it is the only thing: rotate the xAI key.** It was pasted into a session transcript on 2026-08-20 and is still live — observation 9. New key into `supabase/functions/.env`, then `secrets set --env-file` and a function deploy, both of which only the user can run.
 
 Otherwise nothing. `XAI_API_KEY` and `IP_HASH_SALT` are set as Supabase secrets and the function is deployed with them. They also live in `supabase/functions/.env`, which is gitignored and exists only for `supabase functions serve` and for re-running `secrets set --env-file`. No ElevenLabs key is needed — speech is cut.
 
