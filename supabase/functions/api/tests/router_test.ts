@@ -57,6 +57,22 @@ function services(overrides: Partial<StubServices> = {}): StubServices {
         stale: false,
       }),
     },
+    episodes: {
+      listEpisodes: async () => ({ payload: emptyList, stale: false }),
+      getEpisode: async (id: number) => ({
+        payload: {
+          episode: {
+            id,
+            name: 'Pilot',
+            airDate: 'December 2, 2013',
+            episode: 'S01E01',
+            characterCount: 0,
+          },
+          characters: [],
+        },
+        stale: false,
+      }),
+    },
     ...overrides,
   }
 }
@@ -204,4 +220,30 @@ Deno.test('returns 400 for a non-numeric location id', async () => {
 
   assertEquals(response.status, 400)
   assertEquals(body.error.code, 'INVALID_PARAMETER')
+})
+
+Deno.test('routes episode list requests to the service', async () => {
+  const router = createRouter(services())
+
+  const response = await router(new Request('https://x.test/api/episodes?episode=S03'))
+
+  assertEquals(response.status, 200)
+})
+
+Deno.test('routes an episode detail request by id', async () => {
+  const router = createRouter(services())
+
+  const response = await router(new Request('https://x.test/api/episodes/5'))
+  const body = await response.json()
+
+  assertEquals(response.status, 200)
+  assertEquals(body.episode.id, 5)
+})
+
+Deno.test('does not treat a nested path as a detail request', async () => {
+  const router = createRouter(services())
+
+  const response = await router(new Request('https://x.test/api/episodes/5/cast'))
+
+  assertEquals(response.status, 404)
 })

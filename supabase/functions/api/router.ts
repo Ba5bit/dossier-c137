@@ -8,6 +8,11 @@ import {
   handleListLocations,
   type LocationService,
 } from './handlers/locations.ts'
+import {
+  handleGetEpisode,
+  handleListEpisodes,
+  type EpisodeService,
+} from './handlers/episodes.ts'
 import { AppError } from './lib/errors.ts'
 
 const JSON_HEADERS = { 'content-type': 'application/json' }
@@ -15,6 +20,7 @@ const JSON_HEADERS = { 'content-type': 'application/json' }
 export type Services = {
   characters: CharacterService
   locations: LocationService
+  episodes: EpisodeService
 }
 
 /**
@@ -77,9 +83,14 @@ export function createRouter(services: Services) {
         return json(body, 200, staleHeaders(stale))
       }
 
+      if (path === '/episodes') {
+        const { body, stale } = await handleListEpisodes(url, services.episodes)
+        return json(body, 200, staleHeaders(stale))
+      }
+
       // The id segment is matched loosely so that a malformed id reaches the
       // validator and answers 400, rather than falling through to a 404.
-      const detail = path.match(/^\/(characters|locations)\/([^/]+)$/)
+      const detail = path.match(/^\/(characters|locations|episodes)\/([^/]+)$/)
       if (detail) {
         const [, section, rawId] = detail
 
@@ -88,7 +99,12 @@ export function createRouter(services: Services) {
           return json(body, 200, staleHeaders(stale))
         }
 
-        const { body, stale } = await handleGetLocation(rawId, services.locations)
+        if (section === 'locations') {
+          const { body, stale } = await handleGetLocation(rawId, services.locations)
+          return json(body, 200, staleHeaders(stale))
+        }
+
+        const { body, stale } = await handleGetEpisode(rawId, services.episodes)
         return json(body, 200, staleHeaders(stale))
       }
 
