@@ -1,5 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { fetchCharacters, ApiError } from './client'
+import {
+  ApiError,
+  fetchCharacter,
+  fetchCharacters,
+  fetchEpisode,
+  fetchEpisodes,
+  fetchLocation,
+  fetchLocations,
+} from './client'
 
 const BASE = 'https://api.test/api'
 
@@ -70,5 +78,60 @@ describe('fetchCharacters', () => {
     await expect(fetchCharacters({ page: 1 })).rejects.toMatchObject({
       code: 'NETWORK',
     })
+  })
+})
+
+describe('detail and entity fetches', () => {
+  it('requests a character detail by id', async () => {
+    const spy = vi.fn(async () => jsonResponse({ character: {}, episodes: [] }))
+    vi.stubGlobal('fetch', spy)
+
+    await fetchCharacter(7)
+
+    expect(spy).toHaveBeenCalledWith(`${BASE}/characters/7`)
+  })
+
+  it('sends only the location filters that are present', async () => {
+    const spy = vi.fn(async () => jsonResponse({ items: [], pagination: {} }))
+    vi.stubGlobal('fetch', spy)
+
+    await fetchLocations({ page: 2, dimension: 'C-137' })
+
+    expect(spy).toHaveBeenCalledWith(`${BASE}/locations?page=2&dimension=C-137`)
+  })
+
+  it('requests a location detail by id', async () => {
+    const spy = vi.fn(async () => jsonResponse({ location: {}, residents: [] }))
+    vi.stubGlobal('fetch', spy)
+
+    await fetchLocation(3)
+
+    expect(spy).toHaveBeenCalledWith(`${BASE}/locations/3`)
+  })
+
+  it('sends only the episode filters that are present', async () => {
+    const spy = vi.fn(async () => jsonResponse({ items: [], pagination: {} }))
+    vi.stubGlobal('fetch', spy)
+
+    await fetchEpisodes({ page: 1, episode: 'S03' })
+
+    expect(spy).toHaveBeenCalledWith(`${BASE}/episodes?page=1&episode=S03`)
+  })
+
+  it('requests an episode detail by id', async () => {
+    const spy = vi.fn(async () => jsonResponse({ episode: {}, characters: [] }))
+    vi.stubGlobal('fetch', spy)
+
+    await fetchEpisode(5)
+
+    expect(spy).toHaveBeenCalledWith(`${BASE}/episodes/5`)
+  })
+
+  it('raises ApiError with the NOT_FOUND code for a missing entity', async () => {
+    vi.stubGlobal('fetch', async () =>
+      jsonResponse({ error: { code: 'NOT_FOUND', message: 'gone' } }, 404),
+    )
+
+    await expect(fetchCharacter(99999)).rejects.toMatchObject({ code: 'NOT_FOUND' })
   })
 })

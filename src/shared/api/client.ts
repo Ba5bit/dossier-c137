@@ -1,4 +1,15 @@
-import type { Character, CharacterFilters, ListResponse } from './types'
+import type {
+  Character,
+  CharacterDetail,
+  CharacterFilters,
+  Episode,
+  EpisodeDetail,
+  EpisodeFilters,
+  ListResponse,
+  Location,
+  LocationDetail,
+  LocationFilters,
+} from './types'
 
 export class ApiError extends Error {
   // Declared as a field rather than a constructor parameter property:
@@ -35,15 +46,58 @@ async function get<T>(path: string): Promise<T> {
   return body as T
 }
 
+function toQuery(filters: Record<string, string | number | undefined>): string {
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(filters)) {
+    if (value !== undefined && value !== '') params.set(key, String(value))
+  }
+  return params.toString()
+}
+
 export function fetchCharacters(
   filters: CharacterFilters,
 ): Promise<ListResponse<Character>> {
-  const params = new URLSearchParams()
-  params.set('page', String(filters.page ?? 1))
-  if (filters.name) params.set('name', filters.name)
-  if (filters.status) params.set('status', filters.status)
-  if (filters.species) params.set('species', filters.species)
-  if (filters.gender) params.set('gender', filters.gender)
+  const search = toQuery({
+    page: filters.page ?? 1,
+    name: filters.name,
+    status: filters.status,
+    species: filters.species,
+    gender: filters.gender,
+  })
+  return get<ListResponse<Character>>(`/characters?${search}`)
+}
 
-  return get<ListResponse<Character>>(`/characters?${params.toString()}`)
+export function fetchCharacter(id: number): Promise<CharacterDetail> {
+  return get<CharacterDetail>(`/characters/${id}`)
+}
+
+export function fetchLocations(
+  filters: LocationFilters,
+): Promise<ListResponse<Location>> {
+  const search = toQuery({
+    page: filters.page ?? 1,
+    name: filters.name,
+    type: filters.type,
+    dimension: filters.dimension,
+  })
+  return get<ListResponse<Location>>(`/locations?${search}`)
+}
+
+export function fetchLocation(id: number): Promise<LocationDetail> {
+  return get<LocationDetail>(`/locations/${id}`)
+}
+
+export function fetchEpisodes(
+  filters: EpisodeFilters,
+): Promise<ListResponse<Episode>> {
+  const search = toQuery({
+    page: filters.page ?? 1,
+    name: filters.name,
+    episode: filters.episode,
+  })
+  return get<ListResponse<Episode>>(`/episodes?${search}`)
+}
+
+export function fetchEpisode(id: number): Promise<EpisodeDetail> {
+  return get<EpisodeDetail>(`/episodes/${id}`)
 }
