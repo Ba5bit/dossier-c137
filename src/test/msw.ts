@@ -127,6 +127,16 @@ export const handlers = [
       characters: [summary(1, 'Rick Sanchez'), summary(2, 'Morty Smith')],
     }),
   ),
+
+  http.get(`${BASE}/stats`, () =>
+    HttpResponse.json({
+      characters: { total: 826, pages: 42 },
+      locations: { total: 126, pages: 7 },
+      episodes: { total: 51, pages: 3 },
+      ricks: 112,
+      mortys: 53,
+    }),
+  ),
 ]
 
 export const server = setupServer(...handlers)

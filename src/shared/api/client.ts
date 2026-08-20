@@ -9,6 +9,7 @@ import type {
   Location,
   LocationDetail,
   LocationFilters,
+  Stats,
 } from './types'
 
 export class ApiError extends Error {
@@ -100,4 +101,8 @@ export function fetchEpisodes(
 
 export function fetchEpisode(id: number): Promise<EpisodeDetail> {
   return get<EpisodeDetail>(`/episodes/${id}`)
+}
+
+export function fetchStats(): Promise<Stats> {
+  return get<Stats>('/stats')
 }

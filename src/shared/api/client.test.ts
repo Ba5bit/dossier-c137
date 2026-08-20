@@ -7,6 +7,7 @@ import {
   fetchEpisodes,
   fetchLocation,
   fetchLocations,
+  fetchStats,
 } from './client'
 
 const BASE = 'https://api.test/api'
@@ -133,5 +134,36 @@ describe('detail and entity fetches', () => {
     )
 
     await expect(fetchCharacter(99999)).rejects.toMatchObject({ code: 'NOT_FOUND' })
+  })
+})
+
+describe('fetchStats', () => {
+  it('requests the statistics endpoint with no query string', async () => {
+    const spy = vi.fn(async () =>
+      jsonResponse({
+        characters: { total: 826, pages: 42 },
+        locations: { total: 126, pages: 7 },
+        episodes: { total: 51, pages: 3 },
+        ricks: 112,
+        mortys: 53,
+      }),
+    )
+    vi.stubGlobal('fetch', spy)
+
+    const stats = await fetchStats()
+
+    expect(spy).toHaveBeenCalledWith(`${BASE}/stats`)
+    expect(stats.ricks).toBe(112)
+  })
+
+  it('raises ApiError when the archive will not answer', async () => {
+    vi.stubGlobal('fetch', async () =>
+      jsonResponse(
+        { error: { code: 'UPSTREAM_UNAVAILABLE', message: 'no' } },
+        503,
+      ),
+    )
+
+    await expect(fetchStats()).rejects.toBeInstanceOf(ApiError)
   })
 })

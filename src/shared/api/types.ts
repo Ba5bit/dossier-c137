@@ -100,3 +100,16 @@ export type EpisodeFilters = {
   name?: string
   episode?: string
 }
+
+export type EntityCount = {
+  total: number
+  pages: number
+}
+
+export type Stats = {
+  characters: EntityCount
+  locations: EntityCount
+  episodes: EntityCount
+  ricks: number
+  mortys: number
+}
