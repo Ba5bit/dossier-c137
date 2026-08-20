@@ -6,6 +6,7 @@ import {
 } from '../features/locations/LocationFilters'
 import { LocationGrid } from '../features/locations/LocationGrid'
 import { Pagination } from '../shared/ui/Pagination'
+import { COPY } from '../shared/lore/copy'
 
 export function LocationsPage() {
   const { filters, setFilter, clearFilters } = useUrlFilters(LOCATION_FILTER_KEYS)
@@ -15,9 +16,9 @@ export function LocationsPage() {
     <main className="mx-auto max-w-[1280px] space-y-6 px-6 py-10">
       <header className="space-y-1">
         <p className="font-mono text-xs text-muted">
-          DOSSIER C-137 // CLEARANCE: UNRESTRICTED
+          {COPY.clearanceStamp}
         </p>
-        <h1 className="text-fg text-3xl font-bold">Locations</h1>
+        <h1 className="text-fg text-3xl font-bold">{COPY.sections.locationsHeading}</h1>
       </header>
 
       <LocationFilters

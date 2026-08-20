@@ -6,6 +6,7 @@ import { ApiError } from '../shared/api/client'
 import { DetailSkeleton } from '../shared/ui/DetailSkeleton'
 import { DimensionNotFound } from '../shared/ui/DimensionNotFound'
 import { ErrorState } from '../shared/ui/ErrorState'
+import { COPY } from '../shared/lore/copy'
 
 export function CharacterDetailPage() {
   const { id } = useParams()
@@ -14,7 +15,7 @@ export function CharacterDetailPage() {
   return (
     <main className="mx-auto max-w-[1280px] space-y-6 px-6 py-10">
       <p className="font-mono text-xs text-muted">
-        DOSSIER C-137 // CLEARANCE: UNRESTRICTED
+        {COPY.clearanceStamp}
       </p>
 
       {isPending && <DetailSkeleton />}

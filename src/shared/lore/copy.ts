@@ -1,3 +1,6 @@
+/** Seven pages print this; it is defined once and referenced from both keys. */
+const CLEARANCE_STAMP = 'DOSSIER C-137 // CLEARANCE: UNRESTRICTED'
+
 /**
  * Every user-facing string in the app. Spec section 7.3: the voice here is
  * strong and specific, and keeping it consistent is only possible with the
@@ -7,6 +10,7 @@
  * sampled at random, not microcopy a component renders by name.
  */
 export const COPY = {
+  clearanceStamp: CLEARANCE_STAMP,
   states: {
     emptyTitle: 'NO RECORDS FOUND',
     emptyMessage: 'Oooh, nothing here! Existence is pain!',
@@ -81,7 +85,7 @@ export const COPY = {
     gunButtonLabel: 'Portal gun',
   },
   hub: {
-    stamp: 'DOSSIER C-137 // CLEARANCE: UNRESTRICTED',
+    stamp: CLEARANCE_STAMP,
     heading: 'DOSSIER C-137',
     tagline:
       "The Citadel's archive. Everything on file, nothing you're cleared to question.",
@@ -98,6 +102,11 @@ export const COPY = {
       'MORTYS ON FILE',
     ],
   },
+  sections: {
+    charactersHeading: 'Characters',
+    locationsHeading: 'Locations',
+    episodesHeading: 'Episodes',
+  },
   ask: {
     stamp: 'ARCHIVE INTERROGATION TERMINAL',
     heading: 'ASK THE ARCHIVE',
@@ -107,9 +116,14 @@ export const COPY = {
   filters: {
     name: 'Search by name',
     namePlaceholder: 'ENTER DESIGNATION',
+    titlePlaceholder: 'ENTER TITLE',
     species: 'Species',
     status: 'Status',
     gender: 'Gender',
+    type: 'Type',
+    dimension: 'Dimension',
+    code: 'Season or episode code',
+    codePlaceholder: 'S01 OR S01E01',
     any: 'ANY',
     clear: 'CLEAR',
   },

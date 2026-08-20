@@ -5,6 +5,7 @@ import { PortalLink } from '../shared/portal/PortalLink'
 import { EmptyState } from '../shared/ui/EmptyState'
 import { ErrorState } from '../shared/ui/ErrorState'
 import { Skeleton } from '../shared/ui/Skeleton'
+import { COPY } from '../shared/lore/copy'
 import type { SearchResponse } from '../shared/api/types'
 
 type GroupProps = {
@@ -22,7 +23,7 @@ function Group({ title, section, query, total, rows }: GroupProps) {
     <section className="space-y-3">
       <div className="flex items-baseline justify-between gap-4">
         <h2 className="font-mono text-xs tracking-widest text-muted">{title}</h2>
-        <span className="font-mono text-xs text-muted">{total} ON FILE</span>
+        <span className="font-mono text-xs text-muted">{COPY.search.onFile(total)}</span>
       </div>
 
       <ul className="border border-line bg-surface">
@@ -46,7 +47,7 @@ function Group({ title, section, query, total, rows }: GroupProps) {
         to={`/${section}?name=${encodeURIComponent(query)}`}
         className="inline-block font-mono text-xs text-link underline-offset-4 hover:underline"
       >
-        ALL {total} {title} →
+        {COPY.search.allOf(total, title)}
       </PortalLink>
     </section>
   )
@@ -92,19 +93,19 @@ export function SearchPage() {
   return (
     <main className="mx-auto max-w-[1280px] space-y-8 px-6 py-10">
       <header className="space-y-4">
-        <p className="font-mono text-xs tracking-widest text-muted">ARCHIVE SEARCH</p>
+        <p className="font-mono text-xs tracking-widest text-muted">{COPY.search.pageLabel}</p>
         <PortalSearch initialDraft={query} suggestions={false} />
       </header>
 
       {trimmed === '' && (
         <p className="text-muted">
-          Enter coordinates above. Two characters minimum.
+          {COPY.search.pageEmpty}
         </p>
       )}
 
       {tooShort && (
         <p className="text-muted">
-          Two characters minimum. The archive is big, not psychic.
+          {COPY.search.tooShort}
         </p>
       )}
 
@@ -122,21 +123,21 @@ export function SearchPage() {
       {rows && !nothing && (
         <div className="space-y-10">
           <Group
-            title="CHARACTERS"
+            title={COPY.search.groupCharacters}
             section="characters"
             query={query}
             total={data!.groups.characters.total}
             rows={rows.characters}
           />
           <Group
-            title="LOCATIONS"
+            title={COPY.search.groupLocations}
             section="locations"
             query={query}
             total={data!.groups.locations.total}
             rows={rows.locations}
           />
           <Group
-            title="EPISODES"
+            title={COPY.search.groupEpisodes}
             section="episodes"
             query={query}
             total={data!.groups.episodes.total}

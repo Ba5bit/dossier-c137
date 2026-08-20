@@ -6,13 +6,8 @@ import { PortalLink } from '../shared/portal/PortalLink'
 import { SettingsPanel } from '../shared/settings/SettingsPanel'
 import { Skeleton } from '../shared/ui/Skeleton'
 import { ErrorState } from '../shared/ui/ErrorState'
+import { COPY } from '../shared/lore/copy'
 import type { Stats } from '../shared/api/types'
-
-const DESTINATIONS = [
-  { to: '/characters', label: 'CHARACTERS', key: 'characters' },
-  { to: '/locations', label: 'LOCATIONS', key: 'locations' },
-  { to: '/episodes', label: 'EPISODES', key: 'episodes' },
-] as const
 
 type FigureProps = {
   label: string
@@ -47,21 +42,20 @@ export function HubPage() {
     <main className="mx-auto max-w-[1280px] space-y-12 px-6 py-16">
       <header className="space-y-3 text-center">
         <p className="font-mono text-xs text-muted">
-          DOSSIER C-137 // CLEARANCE: UNRESTRICTED
+          {COPY.hub.stamp}
         </p>
         <h1 className="text-fg text-4xl font-bold tracking-tight">
-          DOSSIER C-137
+          {COPY.hub.heading}
         </h1>
         <p className="text-muted">
-          The Citadel&apos;s archive. Everything on file, nothing you&apos;re
-          cleared to question.
+          {COPY.hub.tagline}
         </p>
       </header>
 
       <PortalGun onOpenSettings={() => setSettingsOpen(true)} />
 
       <div className="mx-auto w-full max-w-[640px]">
-        <PortalSearch label="Archive coordinates" />
+        <PortalSearch label={COPY.search.hubLabel} />
       </div>
 
       {settingsOpen && (
@@ -75,7 +69,7 @@ export function HubPage() {
       ) : (
         <>
           <ul className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {DESTINATIONS.map((destination) => (
+            {COPY.hub.destinations.map((destination) => (
               <li key={destination.to}>
                 <PortalLink
                   to={destination.to}
@@ -97,11 +91,11 @@ export function HubPage() {
           </ul>
 
           <dl className="grid grid-cols-2 gap-6 border border-line bg-surface p-6 sm:grid-cols-5">
-            <Figure label="ENTITIES INDEXED" value={indexedTotal(data)} />
-            <Figure label="LOCATIONS ON FILE" value={data?.locations.total} />
-            <Figure label="EPISODES LOGGED" value={data?.episodes.total} />
-            <Figure label="RICKS ON FILE" value={data?.ricks} />
-            <Figure label="MORTYS ON FILE" value={data?.mortys} />
+            <Figure label={COPY.hub.figures[0]} value={indexedTotal(data)} />
+            <Figure label={COPY.hub.figures[1]} value={data?.locations.total} />
+            <Figure label={COPY.hub.figures[2]} value={data?.episodes.total} />
+            <Figure label={COPY.hub.figures[3]} value={data?.ricks} />
+            <Figure label={COPY.hub.figures[4]} value={data?.mortys} />
           </dl>
         </>
       )}

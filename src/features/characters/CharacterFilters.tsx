@@ -2,6 +2,7 @@ import { useCallback } from 'react'
 import { TextFilter } from '../../shared/ui/TextFilter'
 import type { CharacterFilters as Filters } from '../../shared/api/types'
 import type { FilterSetter } from '../../shared/hooks/useUrlFilters'
+import { COPY } from '../../shared/lore/copy'
 
 export const CHARACTER_FILTER_KEYS = ['name', 'status', 'species', 'gender'] as const
 export type CharacterFilterKey = (typeof CHARACTER_FILTER_KEYS)[number]
@@ -44,8 +45,8 @@ export function CharacterFilters({
     <div className="flex flex-wrap items-end gap-4 border border-line bg-surface p-4">
       <TextFilter
         id="filter-name"
-        label="Search by name"
-        placeholder="ENTER DESIGNATION"
+        label={COPY.filters.name}
+        placeholder={COPY.filters.namePlaceholder}
         value={filters.name}
         width="w-56"
         onCommit={commitName}
@@ -53,7 +54,7 @@ export function CharacterFilters({
 
       <div className="flex flex-col gap-1">
         <label htmlFor="filter-status" className={LABEL}>
-          Status
+          {COPY.filters.status}
         </label>
         <select
           id="filter-status"
@@ -63,7 +64,7 @@ export function CharacterFilters({
           }
           className={FIELD}
         >
-          <option value="">ANY</option>
+          <option value="">{COPY.filters.any}</option>
           {STATUSES.map((value) => (
             <option key={value} value={value}>
               {value.toUpperCase()}
@@ -74,8 +75,8 @@ export function CharacterFilters({
 
       <TextFilter
         id="filter-species"
-        label="Species"
-        placeholder="ANY"
+        label={COPY.filters.species}
+        placeholder={COPY.filters.any}
         value={filters.species}
         width="w-40"
         onCommit={commitSpecies}
@@ -83,7 +84,7 @@ export function CharacterFilters({
 
       <div className="flex flex-col gap-1">
         <label htmlFor="filter-gender" className={LABEL}>
-          Gender
+          {COPY.filters.gender}
         </label>
         <select
           id="filter-gender"
@@ -93,7 +94,7 @@ export function CharacterFilters({
           }
           className={FIELD}
         >
-          <option value="">ANY</option>
+          <option value="">{COPY.filters.any}</option>
           {GENDERS.map((value) => (
             <option key={value} value={value}>
               {value.toUpperCase()}
@@ -108,7 +109,7 @@ export function CharacterFilters({
           onClick={onClear}
           className="border border-line px-3 py-2 font-mono text-xs text-muted transition-colors hover:border-accent hover:text-accent"
         >
-          CLEAR
+          {COPY.filters.clear}
         </button>
       )}
     </div>

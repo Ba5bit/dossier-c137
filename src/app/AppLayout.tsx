@@ -7,13 +7,7 @@ import { DimensionWave } from '../shared/settings/DimensionWave'
 import { RefreshBar } from '../shared/ui/RefreshBar'
 import { SearchOverlay } from '../features/search/SearchOverlay'
 import { useSearchHotkey } from '../features/search/useSearchHotkey'
-
-const SECTIONS = [
-  { to: '/characters', label: 'CHARACTERS' },
-  { to: '/locations', label: 'LOCATIONS' },
-  { to: '/episodes', label: 'EPISODES' },
-  { to: '/ask', label: 'ASK' },
-]
+import { COPY } from '../shared/lore/copy'
 
 export function AppLayout() {
   const { pathname } = useLocation()
@@ -47,18 +41,18 @@ export function AppLayout() {
         <div data-testid="page-shell" inert={searchOpen}>
           <header className="border-b border-line bg-surface">
             <nav
-              aria-label="Sections"
+              aria-label={COPY.layout.navLabel}
               className="mx-auto flex max-w-[1280px] items-center gap-6 px-6 py-4"
             >
               <PortalLink
                 to="/"
                 className="font-mono text-xs tracking-widest text-accent"
               >
-                DOSSIER C-137
+                {COPY.layout.brand}
               </PortalLink>
 
               <ul className="flex items-center gap-4">
-                {SECTIONS.map((section) => {
+                {COPY.layout.sections.map((section) => {
                   const active = pathname.startsWith(section.to)
 
                   return (
@@ -80,22 +74,22 @@ export function AppLayout() {
               <button
                 ref={searchRef}
                 type="button"
-                aria-label="Search"
+                aria-label={COPY.layout.searchButtonLabel}
                 onClick={openSearch}
                 className="ml-auto border border-line px-3 py-1 font-mono text-xs text-muted transition-colors hover:border-accent hover:text-accent"
               >
-                &#8981; SEARCH
+                {COPY.layout.searchButton}
               </button>
 
               <button
                 ref={gunRef}
                 type="button"
-                aria-label="Portal gun"
+                aria-label={COPY.layout.gunButtonLabel}
                 aria-expanded={settingsOpen}
                 onClick={() => setSettingsOpen((open) => !open)}
                 className="border border-line px-3 py-1 font-mono text-xs text-muted transition-colors hover:border-accent hover:text-accent"
               >
-                &#9678; GUN
+                {COPY.layout.gunButton}
               </button>
             </nav>
 

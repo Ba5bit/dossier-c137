@@ -21,6 +21,18 @@ describe('COPY', () => {
     expect(COPY.search.hint).toBe('↑ ↓ TO AIM · ENTER TO FIRE · ESC TO ABORT')
   })
 
+  it('carries the hub and layout text', () => {
+    expect(COPY.layout.brand).toBe('DOSSIER C-137')
+    expect(COPY.layout.sections.map((section) => section.to)).toEqual([
+      '/characters',
+      '/locations',
+      '/episodes',
+      '/ask',
+    ])
+    expect(COPY.hub.stamp).toBe('DOSSIER C-137 // CLEARANCE: UNRESTRICTED')
+    expect(COPY.hub.figures).toHaveLength(5)
+  })
+
   it('holds no empty strings', () => {
     const walk = (value: unknown): void => {
       if (typeof value === 'string') {

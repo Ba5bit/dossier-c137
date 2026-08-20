@@ -2,6 +2,7 @@ import { useCallback } from 'react'
 import { TextFilter } from '../../shared/ui/TextFilter'
 import type { LocationFilters as Filters } from '../../shared/api/types'
 import type { FilterSetter } from '../../shared/hooks/useUrlFilters'
+import { COPY } from '../../shared/lore/copy'
 
 export const LOCATION_FILTER_KEYS = ['name', 'type', 'dimension'] as const
 export type LocationFilterKey = (typeof LOCATION_FILTER_KEYS)[number]
@@ -36,24 +37,24 @@ export function LocationFilters({
     <div className="flex flex-wrap items-end gap-4 border border-line bg-surface p-4">
       <TextFilter
         id="filter-location-name"
-        label="Search by name"
-        placeholder="ENTER DESIGNATION"
+        label={COPY.filters.name}
+        placeholder={COPY.filters.namePlaceholder}
         value={filters.name}
         width="w-56"
         onCommit={commitName}
       />
       <TextFilter
         id="filter-location-type"
-        label="Type"
-        placeholder="ANY"
+        label={COPY.filters.type}
+        placeholder={COPY.filters.any}
         value={filters.type}
         width="w-40"
         onCommit={commitType}
       />
       <TextFilter
         id="filter-location-dimension"
-        label="Dimension"
-        placeholder="ANY"
+        label={COPY.filters.dimension}
+        placeholder={COPY.filters.any}
         value={filters.dimension}
         width="w-48"
         onCommit={commitDimension}
@@ -65,7 +66,7 @@ export function LocationFilters({
           onClick={onClear}
           className="border border-line px-3 py-2 font-mono text-xs text-muted transition-colors hover:border-accent hover:text-accent"
         >
-          CLEAR
+          {COPY.filters.clear}
         </button>
       )}
     </div>
