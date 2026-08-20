@@ -58,7 +58,7 @@ export function AppLayout() {
             >
               <PortalLink
                 to="/"
-                className="font-mono text-xs tracking-widest text-accent"
+                className="tap-target font-mono text-xs tracking-widest text-accent"
               >
                 {COPY.layout.brand}
               </PortalLink>
@@ -72,7 +72,7 @@ export function AppLayout() {
                       <PortalLink
                         to={section.to}
                         aria-current={active ? 'page' : undefined}
-                        className={`font-mono text-xs transition-colors hover:text-accent ${
+                        className={`tap-target font-mono text-xs transition-colors hover:text-accent ${
                           active ? 'text-accent' : 'text-muted'
                         }`}
                       >
@@ -88,7 +88,7 @@ export function AppLayout() {
                 type="button"
                 aria-label={COPY.layout.searchButtonLabel}
                 onClick={openSearch}
-                className="ml-auto border border-line px-3 py-1 font-mono text-xs text-muted transition-colors hover:border-accent hover:text-accent"
+                className="tap-target ml-auto border border-line px-3 py-1 font-mono text-xs text-muted transition-colors hover:border-accent hover:text-accent"
               >
                 {COPY.layout.searchButton}
               </button>
@@ -99,7 +99,7 @@ export function AppLayout() {
                 aria-label={COPY.layout.gunButtonLabel}
                 aria-expanded={settingsOpen}
                 onClick={() => setSettingsOpen((open) => !open)}
-                className="border border-line px-3 py-1 font-mono text-xs text-muted transition-colors hover:border-accent hover:text-accent"
+                className="tap-target border border-line px-3 py-1 font-mono text-xs text-muted transition-colors hover:border-accent hover:text-accent"
               >
                 {COPY.layout.gunButton}
               </button>

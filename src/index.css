@@ -172,3 +172,17 @@ body {
     animation: none;
   }
 }
+
+/* Touch pointers cannot hit a 16px nav link. On a coarse pointer, or on any
+   viewport narrow enough to be a phone, every interactive element carrying
+   this class grows to the 44px minimum. The mouse-driven desktop layout keeps
+   the compact header the dossier look needs. */
+@media (pointer: coarse), (max-width: 640px) {
+  .tap-target {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
