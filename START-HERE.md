@@ -1,6 +1,6 @@
 # Start Here
 
-Handoff note for a fresh session. Last updated 2026-08-20, after **all five plans shipped in full**. Nothing is outstanding except one thing only the user can do: rotate the exposed xAI key.
+Handoff note for a fresh session. Last updated 2026-08-20, after **all five plans shipped in full**. Nothing is outstanding. No API key is needed and none is missing.
 
 ## What this project is
 
@@ -73,9 +73,9 @@ If more work is wanted, these are the honest candidates, none of them blocking:
 
 ## Open observations
 
-**All eight closed by plan 5**, each with a test or a live verification behind it. The ninth was never a code problem:
+**None.** Observations 1–8 were closed by plan 5, each with a test or a live verification behind it.
 
-**9. The xAI key was pasted into a session transcript on 2026-08-20 and should be treated as compromised.** It is still live. Rotate it at `console.x.ai`, put the new value in `supabase/functions/.env`, then re-run `secrets set --env-file` and the function deploy. Nothing in the repository holds it — the exposure is the transcript on disk. **Only the user can run those commands.**
+Observation 9 — the xAI key pasted into a session transcript on 2026-08-20 — is closed too. The user revoked that key and issued a new one, which is set as a Supabase secret and deployed: `POST /api/dossier` generated a fresh dossier against the live function on 2026-08-20, which it could not do with a revoked key. A revoked key in an old transcript is inert. Nothing in the repository ever held it.
 
 ## Deploying
 
@@ -156,9 +156,7 @@ None of them are worth chasing. What matters is that the count of **errors** sta
 
 ## Still needed from the user
 
-**One thing, and it is the only thing: rotate the xAI key.** It was pasted into a session transcript on 2026-08-20 and is still live — observation 9. New key into `supabase/functions/.env`, then `secrets set --env-file` and a function deploy, both of which only the user can run.
-
-Otherwise nothing. `XAI_API_KEY` and `IP_HASH_SALT` are set as Supabase secrets and the function is deployed with them. They also live in `supabase/functions/.env`, which is gitignored and exists only for `supabase functions serve` and for re-running `secrets set --env-file`. No ElevenLabs key is needed — speech is cut.
+**Nothing.** `XAI_API_KEY` and `IP_HASH_SALT` are set as Supabase secrets and the function is deployed with them. They also live in `supabase/functions/.env`, which is gitignored and exists only for `supabase functions serve` and for re-running `secrets set --env-file`. No ElevenLabs key is needed — speech is cut.
 
 ## Decisions already made — do not relitigate
 
