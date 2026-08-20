@@ -1,6 +1,6 @@
 # Start Here
 
-Handoff note for a fresh session. Last updated 2026-08-20, after plan 1 tasks 1-12 shipped.
+Handoff note for a fresh session. Last updated 2026-08-20, after plan 1 shipped in full.
 
 ## What this project is
 
@@ -18,9 +18,11 @@ The assignment requires a public GitHub repository, a thorough README, and that 
 | `docs/design/visual-direction.md` | The direction, the rejected alternatives, and why each reference was weighted as it was |
 | `design-brief/STEP-2-PROMPTS.md` | Per-screen layout descriptions, detailed enough to build from directly |
 
+The approved Claude Design mockup lives outside the repository, at `Downloads/design-system-approved.html`. It is the visual reference for the whole site, and its palette and typefaces already match `src/index.css` exactly. Its empty-state copy differs from the shipped copy; the plan's wording won, because the tests assert it.
+
 ## Current state
 
-**Plan 1 is half done: tasks 1-12 are complete, 13-23 are not.** Both halves are deployed and talking to each other. Fifteen commits on `main`, pushed.
+**Plan 1 is complete: tasks 1-23 are done, deployed, and tagged `plan-1-foundation`.** Twenty-one commits on `main`, pushed.
 
 | | |
 |---|---|
@@ -33,14 +35,17 @@ What exists:
 
 - **Backend, complete for characters.** `router -> handler -> service -> client/cache`, deployed with `--no-verify-jwt`. 33 Deno tests
 - **Cache.** `cache_entries` migrated and live, 24 h TTL, stale-on-failure fallback. RLS on with no policies, verified: the anon key reads `[]`, the service role reads rows
-- **Frontend.** Scaffold, Tailwind v4 wired to all three dimension palettes, Vitest, and the `Skeleton` primitive. 2 tests. Everything else in `src/` is still the placeholder `App.tsx`
+- **Frontend, the whole characters slice.** API client, URL filter state, filter bar, grid, card, status indicator, pagination, empty and error states, skeletons, the 404 page, router and query provider. 61 Vitest tests, plus an MSW-backed integration test on the page
+- **The boundary lint rule** fires on any `rickandmortyapi.com` reference in `src/`, and the shipped bundle is clean
 - **`.env.local`** holds real values and is gitignored. `.env.example` records the contract
+
+Verified against the live deployment: real data and images, shareable filtered URLs, back button, pagination, page reset on filter change, empty state, redaction bars, 404 page.
 
 ## Immediate next step
 
-Resume plan 1 at **task 13** (the frontend API client). Tasks 13-22 are pure frontend against MSW mocks and need nothing from the user. Task 23 re-verifies the deployed slice and tags `plan-1-foundation`.
+Start plan 2. It has not been written yet — write it before implementing.
 
-Vercel rebuilds on every push to `main`, so no deploy step is needed until task 23.
+Vercel rebuilds on every push to `main`, so no separate deploy step is needed.
 
 ## Commands that are not obvious
 
@@ -57,6 +62,9 @@ npm run build
 - **`supabase/functions/deno.json` added.** Without it Deno resolved JSR imports through the frontend's `node_modules` and failed
 - **`vite.config.ts` imports `defineConfig` from `vitest/config`.** Vitest 4 dropped the triple-slash augmentation the plan uses, and `tsc` rejected the `test` key
 - **The project was renamed** from Citadel Archive to Dossier C-137, after the deploy. The `citadel` dimension token is unrelated and unchanged
+- **`ApiError` declares `code` as a field, not a constructor parameter property.** `tsconfig` runs with `erasableSyntaxOnly`, which rejects the shorthand
+- **`vercel.json` added** with a catch-all rewrite to `index.html`. Without it Vercel resolved `/characters` against the filesystem and returned its own 404, so no deep link or shared filtered URL worked
+- **Text filters are debounced and hold a local draft.** The plan bound the name and species inputs straight to the URL, which dropped keystrokes on the deployed build: typing `morty` produced `?name=moy`, because the router round trip is asynchronous and React restored the stale value into the DOM mid-typing. The commit delay is 300 ms, and external changes (clear, back button, pasted URL) are still adopted
 
 ## Still needed from the user, later
 
