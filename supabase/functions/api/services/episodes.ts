@@ -23,7 +23,7 @@ type CacheLike = {
   ): Promise<Resolved<T>>
 }
 
-function toEpisode(raw: RawEpisode): Episode {
+export function toEpisode(raw: RawEpisode): Episode {
   return {
     id: raw.id,
     name: raw.name,

@@ -23,7 +23,7 @@ type CacheLike = {
   ): Promise<Resolved<T>>
 }
 
-function toLocation(raw: RawLocation): Location {
+export function toLocation(raw: RawLocation): Location {
   return {
     id: raw.id,
     name: raw.name,
