@@ -51,3 +51,8 @@ coverage/
 
 # Local secrets for `supabase functions serve`. Never committed.
 supabase/functions/.env
+
+# Added by `vercel link` — the CLI writes a project id and an OIDC token here.
+.vercel
+.env*
+!.env.example
