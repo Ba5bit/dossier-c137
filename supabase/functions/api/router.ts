@@ -13,6 +13,7 @@ import {
   handleListEpisodes,
   type EpisodeService,
 } from './handlers/episodes.ts'
+import { handleGetStats, type StatsService } from './handlers/stats.ts'
 import { AppError } from './lib/errors.ts'
 
 const JSON_HEADERS = { 'content-type': 'application/json' }
@@ -21,6 +22,7 @@ export type Services = {
   characters: CharacterService
   locations: LocationService
   episodes: EpisodeService
+  stats: StatsService
 }
 
 /**
@@ -85,6 +87,11 @@ export function createRouter(services: Services) {
 
       if (path === '/episodes') {
         const { body, stale } = await handleListEpisodes(url, services.episodes)
+        return json(body, 200, staleHeaders(stale))
+      }
+
+      if (path === '/stats') {
+        const { body, stale } = await handleGetStats(services.stats)
         return json(body, 200, staleHeaders(stale))
       }
 

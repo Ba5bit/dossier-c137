@@ -4,6 +4,7 @@ import { createCache, createPostgresStore } from './lib/cache.ts'
 import { createCharacterService } from './services/characters.ts'
 import { createEpisodeService } from './services/episodes.ts'
 import { createLocationService } from './services/locations.ts'
+import { createStatsService } from './services/stats.ts'
 
 const ALLOWED_ORIGIN_PATTERNS = [
   /^http:\/\/localhost:\d+$/,
@@ -30,6 +31,7 @@ const route = createRouter({
   characters: createCharacterService(client, cache),
   locations: createLocationService(client, cache),
   episodes: createEpisodeService(client, cache),
+  stats: createStatsService(client, cache),
 })
 
 Deno.serve(async (request) => {

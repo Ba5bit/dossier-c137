@@ -73,6 +73,18 @@ function services(overrides: Partial<StubServices> = {}): StubServices {
         stale: false,
       }),
     },
+    stats: {
+      getStats: async () => ({
+        payload: {
+          characters: { total: 826, pages: 42 },
+          locations: { total: 126, pages: 7 },
+          episodes: { total: 51, pages: 3 },
+          ricks: 112,
+          mortys: 53,
+        },
+        stale: false,
+      }),
+    },
     ...overrides,
   }
 }
@@ -246,4 +258,15 @@ Deno.test('does not treat a nested path as a detail request', async () => {
   const response = await router(new Request('https://x.test/api/episodes/5/cast'))
 
   assertEquals(response.status, 404)
+})
+
+Deno.test('routes stats requests to the service', async () => {
+  const router = createRouter(services())
+
+  const response = await router(new Request('https://x.test/api/stats'))
+  const body = await response.json()
+
+  assertEquals(response.status, 200)
+  assertEquals(body.characters.total, 826)
+  assertEquals(body.ricks, 112)
 })
