@@ -1,3 +1,5 @@
+import { COPY } from '../lore/copy'
+
 type PaginationProps = {
   page: number
   pageCount: number
@@ -14,31 +16,31 @@ export function Pagination({ page, pageCount, onChange }: PaginationProps) {
 
   return (
     <nav
-      aria-label="Pagination"
+      aria-label={COPY.pagination.label}
       className="flex items-center justify-center gap-4 py-6"
     >
       <button
         type="button"
-        aria-label="Previous page"
+        aria-label={COPY.pagination.previous}
         disabled={page <= 1}
         onClick={() => onChange(page - 1)}
         className={BUTTON}
       >
-        &larr; JUMP
+        {COPY.pagination.previousText}
       </button>
 
       <span className="font-mono text-xs text-muted">
-        DIMENSION {page} / {pageCount}
+        {COPY.pagination.position(page, pageCount)}
       </span>
 
       <button
         type="button"
-        aria-label="Next page"
+        aria-label={COPY.pagination.next}
         disabled={page >= pageCount}
         onClick={() => onChange(page + 1)}
         className={BUTTON}
       >
-        JUMP &rarr;
+        {COPY.pagination.nextText}
       </button>
     </nav>
   )

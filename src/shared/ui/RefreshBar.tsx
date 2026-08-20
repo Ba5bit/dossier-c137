@@ -1,4 +1,5 @@
 import { useIsFetching, useQueryClient } from '@tanstack/react-query'
+import { COPY } from '../lore/copy'
 
 /**
  * Spec section 11.4: a background refresh must not replace content that is
@@ -21,7 +22,7 @@ export function RefreshBar() {
   return (
     <div
       role="progressbar"
-      aria-label="Refreshing"
+      aria-label={COPY.refresh.label}
       aria-busy="true"
       className="fixed inset-x-0 top-0 z-50 h-0.5 animate-pulse bg-accent"
     />
