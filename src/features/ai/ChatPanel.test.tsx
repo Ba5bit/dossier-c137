@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ChatPanel } from './ChatPanel'
 import { SettingsProvider } from '../../shared/settings/SettingsProvider'
 import type { AskEvent } from '../../shared/api/types'
+import { COPY } from '../../shared/lore/copy'
 
 const streamAsk = vi.hoisted(() => vi.fn())
 
@@ -41,6 +42,22 @@ beforeEach(() => {
 })
 
 describe('ChatPanel', () => {
+  it('offers opener questions before anything is asked, and asks one on click', async () => {
+    const user = userEvent.setup()
+    renderPanel()
+
+    const opener = screen.getByRole('button', { name: COPY.ai.openers[0] })
+    await user.click(opener)
+
+    expect(streamAsk).toHaveBeenCalledWith(
+      expect.objectContaining({ q: COPY.ai.openers[0], persona: 'rick' }),
+    )
+    // The openers belong to the empty state and must leave with it.
+    expect(
+      screen.queryByRole('button', { name: COPY.ai.openers[1] }),
+    ).not.toBeInTheDocument()
+  })
+
   it('greets in the selected voice before anything is asked', () => {
     renderPanel()
 

@@ -48,7 +48,31 @@ export function ChatPanel({ initialQuestion }: ChatPanelProps) {
       </header>
 
       {messages.length === 0 && (
-        <p className="text-muted text-sm">{COPY.ai.greetings[settings.persona]}</p>
+        <div className="space-y-4">
+          <p className="text-muted text-sm">{COPY.ai.greetings[settings.persona]}</p>
+
+          {/* An empty chat teaches nothing. These are real archive names, so
+              the first answer a visitor sees is a grounded one. */}
+          <div className="space-y-2">
+            <p className="font-mono text-xs tracking-widest text-muted">
+              {COPY.ai.openersLabel}
+            </p>
+            <ul className="flex flex-wrap gap-2">
+              {COPY.ai.openers.map((opener) => (
+                <li key={opener}>
+                  <button
+                    type="button"
+                    disabled={streaming}
+                    onClick={() => void ask(opener)}
+                    className="tap-target border border-line px-3 py-2 text-left text-sm text-link transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
+                  >
+                    {opener}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       )}
 
       <ol className="space-y-6">

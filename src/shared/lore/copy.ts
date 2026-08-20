@@ -61,6 +61,15 @@ export const COPY = {
     },
     voiceLabel: 'AI voice',
     you: 'YOU',
+    openersLabel: 'TRY ASKING',
+    // Each one is a name the archive actually holds, so a first-time visitor
+    // never opens with a question that has no records behind it.
+    openers: [
+      'Who is Birdperson?',
+      'What is the Citadel of Ricks?',
+      'Tell me about Evil Morty',
+      'What is Planet Squanch?',
+    ],
     inputLabel: 'Ask a question',
     inputPlaceholder: 'ASK ABOUT ANYTHING ON FILE',
     send: 'SEND ▸',
