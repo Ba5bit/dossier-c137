@@ -88,7 +88,7 @@ export function parseSuggestions(tail: string): string[] {
   return tail
     .split('|')
     .map((part) => part.replace(/^[\s\-*\d.)]+/, '').trim())
-    .filter((part) => part.length > 3 && part.length <= 80)
+    .filter((part) => part.length > 4 && part.length <= 80)
     .slice(0, MAX_SUGGESTIONS)
 }
 

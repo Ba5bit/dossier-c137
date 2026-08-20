@@ -12,10 +12,10 @@ records.
 
 | | |
 |---|---|
-| ![A character dossier with a generated field assessment](docs/screenshots/character-dossier.png) | ![The search overlay, all three entity types at once](docs/screenshots/search-overlay.png) |
-| A character dossier, with the AI field assessment at the bottom | The `⌘K` overlay, searching all three entity types at once |
-| ![The grounded chat, with its sources](docs/screenshots/grounded-chat.png) | ![The Citadel dimension](docs/screenshots/citadel-dimension.png) |
-| The grounded chat: the answer, then what it stands on | The `Citadel` dimension — one light, two dark |
+| ![A character dossier with its generated field assessment](docs/screenshots/character-dossier.png) | ![The search overlay, all three entity types at once](docs/screenshots/search-overlay.png) |
+| A character dossier: the record, the generated field assessment, and the episode roll by season | The `⌘K` overlay, searching all three entity types at once |
+| ![The chat, focused on the open dossier](docs/screenshots/grounded-chat.png) | ![The Citadel dimension on the character list](docs/screenshots/citadel-dimension.png) |
+| The chat, opened from Rick's dossier: it answers about that record, in the voice you pick | The `Citadel` dimension, on the character list — one light, two dark |
 
 ## What it does
 
@@ -24,8 +24,11 @@ records.
 - **Search across all three entity types at once**, from `⌘K` / `Ctrl+K`, from the header field, or from the hub.
 - **Long rolls are paged, not dumped.** Fifty-one episodes on a dossier become one slide per season, and a hundred residents become pages of eight — arrows on a desktop, an ordinary swipe on a phone, because the track is a real scroll container with snap points.
 - **Episodes filter by season** from a chip row, on top of the title and code fields.
-- **In-page back and forward**, plus a trail of where you are, so moving sideways through the archive does not depend on the browser chrome. Every route change starts at the top of the page.
-- **A grounded AI chat.** Ask a question in English; the server retrieves real records first and hands the model those records as its only permitted source of facts. The sources are shown, and they are clickable.
+- **A back link inside each dossier's own header**, so moving sideways through the archive does not depend on the browser chrome. Every route change starts at the top of the page.
+- **A grounded AI chat.** Ask a question in English; the server retrieves real records first and hands the model those records as its authority on the figures. The sources are shown, and they are clickable — the answer cites them inline as `[#47]`, and a number becomes a link only if this answer actually retrieved that record.
+- **Every answer closes on three follow-up questions**, rendered as buttons, so a question that went nowhere still offers a way on.
+- **`ASK AI ABOUT THIS` carries the open dossier into the chat**, as `?focus=`, and the server resolves that record in full — a character's episodes, a location's residents — ahead of anything search found.
+- **The transcript survives a reload**, through `sessionStorage`, with a wipe button; each answer keeps the voice that wrote it.
 - **A generated field assessment on every character**, in the voice you chose, written once and stored forever.
 - **Three dimensions instead of two themes** — `C-137` (dark), `Citadel` (light), `Cronenberg-1` (dark) — persisted, and applied before first paint so a light-theme visitor never sees a dark flash.
 - **The portal transition is the loading indicator.** It lasts exactly as long as the request behind it, as a small badge over a blurred scrim rather than a full-screen takeover.
@@ -142,11 +145,14 @@ and an 8 s ceiling so it never hangs. A request that outlives 1.5 s raises a
 quote. There is no animation library: CSS keyframes hang off a `data-phase`
 attribute and the vortex is a canvas.
 
-**The AI is grounded, not asked nicely.** `/api/ask` searches the literal
-question first, widens to extracted terms only if that found nothing, caps at six
-records, and hands the model a `CONTEXT` block as its only permitted knowledge.
-When nothing matched, the context says so rather than being omitted. Ask it about
-Gandalf and it invents nobody — and shows you it had no sources.
+**The AI is grounded, not asked nicely.** `/api/ask` resolves the focused record
+in full when the question came from a dossier, otherwise it searches the literal
+question and widens to extracted terms only if that found nothing, caps at six
+records, and hands the model a `CONTEXT` block as its authority on every figure.
+The archive is the authority on the numbers, not the boundary of the subject: a
+thin record is no longer a reason to refuse a question about the show. Citations
+come back as `[#47]` and are rendered as links, but a number becomes a link only
+if this answer actually retrieved that record.
 
 **Dossiers are permanent and versioned.** The primary key includes the persona
 and a prompt version, so rewording a prompt writes new rows beside the old ones
@@ -196,15 +202,15 @@ into something automatically verified rather than a matter of trust.
 
 ## Testing
 
-445 tests: 289 on the frontend under Vitest with React Testing Library and MSW,
-156 on the backend under Deno test against stubbed clients. Both suites, the
+475 tests: 307 on the frontend under Vitest with React Testing Library and MSW,
+168 on the backend under Deno test against stubbed clients. Both suites, the
 build and the lint pass on `main` as published — `npm run lint` reports 0 errors
-and 13 `react-refresh/only-export-components` warnings, all of them on filter
-components that export a constant beside the component.
+and 15 `react-refresh/only-export-components` warnings, all of them on files that
+export a constant beside the component.
 
 Effort concentrates on branching logic rather than markup: filter parsing, cache
 keys, relation expansion, the portal state machine, season grouping and the
-carousel pager, in-page history, retrieval and grounding, quota accounting, and
+carousel pager, the follow-up parser, retrieval and grounding, quota accounting, and
 the contrast grid. `npm test` does not type-check — Vitest
 transpiles without checking — so `npm run build` is part of every verification.
 

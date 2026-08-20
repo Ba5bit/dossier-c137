@@ -122,7 +122,7 @@ function services(overrides: Partial<StubServices> = {}): StubServices {
     },
     ask: {
       ask: async function* () {
-        yield { type: 'sources' as const, sources: [] }
+        yield { type: 'sources' as const, sources: [], citable: [] }
       },
     },
     quota: {
@@ -453,6 +453,7 @@ Deno.test('streams an ask response as Server-Sent Events', async () => {
         yield {
           type: 'sources' as const,
           sources: [{ type: 'character' as const, id: 1, name: 'Rick Sanchez' }],
+          citable: [{ type: 'character' as const, id: 1, name: 'Rick Sanchez' }],
         }
         yield { type: 'token' as const, text: 'Wubba' }
       },
