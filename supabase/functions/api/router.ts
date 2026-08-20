@@ -15,6 +15,7 @@ import {
 } from './handlers/episodes.ts'
 import { handleGetStats, type StatsService } from './handlers/stats.ts'
 import { handleSearch, type SearchService } from './handlers/search.ts'
+import { handleDossier, type DossierService, type QuotaLike } from './handlers/dossier.ts'
 import { AppError } from './lib/errors.ts'
 
 const JSON_HEADERS = { 'content-type': 'application/json' }
@@ -25,6 +26,8 @@ export type Services = {
   episodes: EpisodeService
   stats: StatsService
   search: SearchService
+  dossier: DossierService
+  quota: QuotaLike
 }
 
 /**
@@ -68,6 +71,18 @@ export function createRouter(services: Services) {
     try {
       if (path === '/health') {
         return json({ status: 'ok' })
+      }
+
+      if (request.method === 'POST') {
+        if (path === '/dossier') {
+          const { body } = await handleDossier(request, services.dossier, services.quota)
+          return json(body)
+        }
+
+        return json(
+          { error: { code: 'NOT_FOUND', message: `No route for ${path}` } },
+          404,
+        )
       }
 
       if (request.method !== 'GET') {

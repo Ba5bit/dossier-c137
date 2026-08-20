@@ -1,6 +1,6 @@
 import { assertEquals } from 'jsr:@std/assert'
 import { normalizePath, createRouter } from '../router.ts'
-import { NotFoundError } from '../lib/errors.ts'
+import { NotFoundError, RateLimitError } from '../lib/errors.ts'
 
 const emptyList = {
   items: [],
@@ -97,6 +97,20 @@ function services(overrides: Partial<StubServices> = {}): StubServices {
         },
         stale: false,
       }),
+    },
+    dossier: {
+      getDossier: async (entityType: string, entityId: number, persona: 'rick' | 'morty') => ({
+        entityType,
+        entityId,
+        persona,
+        text: 'On file.',
+        model: 'grok-test',
+        promptVersion: 1,
+        cached: true,
+      }),
+    },
+    quota: {
+      check: async () => {},
     },
     ...overrides,
   }
@@ -302,4 +316,64 @@ Deno.test('answers 400 for a one-character search', async () => {
 
   assertEquals(response.status, 400)
   assertEquals(body.error.code, 'INVALID_PARAMETER')
+})
+
+Deno.test('routes a dossier request', async () => {
+  const route = createRouter(services())
+
+  const response = await route(
+    new Request('https://x.test/api/dossier', {
+      method: 'POST',
+      body: JSON.stringify({ entityId: 1, persona: 'morty' }),
+    }),
+  )
+  const body = await response.json()
+
+  assertEquals(response.status, 200)
+  assertEquals(body.persona, 'morty')
+  assertEquals(body.cached, true)
+})
+
+Deno.test('answers 400 for a dossier request with no id', async () => {
+  const route = createRouter(services())
+
+  const response = await route(
+    new Request('https://x.test/api/dossier', { method: 'POST', body: '{}' }),
+  )
+  const body = await response.json()
+
+  assertEquals(response.status, 400)
+  assertEquals(body.error.code, 'INVALID_PARAMETER')
+})
+
+Deno.test('answers 429 when the dossier allowance is gone', async () => {
+  const route = createRouter({
+    ...services(),
+    quota: {
+      check: async () => {
+        throw new RateLimitError('out of fluid')
+      },
+    },
+  })
+
+  const response = await route(
+    new Request('https://x.test/api/dossier', {
+      method: 'POST',
+      body: JSON.stringify({ entityId: 1 }),
+    }),
+  )
+  const body = await response.json()
+
+  assertEquals(response.status, 429)
+  assertEquals(body.error.code, 'RATE_LIMITED')
+})
+
+Deno.test('still answers 404 for an unknown POST path', async () => {
+  const route = createRouter(services())
+
+  const response = await route(
+    new Request('https://x.test/api/nonsense', { method: 'POST', body: '{}' }),
+  )
+
+  assertEquals(response.status, 404)
 })

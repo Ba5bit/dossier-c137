@@ -1,4 +1,5 @@
 import { ValidationError } from './errors.ts'
+import { parsePersona } from './persona.ts'
 import type {
   CharacterGender,
   CharacterQuery,
@@ -6,6 +7,7 @@ import type {
   EpisodeQuery,
   LocationQuery,
 } from '../types.ts'
+import type { ChatTurn, Persona } from '../types.ts'
 
 const STATUSES: CharacterStatus[] = ['alive', 'dead', 'unknown']
 const GENDERS: CharacterGender[] = ['female', 'male', 'genderless', 'unknown']
@@ -97,4 +99,84 @@ export function parseSearchQuery(params: URLSearchParams): string {
     throw new ValidationError(`q must be at most ${SEARCH_MAX} characters`)
   }
   return value
+}
+
+export const ASK_MIN = 3
+export const ASK_MAX = 300
+export const MAX_HISTORY = 6
+
+export type DossierBody = {
+  entityType: string
+  entityId: number
+  persona: Persona
+}
+
+export type AskBody = {
+  q: string
+  persona: Persona
+  history: ChatTurn[]
+}
+
+function asRecord(raw: unknown): Record<string, unknown> {
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
+    throw new ValidationError('body must be an object')
+  }
+  return raw as Record<string, unknown>
+}
+
+/** A request whose body is not JSON is a client error, not a crash. */
+export async function readJsonBody(request: Request): Promise<unknown> {
+  try {
+    return await request.json()
+  } catch {
+    throw new ValidationError('body must be valid JSON')
+  }
+}
+
+export function parseDossierBody(raw: unknown): DossierBody {
+  const body = asRecord(raw)
+
+  if (body.entityId === undefined || body.entityId === null) {
+    throw new ValidationError('entityId is required')
+  }
+
+  return {
+    entityType: typeof body.entityType === 'string' ? body.entityType : 'character',
+    entityId: parseId(String(body.entityId)),
+    persona: parsePersona(body.persona),
+  }
+}
+
+export function parseAskBody(raw: unknown): AskBody {
+  const body = asRecord(raw)
+  const q = parseText(typeof body.q === 'string' ? body.q : null)
+
+  if (q === undefined) {
+    throw new ValidationError('q is required')
+  }
+  if (q.length < ASK_MIN) {
+    throw new ValidationError(`q must be at least ${ASK_MIN} characters`)
+  }
+  if (q.length > ASK_MAX) {
+    throw new ValidationError(`q must be at most ${ASK_MAX} characters`)
+  }
+
+  // History arrives from the browser, so it is filtered rather than trusted:
+  // only user and assistant turns survive, which closes the obvious door to
+  // injecting a second system prompt.
+  const rawHistory = Array.isArray(body.history) ? body.history : []
+  const history: ChatTurn[] = rawHistory
+    .filter((turn): turn is ChatTurn => {
+      if (typeof turn !== 'object' || turn === null) return false
+      const candidate = turn as Record<string, unknown>
+      return (
+        (candidate.role === 'user' || candidate.role === 'assistant') &&
+        typeof candidate.content === 'string' &&
+        candidate.content.trim() !== ''
+      )
+    })
+    .slice(-MAX_HISTORY)
+    .map((turn) => ({ role: turn.role, content: turn.content.slice(0, ASK_MAX) }))
+
+  return { q, persona: parsePersona(body.persona), history }
 }
