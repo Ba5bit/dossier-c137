@@ -1,5 +1,5 @@
 import { assertEquals, assertThrows } from 'jsr:@std/assert'
-import { parseCharacterQuery, parseId } from '../lib/validate.ts'
+import { parseCharacterQuery, parseId, parseLocationQuery } from '../lib/validate.ts'
 import { ValidationError } from '../lib/errors.ts'
 
 Deno.test('defaults to page 1 when no page is supplied', () => {
@@ -61,4 +61,29 @@ Deno.test('rejects a non-numeric id', () => {
 
 Deno.test('rejects a zero id', () => {
   assertThrows(() => parseId('0'), ValidationError)
+})
+
+Deno.test('reads every location filter out of the query string', () => {
+  const query = parseLocationQuery(
+    new URLSearchParams('page=2&name=earth&type=Planet&dimension=C-137'),
+  )
+
+  assertEquals(query, {
+    page: 2,
+    name: 'earth',
+    type: 'Planet',
+    dimension: 'C-137',
+  })
+})
+
+Deno.test('defaults the location page to 1', () => {
+  const query = parseLocationQuery(new URLSearchParams(''))
+  assertEquals(query.page, 1)
+})
+
+Deno.test('rejects a malformed location page', () => {
+  assertThrows(
+    () => parseLocationQuery(new URLSearchParams('page=abc')),
+    ValidationError,
+  )
 })

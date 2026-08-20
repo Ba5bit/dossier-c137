@@ -3,6 +3,7 @@ import type {
   CharacterGender,
   CharacterQuery,
   CharacterStatus,
+  LocationQuery,
 } from '../types.ts'
 
 const STATUSES: CharacterStatus[] = ['alive', 'dead', 'unknown']
@@ -61,4 +62,13 @@ export function parseId(raw: string): number {
     throw new ValidationError(`id must be at least 1, received ${id}`)
   }
   return id
+}
+
+export function parseLocationQuery(params: URLSearchParams): LocationQuery {
+  return {
+    page: parsePage(params.get('page')),
+    name: parseText(params.get('name')),
+    type: parseText(params.get('type')),
+    dimension: parseText(params.get('dimension')),
+  }
 }
