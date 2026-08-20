@@ -48,3 +48,6 @@ coverage/
 
 # Playwright MCP scratch
 .playwright-mcp/
+
+# Local secrets for `supabase functions serve`. Never committed.
+supabase/functions/.env
