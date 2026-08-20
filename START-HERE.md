@@ -66,25 +66,47 @@ What exists:
 
 Verified against the live deployment after plan 4, in a real browser: `Ctrl+K` opens the overlay, `rick` returns fifteen grouped results, arrow-plus-Enter fires the portal into the character page, `GENERATE DOSSIER` returns the stored text instantly, `/ask?q=…` asks once and renders four clickable source cards before the answer, the Morty voice survives a reload, and the Gandalf question refuses to invent. `grep` over `dist/assets` finds neither `rickandmortyapi` nor `xai-`.
 
-**Two walkthrough items were not run and are open for plan 5:** the muted-on-raised contrast check in the `citadel` and `cronenberg` dimensions, and the narrow-window pass over the overlay, the chat input and the source cards. The plan-3 visual walkthrough (task 22, steps 4 and 5) is still unrun as well — the portal animation, the dimension repaint, the absence of a flash on reload, `prefers-reduced-motion`.
-
-**One quality observation, not a defect.** In `/ask` the two voices are much less distinct than in the dossiers: a narrow factual question produces near-identical prose from Rick and from Morty, partly because the previous answer travels back as history and the model mirrors it. Morty's voice does come through when the archive has nothing ("Aw jeez, no records matched this question. Sorry."). Strengthening it means rewording `askSystemPrompt` and **bumping `PROMPT_VERSION`** — a plan 5 item, deliberately not done inline.
+Nine things were found and deliberately not fixed. They are listed with their evidence under **Open observations**, below the plan 5 agenda; four of them are confirmed defects.
 
 ## Immediate next step
 
 **Write plan 5**, then execute it — inline in the session, using the superpowers `writing-plans` and `executing-plans` skills. Not subagent-driven: the user chose inline deliberately, because a fresh subagent per task re-reads the whole context and costs far more tokens than this project is worth.
 
-Plan 5 owns, in this order:
+Plan 5 owns, in this order. The **Open observations** section below carries the evidence for every row marked with a number.
 
-| Item | What it covers |
-|---|---|
-| The README | The assignment grades it. Setup, architecture, the server-side-API guarantee, the bonus features, and an honest known-issues list: speech cut, Edge Function cold starts, the AI daily quotas, no SSR |
-| The microcopy move | Spec §7.3 wants every string in `src/shared/lore/copy.ts`. Plan 1 deliberately deferred it and every plan since has added inline copy. `src/shared/lore/quotes.ts` is a data file and stays where it is |
-| The mobile pass | Narrow-window behaviour of the search overlay, the chat input, the source cards, the filter bars and the grids |
-| The contrast pass | Muted text on `--surface-raised` in `citadel` and `cronenberg`, over the new chat and dossier surfaces |
-| The persona prompt | Sharpen `askSystemPrompt` so the two voices differ in the chat as clearly as they do in the dossiers, and **bump `PROMPT_VERSION`** so stored dossiers survive |
-| The Konami easter egg | `shared/hooks/useKonami.ts` |
-| The plan-3 walkthrough | Still unrun: the portal animation, the dimension repaint, the absence of a flash on reload, `prefers-reduced-motion`. Checklist is in plan 3, task 22, steps 4 and 5 |
+| # | Item | What it covers |
+|---|---|---|
+| 1 | The README | The assignment grades it. Setup, architecture, the server-side-API guarantee, the bonus features, and an honest known-issues list: speech cut, Edge Function cold starts, the AI daily quotas, no SSR |
+| 2 | Four confirmed defects | Observations 1–4 below. All small, all reproducible, all found during the plan 4 walkthrough |
+| 3 | The microcopy move | Spec §7.3 wants every string in `src/shared/lore/copy.ts`. Plan 1 deliberately deferred it and every plan since has added inline copy. `src/shared/lore/quotes.ts` is a data file and stays where it is |
+| 4 | The mobile pass | Narrow-window behaviour of the search overlay, the chat input, the source cards, the filter bars and the grids |
+| 5 | The contrast pass | Muted text on `--surface-raised` in `citadel` and `cronenberg`, over the new chat and dossier surfaces |
+| 6 | The persona prompt | Observation 6. Sharpen `askSystemPrompt`, and **bump `PROMPT_VERSION`** so stored dossiers survive |
+| 7 | Accessibility | Observations 5 and 7 |
+| 8 | The Konami easter egg | `shared/hooks/useKonami.ts` |
+| 9 | The plan-3 walkthrough | Still unrun: the portal animation, the dimension repaint, the absence of a flash on reload, `prefers-reduced-motion`. Checklist is in plan 3, task 22, steps 4 and 5 |
+
+## Open observations
+
+Everything found during plan 4 that was **not** fixed inline, because it was imperfect rather than broken, or because fixing it needed a decision. Each one states how it was confirmed.
+
+**1. A stored dossier still spends a day's allowance.** `handlers/dossier.ts` calls `quota.check` **before** `service.getDossier`, and the store read happens inside the service. So the 10-per-day dossier ceiling counts *views*, not *generations* — an eleventh visitor reading a dossier that was written last week is refused, having cost nothing. Confirmed by reading the handler. The fix is to move the quota behind the store lookup, which means the service has to tell the handler whether it is about to call the provider; the cleanest shape is for `getDossier` to take the quota and check it only on the miss path.
+
+**2. `/search?q=<one character>` renders skeletons forever.** `useSearch` disables the query below two characters, and a disabled TanStack query reports `status: 'pending'`, so `SearchPage`'s `query.trim() !== '' && isPending` branch is true with nothing on the way. Confirmed live at `https://dossier-c137.vercel.app/search?q=r` — two `Loading` statuses and no explanation. The page should show the same "two characters minimum" line `PortalSearch` already uses.
+
+**3. The `/search` input does not prefill from the URL.** Landing on `/search?q=rick` shows the results but an empty search box, so refining the query means retyping it. Confirmed in the same live check. `PortalSearch` needs an optional initial draft.
+
+**4. The first `Ctrl+K` after a cold page load does nothing.** Reproduced once on the live site: the very first press right after navigation did not open the overlay, and the second did. Most likely the press landed before the lazy route chunk hydrated and `useSearchHotkey` attached its listener. Worth confirming and, if real, worth attaching the listener above the lazy boundary.
+
+**5. The search overlay has no focus trap.** `SearchOverlay` sets `aria-modal="true"` and closes on `Escape`, but nothing stops `Tab` from walking into the page behind it. Confirmed by reading the component.
+
+**6. The two voices barely differ in the chat.** In `/ask`, a narrow factual question produces near-identical prose from Rick and from Morty — confirmed live, asking "who is Birdperson?" in both voices. Two causes: the previous answer travels back as history and the model mirrors it, and `askSystemPrompt`'s "plain prose, under 120 words" pulls hard against characterisation. Morty's voice does come through when the archive has nothing — "Aw jeez, no records matched this question. Sorry." The dossiers, which have no history and a more evaluative instruction, are clearly distinct. **Any reword must bump `PROMPT_VERSION`**, or stored dossiers will silently disagree with the prompt that supposedly wrote them.
+
+**7. Two elements share the label "Search the archive".** When the overlay opens over the hub, the hub's own coordinate input is still in the accessibility tree under the same name. Confirmed in a live accessibility snapshot.
+
+**8. The `citadel` and `cronenberg` contrast check was not run** over the chat and the dossier block, and neither was the narrow-window pass. Both are in the plan 4 walkthrough as steps 10 and 11 and were deliberately left — they are visual judgement, and the mobile pass was already plan 5's scope.
+
+**9. The xAI key was pasted into a session transcript on 2026-08-20 and should be treated as compromised.** It is still live. Rotate it at `console.x.ai`, put the new value in `supabase/functions/.env`, then re-run `secrets set --env-file` and the function deploy. Nothing in the repository holds it — the exposure is the transcript on disk.
 
 **Nothing is needed from the user to start.** Both secrets are set and both deploys are done.
 
@@ -182,7 +204,9 @@ None of them are worth chasing. What matters is that the count of **errors** sta
 
 ## Still needed from the user
 
-**Nothing.** `XAI_API_KEY` and `IP_HASH_SALT` are both set as Supabase secrets and the function is deployed with them. They also live in `supabase/functions/.env`, which is gitignored and exists only for `supabase functions serve` and for re-running `secrets set --env-file`. No ElevenLabs key is needed — speech is cut.
+**One thing, and it is not blocking: rotate the xAI key.** It was pasted into a session transcript on 2026-08-20 and is still live — observation 9. New key into `supabase/functions/.env`, then `secrets set --env-file` and a function deploy, both of which only the user can run.
+
+Otherwise nothing. `XAI_API_KEY` and `IP_HASH_SALT` are set as Supabase secrets and the function is deployed with them. They also live in `supabase/functions/.env`, which is gitignored and exists only for `supabase functions serve` and for re-running `secrets set --env-file`. No ElevenLabs key is needed — speech is cut.
 
 ## Decisions already made — do not relitigate
 
@@ -206,7 +230,9 @@ None of them are worth chasing. What matters is that the count of **errors** sta
 
 **Design system publishes from code.** Claude Design's `/design-sync` reads tokens and React components from the repository, not an exported mockup — so the code comes first. The command must be typed by the user; it cannot be run on their behalf.
 
-## Two things that are easy to get wrong
+## Three things that are easy to get wrong
+
+**A stored dossier is permanent, so a reworded prompt must bump `PROMPT_VERSION`.** `prompt_version` is part of the `ai_dossiers` primary key precisely so that new wording writes new rows beside the old ones. Editing `lib/persona.ts` without bumping it leaves every stored dossier attributed to a prompt that no longer exists, and no new one is ever generated for a character that already has a row. This matters immediately: plan 5 is expected to reword `askSystemPrompt` — and while that particular function does not feed the dossier path, the constant is shared, so the bump is the safe move either way.
 
 **Muted text must be validated against every surface, not just the background.** The original `--text-secondary` values passed on `--bg` and failed on `--surface-raised`, which is where muted text actually lives. Current values pass in the worst case. Any new colour needs the same treatment — and there are three dimensions to check now, not one. Cronenberg's muted-on-raised pair is the highest-risk of the nine.
 
