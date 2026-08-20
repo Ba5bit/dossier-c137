@@ -90,12 +90,10 @@ export function HubPage() {
             ))}
           </ul>
 
-          <dl className="grid grid-cols-2 gap-6 border border-line bg-surface p-4 sm:grid-cols-3 sm:p-6 lg:grid-cols-5">
+          <dl className="grid grid-cols-1 gap-6 border border-line bg-surface p-4 sm:grid-cols-3 sm:p-6">
             <Figure label={COPY.hub.figures[0]} value={indexedTotal(data)} />
-            <Figure label={COPY.hub.figures[1]} value={data?.locations.total} />
-            <Figure label={COPY.hub.figures[2]} value={data?.episodes.total} />
-            <Figure label={COPY.hub.figures[3]} value={data?.ricks} />
-            <Figure label={COPY.hub.figures[4]} value={data?.mortys} />
+            <Figure label={COPY.hub.figures[1]} value={data?.ricks} />
+            <Figure label={COPY.hub.figures[2]} value={data?.mortys} />
           </dl>
         </>
       )}

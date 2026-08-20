@@ -30,7 +30,7 @@ describe('COPY', () => {
       '/ask',
     ])
     expect(COPY.hub.stamp).toBe('DOSSIER C-137 // CLEARANCE: UNRESTRICTED')
-    expect(COPY.hub.figures).toHaveLength(5)
+    expect(COPY.hub.figures).toHaveLength(3)
   })
 
   it('holds no empty strings', () => {

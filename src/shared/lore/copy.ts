@@ -103,13 +103,10 @@ export const COPY = {
       { to: '/locations', label: 'LOCATIONS', key: 'locations' },
       { to: '/episodes', label: 'EPISODES', key: 'episodes' },
     ],
-    figures: [
-      'ENTITIES INDEXED',
-      'LOCATIONS ON FILE',
-      'EPISODES LOGGED',
-      'RICKS ON FILE',
-      'MORTYS ON FILE',
-    ],
+    // Locations and episodes are not repeated here: the destination cards
+    // above already carry those two counts, and showing them twice on one
+    // screen reads as a contradiction rather than a summary.
+    figures: ['ENTITIES INDEXED', 'RICKS ON FILE', 'MORTYS ON FILE'],
   },
   sections: {
     charactersHeading: 'Characters',
