@@ -4,8 +4,11 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { useUrlFilters } from './useUrlFilters'
 
+const CHARACTER_KEYS = ['name', 'status', 'species', 'gender'] as const
+const EPISODE_KEYS = ['name', 'episode'] as const
+
 function Probe() {
-  const { filters, setFilter, clearFilters } = useUrlFilters()
+  const { filters, setFilter, clearFilters } = useUrlFilters(CHARACTER_KEYS)
   const location = useLocation()
 
   return (
@@ -20,11 +23,16 @@ function Probe() {
   )
 }
 
-function renderAt(path: string) {
+function EpisodeProbe() {
+  const { filters } = useUrlFilters(EPISODE_KEYS)
+  return <span data-testid="episode">{filters.episode ?? ''}</span>
+}
+
+function renderAt(path: string, element = <Probe />) {
   return render(
     <MemoryRouter initialEntries={[path]}>
       <Routes>
-        <Route path="/characters" element={<Probe />} />
+        <Route path="/characters" element={element} />
       </Routes>
     </MemoryRouter>,
   )
@@ -66,5 +74,15 @@ describe('useUrlFilters', () => {
     await userEvent.click(screen.getByText('clear'))
     expect(screen.getByTestId('search')).toHaveTextContent('')
     expect(screen.getByTestId('page')).toHaveTextContent('1')
+  })
+
+  it('reads a key set belonging to a different entity', () => {
+    renderAt('/characters?episode=S03', <EpisodeProbe />)
+    expect(screen.getByTestId('episode')).toHaveTextContent('S03')
+  })
+
+  it('ignores query parameters outside the declared key set', () => {
+    renderAt('/characters?status=alive', <EpisodeProbe />)
+    expect(screen.getByTestId('episode')).toHaveTextContent('')
   })
 })

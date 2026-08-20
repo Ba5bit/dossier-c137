@@ -1,11 +1,14 @@
 import { useUrlFilters } from '../shared/hooks/useUrlFilters'
 import { useCharacters } from '../features/characters/useCharacters'
-import { CharacterFilters } from '../features/characters/CharacterFilters'
+import {
+  CharacterFilters,
+  CHARACTER_FILTER_KEYS,
+} from '../features/characters/CharacterFilters'
 import { CharacterGrid } from '../features/characters/CharacterGrid'
 import { Pagination } from '../shared/ui/Pagination'
 
 export function CharactersPage() {
-  const { filters, setFilter, clearFilters } = useUrlFilters()
+  const { filters, setFilter, clearFilters } = useUrlFilters(CHARACTER_FILTER_KEYS)
   const { data, isPending, isError, refetch } = useCharacters(filters)
 
   return (

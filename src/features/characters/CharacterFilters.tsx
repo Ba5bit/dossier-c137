@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { CharacterFilters as Filters } from '../../shared/api/types'
-import type { FilterKey } from '../../shared/hooks/useUrlFilters'
+import type { FilterSetter } from '../../shared/hooks/useUrlFilters'
+
+export const CHARACTER_FILTER_KEYS = ['name', 'status', 'species', 'gender'] as const
+export type CharacterFilterKey = (typeof CHARACTER_FILTER_KEYS)[number]
 
 type CharacterFiltersProps = {
   filters: Filters
-  onChange: (key: FilterKey, value: string | undefined) => void
+  onChange: FilterSetter<CharacterFilterKey>
   onClear: () => void
 }
 
