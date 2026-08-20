@@ -85,6 +85,19 @@ function services(overrides: Partial<StubServices> = {}): StubServices {
         stale: false,
       }),
     },
+    search: {
+      search: async (query: string) => ({
+        payload: {
+          query,
+          groups: {
+            characters: { items: [], total: 0 },
+            locations: { items: [], total: 0 },
+            episodes: { items: [], total: 0 },
+          },
+        },
+        stale: false,
+      }),
+    },
     ...overrides,
   }
 }
@@ -269,4 +282,24 @@ Deno.test('routes stats requests to the service', async () => {
   assertEquals(response.status, 200)
   assertEquals(body.characters.total, 826)
   assertEquals(body.ricks, 112)
+})
+
+Deno.test('routes a search request and echoes the query', async () => {
+  const route = createRouter(services())
+
+  const response = await route(new Request('https://x.test/api/search?q=morty'))
+  const body = await response.json()
+
+  assertEquals(response.status, 200)
+  assertEquals(body.query, 'morty')
+})
+
+Deno.test('answers 400 for a one-character search', async () => {
+  const route = createRouter(services())
+
+  const response = await route(new Request('https://x.test/api/search?q=m'))
+  const body = await response.json()
+
+  assertEquals(response.status, 400)
+  assertEquals(body.error.code, 'INVALID_PARAMETER')
 })

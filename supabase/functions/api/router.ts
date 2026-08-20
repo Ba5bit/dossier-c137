@@ -14,6 +14,7 @@ import {
   type EpisodeService,
 } from './handlers/episodes.ts'
 import { handleGetStats, type StatsService } from './handlers/stats.ts'
+import { handleSearch, type SearchService } from './handlers/search.ts'
 import { AppError } from './lib/errors.ts'
 
 const JSON_HEADERS = { 'content-type': 'application/json' }
@@ -23,6 +24,7 @@ export type Services = {
   locations: LocationService
   episodes: EpisodeService
   stats: StatsService
+  search: SearchService
 }
 
 /**
@@ -92,6 +94,11 @@ export function createRouter(services: Services) {
 
       if (path === '/stats') {
         const { body, stale } = await handleGetStats(services.stats)
+        return json(body, 200, staleHeaders(stale))
+      }
+
+      if (path === '/search') {
+        const { body, stale } = await handleSearch(url, services.search)
         return json(body, 200, staleHeaders(stale))
       }
 

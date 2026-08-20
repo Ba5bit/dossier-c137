@@ -4,6 +4,7 @@ import {
   parseEpisodeQuery,
   parseId,
   parseLocationQuery,
+  parseSearchQuery,
 } from '../lib/validate.ts'
 import { ValidationError } from '../lib/errors.ts'
 
@@ -101,4 +102,29 @@ Deno.test('reads every episode filter out of the query string', () => {
 
 Deno.test('defaults the episode page to 1', () => {
   assertEquals(parseEpisodeQuery(new URLSearchParams('')).page, 1)
+})
+
+Deno.test('accepts a trimmed search query', () => {
+  assertEquals(parseSearchQuery(new URLSearchParams('q=  morty  ')), 'morty')
+})
+
+Deno.test('rejects a search query shorter than two characters', () => {
+  assertThrows(
+    () => parseSearchQuery(new URLSearchParams('q=m')),
+    Error,
+    'at least 2 characters',
+  )
+})
+
+Deno.test('rejects a missing search query', () => {
+  assertThrows(() => parseSearchQuery(new URLSearchParams('')), Error, 'q is required')
+})
+
+Deno.test('rejects a search query longer than a hundred characters', () => {
+  const long = 'm'.repeat(101)
+  assertThrows(
+    () => parseSearchQuery(new URLSearchParams(`q=${long}`)),
+    Error,
+    'at most 100 characters',
+  )
 })

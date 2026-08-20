@@ -81,3 +81,20 @@ export function parseEpisodeQuery(params: URLSearchParams): EpisodeQuery {
     episode: parseText(params.get('episode')),
   }
 }
+
+export const SEARCH_MIN = 2
+export const SEARCH_MAX = 100
+
+export function parseSearchQuery(params: URLSearchParams): string {
+  const value = parseText(params.get('q'))
+  if (value === undefined) {
+    throw new ValidationError('q is required')
+  }
+  if (value.length < SEARCH_MIN) {
+    throw new ValidationError(`q must be at least ${SEARCH_MIN} characters`)
+  }
+  if (value.length > SEARCH_MAX) {
+    throw new ValidationError(`q must be at most ${SEARCH_MAX} characters`)
+  }
+  return value
+}
