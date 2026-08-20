@@ -1,6 +1,6 @@
 # Start Here
 
-Handoff note for a fresh session. Last updated 2026-08-20, after plans 1, 2, and 3 shipped in full. **Plan 4 has not been written yet** — writing it is the next step, and it needs two API keys from the user first.
+Handoff note for a fresh session. Last updated 2026-08-20, after plans 1, 2, and 3 shipped in full and plan 4 was written. **Plan 4 is written but not executed** — executing it is the next step, and it needs one API key from the user first.
 
 ## What this project is
 
@@ -16,6 +16,7 @@ The assignment requires a public GitHub repository, a thorough README, and that 
 | `docs/superpowers/plans/2026-08-20-dossier-c137-foundation.md` | Plan 1 of 5, complete. Twenty-three TDD tasks with complete code in every step |
 | `docs/superpowers/plans/2026-08-20-dossier-c137-entities.md` | Plan 2 of 5, complete. Twenty TDD tasks: locations, episodes, and all three detail pages |
 | `docs/superpowers/plans/2026-08-20-dossier-c137-portal.md` | Plan 3 of 5, complete. Twenty-two TDD tasks: `/api/stats`, the settings layer, the three dimensions, the portal transition system, the hub, and the real header |
+| `docs/superpowers/plans/2026-08-20-dossier-c137-ai.md` | Plan 4 of 5, **written, not executed**. Twenty-four TDD tasks: `/api/search`, `/api/dossier`, `/api/ask`, AI storage, spend ceilings, the search overlay and page, the hub input, the persona setting, the dossier block, and the grounded chat |
 | `docs/design/tokens.md` | Ten source colors expanded into three palettes, every pair contrast-checked |
 | `docs/design/visual-direction.md` | The direction, the rejected alternatives, and why each reference was weighted as it was |
 | `design-brief/STEP-2-PROMPTS.md` | Per-screen layout descriptions, detailed enough to build from directly |
@@ -59,13 +60,29 @@ Verified against the live deployment after plan 3: `/stats` returns all five rea
 
 ## Immediate next step
 
-**Write plan 4.** It does not exist. Use the superpowers `writing-plans` skill against spec §6.2, §6.4, §6.5, §7.4, and §10.
+**Execute plan 4**, `docs/superpowers/plans/2026-08-20-dossier-c137-ai.md`, **inline in the session, using the superpowers `executing-plans` skill**. Not subagent-driven: the user chose inline deliberately, because a fresh subagent per task re-reads the whole context and costs far more tokens than this project is worth. Do not dispatch subagents for the tasks.
 
-Plan 4 is the AI slice: `/api/search`, `/api/ask`, `/api/dossier`, `/api/speak`, AI storage, spend controls, the search overlay, and the hub's coordinate input — which is the search field, deliberately left out of plan 3.
+Read the plan's own header sections first — Scope, "Four deviations from the spec", "Five things that will bite", and the file structure — then work the tasks in order. Every task is TDD with the complete code in each step; write the test, watch it fail, implement, watch it pass, commit.
 
-**It needs two API keys from the user before any of it can be deployed**: Grok and ElevenLabs, set via `supabase secrets set`. Ask for them at the start rather than at the end.
+**Batch the tasks between checkpoints like this.** Stop at each checkpoint, report what landed, and wait:
 
-Plan 5 then owns the Konami easter egg (`shared/hooks/useKonami.ts`), the microcopy move to `src/shared/lore/copy.ts`, and the README.
+| Batch | Tasks | Checkpoint |
+|---|---|---|
+| 1 | 1–2 | Search service and endpoint, backend green |
+| 2 | 3–4 | **User runs two commands**: the function deploy, then `db push` for the AI tables |
+| 3 | 5–8 | Personas, the Grok client, the quota, the dossier service |
+| 4 | 9–11 | The dossier and ask endpoints, the SSE writer |
+| 5 | 12 | **User runs two commands**: `supabase secrets set`, then the deploy. Then the live curl checks — including the Gandalf question, which proves grounding |
+| 6 | 13–16 | The client contract, the search hook, `PortalSearch`, the overlay and the hotkey |
+| 7 | 17–19 | The `/search` page, the hub input, the persona setting |
+| 8 | 20–23 | The dossier block, the ask stream hook, the chat panel, `/ask` |
+| 9 | 24 | Full gates, the live walkthrough, the tag, this note |
+
+**One API key is needed before batch 5, and only there**: Grok (`XAI_API_KEY`), plus an `IP_HASH_SALT`. The user sets both themselves with `!npx supabase secrets set …` — the key must never be pasted into the conversation or into a tracked file. ElevenLabs is no longer needed at all; speech was cut from the project.
+
+**Three commands in the whole plan cannot be run by Claude** — the permission classifier blocks every `supabase` invocation. They are in tasks 3, 4, and 12, and the plan marks each one. Ask the user to run them with a `!` prefix.
+
+Plan 5 then owns the Konami easter egg (`shared/hooks/useKonami.ts`), the microcopy move to `src/shared/lore/copy.ts`, the mobile pass, and the README.
 
 Before touching anything, confirm the inherited state is green:
 
@@ -75,6 +92,8 @@ npm test                  # expect 203 passing
 npm run test:api          # expect 85 passing
 npm run lint && npm run build
 ```
+
+All four were run and were green immediately before plan 4 was committed: 203 frontend, 85 backend, 0 lint errors with 11 warnings, build clean, tree clean on `main`. If a fresh session sees anything else, something changed outside these commits.
 
 Run them one at a time. Chaining all four in a single command has produced one run where Vitest reported fifteen errors with the tests themselves executing in 191 ms — workers failing to start under load on this machine, not assertions failing. Re-running alone gave a clean pass twice. If you see that shape — a pile of errors and a suspiciously short test duration — re-run before believing it.
 
@@ -147,13 +166,15 @@ None of them are worth chasing. What matters is that the count of **errors** sta
 
 ## Still needed from the user
 
-**Grok and ElevenLabs API keys**, for plan 4, set via `supabase secrets set`. Nothing else.
+**The Grok API key** (`XAI_API_KEY`) and an `IP_HASH_SALT`, both set by the user with `supabase secrets set` at plan 4 task 12. Nothing else. No ElevenLabs key is needed — speech is cut.
 
 ## Decisions already made — do not relitigate
 
 **Stack.** React 19 + Vite + TypeScript, React Router v7, TanStack Query, Tailwind v4, Supabase Edge Functions on Deno, Supabase Postgres as the cache, Vercel for the frontend. Next.js was considered and rejected in favour of a stack the developer already knows.
 
-**AI providers.** Grok for text, chosen over Gemini because tone is the point of the feature. ElevenLabs Voice Design for speech — synthesized from a description rather than cloned, which is both licensing-clean and the only option on the free tier.
+**AI providers.** Grok for text, chosen over Gemini because tone is the point of the feature. **Speech is cut from the project** — no ElevenLabs, no `/api/speak`, no `ai_audio`, no Storage bucket, no §10.3. The AI bonus is carried by the grounded chat and the dossiers, which are the parts that show prompt and retrieval work; a second paid provider for a button nobody grades was not worth the failure modes. The README's known-issues section says so honestly.
+
+**The AI is a chatbot with a persona choice.** Rick or Morty, chosen by the visitor, persisted in `citadel-settings` beside the dimension and switchable both in the portal gun panel and in the chat header. It drives the system prompt and is part of the `ai_dossiers` primary key, so each character has one dossier per voice. The conversation itself is never persisted: the browser sends the last six turns with each question, and the server stays stateless.
 
 **Themes are dimensions.** `c-137` dark by default, `citadel` light, `cronenberg` dark. One light and two dark satisfies the assignment's light/dark requirement literally while keeping the concept.
 
