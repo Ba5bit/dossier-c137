@@ -82,12 +82,12 @@ The portal transition does not play on top of a wait — it **is** the represent
 | Routing | React Router v7 | SPA standard; `useSearchParams` provides URL state |
 | Data | TanStack Query | Caching, deduplication, `isPending` for skeletons, `isFetching` for background refresh |
 | Styling | Tailwind + CSS custom properties | Themes become a swap of variables on `<html>` with no branching in components |
-| Animation | Framer Motion + CSS/canvas | Portal, transitions, `AnimatePresence` for mount/unmount |
+| Animation | ~~Framer Motion~~ + CSS/canvas | **As built: no animation library.** CSS keyframes driven by a `data-phase` attribute, and a canvas vortex. The state machine already owned every duration |
 | Backend | Supabase Edge Functions (Deno) | Our own service; secrets stay server-side; one-command deploy |
 | Storage | Supabase Postgres | Cache for external API responses, AI dossiers, quota accounting |
 | Files | Supabase Storage | Cache for generated audio |
 | Text AI | Grok (xAI API) | Credits already available; the model's tone suits the character far better than the alternatives |
-| Speech | ElevenLabs Voice Design | Free tier; the voice is synthesized from a text description rather than cloned |
+| Speech | ~~ElevenLabs Voice Design~~ | **Not built.** Cut deliberately; see the README's known issues |
 | Frontend hosting | Vercel | Free, deploys on push |
 
 **Alternatives considered** (material for the README "trade-offs" section):

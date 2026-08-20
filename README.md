@@ -33,12 +33,14 @@ The assignment's central requirement. The Rick and Morty API is called only from
 `supabase/functions/api/clients/rmClient.ts`, inside the Edge Function. The
 browser talks to our own API and nothing else.
 
-This is enforced, not promised. An ESLint rule fails the build on the string
-`rickandmortyapi.com` anywhere under `src/`, and the shipped bundle is checked
-for it:
+This is enforced, not promised. An ESLint rule (`no-restricted-syntax` in
+`eslint.config.js`) raises an **error** on the string `rickandmortyapi.com`
+anywhere under `src/`, in both string literals and template parts. `npm run
+build` does not run ESLint, so the bundle is checked separately — both commands
+below are green on the current tree:
 
 ```bash
-npm run lint
+npm run lint                                    # 0 errors
 npm run build && grep -r "rickandmortyapi" dist/assets || echo "clean"
 ```
 
@@ -52,22 +54,27 @@ cp .env.example .env.local     # then fill in the values below
 npm run dev
 ```
 
-`.env.local` — frontend, read by Vite. Anything `VITE_`-prefixed ends up in the
-browser bundle, so no provider key ever goes here:
+`.env.local` — frontend, read by Vite. The frontend reads exactly one variable,
+`src/shared/api/client.ts:33` being the only `import.meta.env` site in the whole
+of `src/`. Anything `VITE_`-prefixed ends up in the browser bundle, so no
+provider key ever goes here:
 
 | Variable | What it is |
 |---|---|
-| `VITE_API_BASE` | The Edge Function base URL, e.g. `https://<ref>.supabase.co/functions/v1/api` |
-| `VITE_SUPABASE_URL` | Supabase project URL |
-| `VITE_SUPABASE_ANON_KEY` | Supabase anon key |
+| `VITE_API_BASE` | The Edge Function base URL, e.g. `https://<ref>.supabase.co/functions/v1/api`. Falls back to `/api` when unset |
+
+No Supabase anon key is needed in the browser: the function is deployed
+`--no-verify-jwt`, and the frontend never talks to Supabase directly — only to
+the Edge Function.
 
 `supabase/functions/.env` — backend secrets, gitignored, never in the bundle:
 
 | Variable | What it is |
 |---|---|
 | `XAI_API_KEY` | Grok API key. Without it the archive still works; only the two AI endpoints answer 502 |
-| `IP_HASH_SALT` | Salt for the per-caller quota digest. Addresses are hashed, never stored |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supplied by the platform at runtime |
+| `IP_HASH_SALT` | Salt for the per-caller quota digest. Addresses are hashed, never stored. Falls back to `unsalted-development`, which is fine locally and wrong in production |
+| `GROK_MODEL` | Optional. Overrides the default `grok-4-fast-non-reasoning` |
+| `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | Injected by the platform at runtime; set neither by hand |
 
 Database and function:
 
@@ -174,7 +181,7 @@ into something automatically verified rather than a matter of trust.
 
 ## Known issues
 
-- **Speech was cut.** The design allowed for narrated dossiers via ElevenLabs. It was dropped rather than half-built: a second paid provider, with its own failure modes and quota, for a button nobody grades. The AI bonus is carried by the grounded chat and the dossiers, which are the parts that actually show retrieval and prompt work.
+- **There is no audio.** Dossiers are read, not narrated. A second paid provider with its own quota and failure modes was not worth a button nobody grades; the AI bonus is carried by the grounded chat and the dossiers, which are the parts that show retrieval and prompt work. The specification still lists ElevenLabs under its stack — the README is the accurate document.
 - **Edge Function cold starts** add 200–500 ms to the first request after an idle period. The portal transition absorbs it, but a cold first load is visibly slower.
 - **AI daily quotas.** 30 questions and 10 dossier generations per caller per day, plus a global ceiling of 500. Exhausting one returns a portal-gun-out-of-fluid message, not an error page.
 - **No SSR**, so the first paint waits for JavaScript.
@@ -185,7 +192,10 @@ into something automatically verified rather than a matter of trust.
 ## Testing
 
 428 tests: 272 on the frontend under Vitest with React Testing Library and MSW,
-156 on the backend under Deno test against stubbed clients.
+156 on the backend under Deno test against stubbed clients. Both suites, the
+build and the lint pass on `main` as published — `npm run lint` reports 0 errors
+and 13 `react-refresh/only-export-components` warnings, all of them on filter
+components that export a constant beside the component.
 
 Effort concentrates on branching logic rather than markup: filter parsing, cache
 keys, relation expansion, the portal state machine, retrieval and grounding,
