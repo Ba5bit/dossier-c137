@@ -147,7 +147,7 @@ export function PortalSearch({
             setHighlight(-1)
           }}
           onKeyDown={onKeyDown}
-          className="text-fg placeholder:text-muted w-full border border-line bg-surface px-4 py-3 font-mono text-sm outline-none focus:border-accent"
+          className="text-fg placeholder:text-muted w-full min-w-0 border border-line bg-surface px-4 py-3 font-mono text-sm outline-none focus:border-accent"
         />
         <button
           type="button"

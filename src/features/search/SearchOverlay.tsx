@@ -21,14 +21,14 @@ export function SearchOverlay({ onClose }: SearchOverlayProps) {
       role="dialog"
       aria-modal="true"
       aria-label={COPY.search.overlayLabel}
-      className="fixed inset-0 z-50 flex items-start justify-center pt-24"
+      className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24"
     >
       <div
         data-testid="search-backdrop"
         onClick={onClose}
         className="absolute inset-0 bg-black/70"
       />
-      <div className="relative w-full max-w-[640px] px-6">
+      <div className="relative w-full max-w-[640px] px-4 sm:px-6">
         <PortalSearch autoFocus onNavigate={onClose} />
         <p className="mt-3 text-center font-mono text-xs text-muted">
           {COPY.search.hint}

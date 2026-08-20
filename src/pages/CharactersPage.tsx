@@ -13,7 +13,7 @@ export function CharactersPage() {
   const { data, isPending, isError, refetch } = useCharacters(filters)
 
   return (
-    <main className="mx-auto max-w-[1280px] space-y-6 px-6 py-10">
+    <main className="mx-auto max-w-[1280px] space-y-6 px-4 py-10 sm:px-6">
       <header className="space-y-1">
         <p className="font-mono text-xs text-muted">
           {COPY.clearanceStamp}

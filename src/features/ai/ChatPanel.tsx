@@ -40,7 +40,7 @@ export function ChatPanel({ initialQuestion }: ChatPanelProps) {
 
   return (
     <section className="space-y-4">
-      <header className="flex items-center justify-between gap-4 border-b border-line pb-3">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3">
         <p className="font-mono text-xs tracking-widest text-accent">
           {COPY.ai.personaNames[settings.persona]}
         </p>
@@ -89,7 +89,7 @@ export function ChatPanel({ initialQuestion }: ChatPanelProps) {
           aria-label={COPY.ai.inputLabel}
           placeholder={COPY.ai.inputPlaceholder}
           onChange={(event) => setDraft(event.target.value)}
-          className="text-fg placeholder:text-muted w-full border border-line bg-surface px-4 py-3 font-mono text-sm outline-none focus:border-accent"
+          className="text-fg placeholder:text-muted w-full min-w-0 border border-line bg-surface px-4 py-3 font-mono text-sm outline-none focus:border-accent"
         />
         <button
           type="submit"

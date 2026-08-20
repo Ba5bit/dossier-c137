@@ -54,7 +54,7 @@ export function AppLayout() {
           <header className="border-b border-line bg-surface">
             <nav
               aria-label={COPY.layout.navLabel}
-              className="mx-auto flex max-w-[1280px] items-center gap-6 px-6 py-4"
+              className="mx-auto flex max-w-[1280px] flex-wrap items-center gap-x-6 gap-y-3 px-4 py-4 sm:px-6"
             >
               <PortalLink
                 to="/"
@@ -63,7 +63,7 @@ export function AppLayout() {
                 {COPY.layout.brand}
               </PortalLink>
 
-              <ul className="flex items-center gap-4">
+              <ul className="flex flex-wrap items-center gap-x-4 gap-y-2">
                 {COPY.layout.sections.map((section) => {
                   const active = pathname.startsWith(section.to)
 

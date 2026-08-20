@@ -7,7 +7,7 @@ export function AskPage() {
   const question = params.get('q') ?? undefined
 
   return (
-    <main className="mx-auto max-w-[840px] space-y-8 px-6 py-10">
+    <main className="mx-auto max-w-[840px] space-y-8 px-4 py-10 sm:px-6">
       <header className="space-y-3">
         <p className="font-mono text-xs tracking-widest text-muted">
           {COPY.ask.stamp}

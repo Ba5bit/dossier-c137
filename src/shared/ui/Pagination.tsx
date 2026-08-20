@@ -17,7 +17,7 @@ export function Pagination({ page, pageCount, onChange }: PaginationProps) {
   return (
     <nav
       aria-label={COPY.pagination.label}
-      className="flex items-center justify-center gap-4 py-6"
+      className="flex flex-wrap items-center justify-center gap-2 py-6 sm:gap-4"
     >
       <button
         type="button"

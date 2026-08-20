@@ -39,12 +39,12 @@ export function HubPage() {
   const { data, isError, refetch } = useStats()
 
   return (
-    <main className="mx-auto max-w-[1280px] space-y-12 px-6 py-16">
+    <main className="mx-auto max-w-[1280px] space-y-12 px-4 py-10 sm:px-6 sm:py-16">
       <header className="space-y-3 text-center">
         <p className="font-mono text-xs text-muted">
           {COPY.hub.stamp}
         </p>
-        <h1 className="text-fg text-4xl font-bold tracking-tight">
+        <h1 className="text-fg text-3xl font-bold tracking-tight sm:text-4xl">
           {COPY.hub.heading}
         </h1>
         <p className="text-muted">
@@ -90,7 +90,7 @@ export function HubPage() {
             ))}
           </ul>
 
-          <dl className="grid grid-cols-2 gap-6 border border-line bg-surface p-6 sm:grid-cols-5">
+          <dl className="grid grid-cols-2 gap-6 border border-line bg-surface p-4 sm:grid-cols-3 sm:p-6 lg:grid-cols-5">
             <Figure label={COPY.hub.figures[0]} value={indexedTotal(data)} />
             <Figure label={COPY.hub.figures[1]} value={data?.locations.total} />
             <Figure label={COPY.hub.figures[2]} value={data?.episodes.total} />

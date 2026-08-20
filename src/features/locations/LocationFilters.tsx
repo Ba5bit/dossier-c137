@@ -34,13 +34,13 @@ export function LocationFilters({
   )
 
   return (
-    <div className="flex flex-wrap items-end gap-4 border border-line bg-surface p-4">
+    <div className="flex flex-wrap items-end gap-3 border border-line bg-surface p-3 sm:gap-4 sm:p-4">
       <TextFilter
         id="filter-location-name"
         label={COPY.filters.name}
         placeholder={COPY.filters.namePlaceholder}
         value={filters.name}
-        width="w-56"
+        width="w-full sm:w-56"
         onCommit={commitName}
       />
       <TextFilter
