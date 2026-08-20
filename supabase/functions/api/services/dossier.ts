@@ -62,10 +62,17 @@ export function createDossierService(
   grok: GrokLike,
   store: DossierStore,
 ) {
+  /**
+   * `onGenerate` runs only when a dossier is about to be written — never on a
+   * store hit. The ceiling counts generations, which are what cost money;
+   * counting views would refuse the eleventh reader of a dossier written last
+   * week. The service is the only code that knows which path it is on.
+   */
   async function getDossier(
     entityType: string,
     entityId: number,
     persona: Persona,
+    onGenerate: () => Promise<void> | void = () => {},
   ): Promise<Dossier> {
     if (!DOSSIER_ENTITY_TYPES.includes(entityType)) {
       throw new ValidationError(
@@ -85,6 +92,8 @@ export function createDossierService(
         cached: true,
       }
     }
+
+    await onGenerate()
 
     // The detail request goes through the ordinary cached service, so a
     // dossier for a character somebody has already viewed costs no upstream

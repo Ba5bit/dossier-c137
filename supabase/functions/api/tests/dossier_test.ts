@@ -146,3 +146,55 @@ Deno.test('rejects an entity type that has no biography', async () => {
 
   assertEquals(code, 'INVALID_PARAMETER')
 })
+
+Deno.test('does not spend the allowance on a stored dossier', async () => {
+  const characters = stubCharacters()
+  const grok = stubGrok()
+  const store = memoryStore({
+    [`character/1/rick/${PROMPT_VERSION}`]: { text: 'On file.', model: 'grok-old' },
+  })
+  const service = createDossierService(characters.service, grok.client, store.store)
+
+  let spent = 0
+  const dossier = await service.getDossier('character', 1, 'rick', () => {
+    spent += 1
+  })
+
+  assertEquals(dossier.cached, true)
+  assertEquals(spent, 0)
+})
+
+Deno.test('spends the allowance before generating a new dossier', async () => {
+  const characters = stubCharacters()
+  const grok = stubGrok()
+  const store = memoryStore()
+  const service = createDossierService(characters.service, grok.client, store.store)
+
+  const order: string[] = []
+  await service.getDossier('character', 1, 'rick', () => {
+    order.push('quota')
+  })
+
+  assertEquals(order, ['quota'])
+  assertEquals(grok.calls.length, 1)
+})
+
+Deno.test('a refused allowance never reaches the provider', async () => {
+  const characters = stubCharacters()
+  const grok = stubGrok()
+  const store = memoryStore()
+  const service = createDossierService(characters.service, grok.client, store.store)
+
+  let message = ''
+  try {
+    await service.getDossier('character', 1, 'rick', () => {
+      throw new Error('out of fluid')
+    })
+  } catch (error) {
+    message = (error as Error).message
+  }
+
+  assertEquals(message, 'out of fluid')
+  assertEquals(grok.calls.length, 0)
+  assertEquals(store.writes.length, 0)
+})

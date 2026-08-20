@@ -99,15 +99,26 @@ function services(overrides: Partial<StubServices> = {}): StubServices {
       }),
     },
     dossier: {
-      getDossier: async (entityType: string, entityId: number, persona: 'rick' | 'morty') => ({
-        entityType,
-        entityId,
-        persona,
-        text: 'On file.',
-        model: 'grok-test',
-        promptVersion: 1,
-        cached: true,
-      }),
+      // Stands in for the generate path: the real service spends the
+      // allowance through `onGenerate` only when it is about to write, so a
+      // stub that ignored the callback would never reach the quota at all.
+      getDossier: async (
+        entityType: string,
+        entityId: number,
+        persona: 'rick' | 'morty',
+        onGenerate?: () => Promise<void> | void,
+      ) => {
+        await onGenerate?.()
+        return {
+          entityType,
+          entityId,
+          persona,
+          text: 'On file.',
+          model: 'grok-test',
+          promptVersion: 1,
+          cached: false,
+        }
+      },
     },
     ask: {
       ask: async function* () {
@@ -336,6 +347,45 @@ Deno.test('routes a dossier request', async () => {
 
   assertEquals(response.status, 200)
   assertEquals(body.persona, 'morty')
+  assertEquals(body.cached, false)
+})
+
+Deno.test('serves a stored dossier even when the allowance is gone', async () => {
+  const route = createRouter({
+    ...services(),
+    // A store hit never calls `onGenerate`, so an exhausted allowance is
+    // irrelevant to it: reading costs nothing, and only writing is rationed.
+    dossier: {
+      getDossier: async (
+        entityType: string,
+        entityId: number,
+        persona: 'rick' | 'morty',
+      ) => ({
+        entityType,
+        entityId,
+        persona,
+        text: 'On file.',
+        model: 'grok-test',
+        promptVersion: 1,
+        cached: true,
+      }),
+    },
+    quota: {
+      check: async () => {
+        throw new RateLimitError('out of fluid')
+      },
+    },
+  })
+
+  const response = await route(
+    new Request('https://x.test/api/dossier', {
+      method: 'POST',
+      body: JSON.stringify({ entityId: 1 }),
+    }),
+  )
+  const body = await response.json()
+
+  assertEquals(response.status, 200)
   assertEquals(body.cached, true)
 })
 

@@ -2,7 +2,12 @@ import { parseDossierBody, readJsonBody } from '../lib/validate.ts'
 import type { Dossier, Persona } from '../types.ts'
 
 export type DossierService = {
-  getDossier(entityType: string, entityId: number, persona: Persona): Promise<Dossier>
+  getDossier(
+    entityType: string,
+    entityId: number,
+    persona: Persona,
+    onGenerate?: () => Promise<void> | void,
+  ): Promise<Dossier>
 }
 
 export type QuotaLike = {
@@ -14,10 +19,17 @@ export async function handleDossier(
   service: DossierService,
   quota: QuotaLike,
 ): Promise<{ body: Dossier }> {
+  // Validation first, so a malformed request never spends a day's allowance —
+  // and the quota travels into the service, which spends it only when it is
+  // about to call the provider.
   const body = parseDossierBody(await readJsonBody(request))
 
-  // Validation first, so a malformed request never spends a day's allowance.
-  await quota.check(request, 'dossier')
-
-  return { body: await service.getDossier(body.entityType, body.entityId, body.persona) }
+  return {
+    body: await service.getDossier(
+      body.entityType,
+      body.entityId,
+      body.persona,
+      () => quota.check(request, 'dossier'),
+    ),
+  }
 }
