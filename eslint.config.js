@@ -23,6 +23,19 @@ export default tseslint.config(
         'warn',
         { allowConstantExport: true },
       ],
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "Literal[value=/rickandmortyapi\.com/]",
+          message:
+            'The frontend must never contact rickandmortyapi.com directly. All external calls go through the Edge Function. See spec section 3.1.',
+        },
+        {
+          selector: "TemplateElement[value.raw=/rickandmortyapi\.com/]",
+          message:
+            'The frontend must never contact rickandmortyapi.com directly. All external calls go through the Edge Function. See spec section 3.1.',
+        },
+      ],
     },
   },
 )
