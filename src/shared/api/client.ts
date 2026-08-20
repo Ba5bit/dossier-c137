@@ -1,12 +1,14 @@
 import type { Character, CharacterFilters, ListResponse } from './types'
 
 export class ApiError extends Error {
-  constructor(
-    readonly code: string,
-    message: string,
-  ) {
+  // Declared as a field rather than a constructor parameter property:
+  // tsconfig runs with erasableSyntaxOnly, which forbids the shorthand.
+  readonly code: string
+
+  constructor(code: string, message: string) {
     super(message)
     this.name = 'ApiError'
+    this.code = code
   }
 }
 
