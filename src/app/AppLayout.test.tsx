@@ -1,24 +1,36 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { SettingsProvider } from '../shared/settings/SettingsProvider'
 import { AppLayout } from './AppLayout'
 
 function renderAt(path: string) {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  })
+
   return render(
-    <MemoryRouter initialEntries={[path]}>
-      <Routes>
-        <Route element={<AppLayout />}>
-          <Route path="/characters" element={<p>characters outlet</p>} />
-          <Route path="/locations" element={<p>locations outlet</p>} />
-        </Route>
-      </Routes>
-    </MemoryRouter>,
+    <QueryClientProvider client={client}>
+      <SettingsProvider>
+        <MemoryRouter initialEntries={[path]}>
+          <Routes>
+            <Route element={<AppLayout />}>
+              <Route path="/characters" element={<p>characters outlet</p>} />
+              <Route path="/locations" element={<p>locations outlet</p>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      </SettingsProvider>
+    </QueryClientProvider>,
   )
 }
 
 describe('AppLayout', () => {
   it('offers a link to each section', () => {
     renderAt('/characters')
+
     expect(screen.getByRole('link', { name: 'CHARACTERS' })).toHaveAttribute(
       'href',
       '/characters',
@@ -33,8 +45,18 @@ describe('AppLayout', () => {
     )
   })
 
+  it('sends the wordmark back to the hub', () => {
+    renderAt('/characters')
+
+    expect(screen.getByRole('link', { name: 'DOSSIER C-137' })).toHaveAttribute(
+      'href',
+      '/',
+    )
+  })
+
   it('marks the active section', () => {
     renderAt('/locations')
+
     expect(screen.getByRole('link', { name: 'LOCATIONS' })).toHaveAttribute(
       'aria-current',
       'page',
@@ -47,5 +69,26 @@ describe('AppLayout', () => {
   it('renders the routed page inside the shell', () => {
     renderAt('/characters')
     expect(screen.getByText('characters outlet')).toBeInTheDocument()
+  })
+
+  it('opens the settings panel from the mini gun', async () => {
+    renderAt('/characters')
+
+    await userEvent.click(screen.getByRole('button', { name: 'Portal gun' }))
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+  })
+
+  it('closes the panel on Escape and gives focus back to the gun', async () => {
+    renderAt('/characters')
+    const gun = screen.getByRole('button', { name: 'Portal gun' })
+
+    await userEvent.click(gun)
+    await userEvent.keyboard('{Escape}')
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    // Focus that vanishes into the body strands a keyboard user where the
+    // panel used to be.
+    expect(gun).toHaveFocus()
   })
 })

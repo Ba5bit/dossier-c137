@@ -1,4 +1,10 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { useRef, useState } from 'react'
+import { Outlet, useLocation } from 'react-router-dom'
+import { PortalProvider } from '../shared/portal/PortalProvider'
+import { PortalLink } from '../shared/portal/PortalLink'
+import { SettingsPanel } from '../shared/settings/SettingsPanel'
+import { DimensionWave } from '../shared/settings/DimensionWave'
+import { RefreshBar } from '../shared/ui/RefreshBar'
 
 const SECTIONS = [
   { to: '/characters', label: 'CHARACTERS' },
@@ -6,40 +12,75 @@ const SECTIONS = [
   { to: '/episodes', label: 'EPISODES' },
 ]
 
-// A plain bar for now. Plan 3 replaces it with the header that carries the
-// mini portal gun and the settings panel.
 export function AppLayout() {
+  const { pathname } = useLocation()
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const gunRef = useRef<HTMLButtonElement | null>(null)
+
+  function closeSettings() {
+    setSettingsOpen(false)
+    gunRef.current?.focus()
+  }
+
   return (
-    <div className="min-h-screen">
-      <header className="border-b border-line bg-surface">
-        <nav
-          aria-label="Sections"
-          className="mx-auto flex max-w-[1280px] items-center gap-6 px-6 py-4"
-        >
-          <span className="font-mono text-xs tracking-widest text-accent">
-            DOSSIER C-137
-          </span>
+    <PortalProvider>
+      <div className="min-h-screen">
+        <RefreshBar />
 
-          <ul className="flex items-center gap-4">
-            {SECTIONS.map((section) => (
-              <li key={section.to}>
-                <NavLink
-                  to={section.to}
-                  className={({ isActive }) =>
-                    `font-mono text-xs transition-colors hover:text-accent ${
-                      isActive ? 'text-accent' : 'text-muted'
-                    }`
-                  }
-                >
-                  {section.label}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </header>
+        <header className="border-b border-line bg-surface">
+          <nav
+            aria-label="Sections"
+            className="mx-auto flex max-w-[1280px] items-center gap-6 px-6 py-4"
+          >
+            <PortalLink
+              to="/"
+              className="font-mono text-xs tracking-widest text-accent"
+            >
+              DOSSIER C-137
+            </PortalLink>
 
-      <Outlet />
-    </div>
+            <ul className="flex items-center gap-4">
+              {SECTIONS.map((section) => {
+                const active = pathname.startsWith(section.to)
+
+                return (
+                  <li key={section.to}>
+                    <PortalLink
+                      to={section.to}
+                      aria-current={active ? 'page' : undefined}
+                      className={`font-mono text-xs transition-colors hover:text-accent ${
+                        active ? 'text-accent' : 'text-muted'
+                      }`}
+                    >
+                      {section.label}
+                    </PortalLink>
+                  </li>
+                )
+              })}
+            </ul>
+
+            <button
+              ref={gunRef}
+              type="button"
+              aria-label="Portal gun"
+              aria-expanded={settingsOpen}
+              onClick={() => setSettingsOpen((open) => !open)}
+              className="ml-auto border border-line px-3 py-1 font-mono text-xs text-muted transition-colors hover:border-accent hover:text-accent"
+            >
+              &#9678; GUN
+            </button>
+          </nav>
+
+          {settingsOpen && (
+            <div className="mx-auto flex max-w-[1280px] justify-end px-6 pb-4">
+              <SettingsPanel onClose={closeSettings} />
+            </div>
+          )}
+        </header>
+
+        <Outlet />
+        <DimensionWave />
+      </div>
+    </PortalProvider>
   )
 }
