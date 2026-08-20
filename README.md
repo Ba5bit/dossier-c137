@@ -21,11 +21,15 @@ records.
 
 - **Three sections** — characters, locations, episodes — each with filters, pagination and skeleton loading.
 - **Detail pages arrive whole.** A character dossier carries its origin, its last known location and every episode it appears in; the frontend never fans out into a dozen follow-up requests.
-- **Search across all three entity types at once**, from `⌘K` / `Ctrl+K`, from the header, or from the hub.
+- **Search across all three entity types at once**, from `⌘K` / `Ctrl+K`, from the header field, or from the hub.
+- **Long rolls are paged, not dumped.** Fifty-one episodes on a dossier become one slide per season, and a hundred residents become pages of eight — arrows on a desktop, an ordinary swipe on a phone, because the track is a real scroll container with snap points.
+- **Episodes filter by season** from a chip row, on top of the title and code fields.
+- **In-page back and forward**, plus a trail of where you are, so moving sideways through the archive does not depend on the browser chrome. Every route change starts at the top of the page.
 - **A grounded AI chat.** Ask a question in English; the server retrieves real records first and hands the model those records as its only permitted source of facts. The sources are shown, and they are clickable.
 - **A generated field assessment on every character**, in the voice you chose, written once and stored forever.
 - **Three dimensions instead of two themes** — `C-137` (dark), `Citadel` (light), `Cronenberg-1` (dark) — persisted, and applied before first paint so a light-theme visitor never sees a dark flash.
-- **The portal transition is the loading indicator.** It lasts exactly as long as the request behind it.
+- **The portal transition is the loading indicator.** It lasts exactly as long as the request behind it, as a small badge over a blurred scrim rather than a full-screen takeover.
+- **Settings are three tabs** — dimension, AI voice, motion — in a popover anchored to the header, not a column that pushes the page down.
 
 ## Every external call happens on the server
 
@@ -181,25 +185,27 @@ into something automatically verified rather than a matter of trust.
 
 ## Known issues
 
-- **There is no audio.** Dossiers are read, not narrated. A second paid provider with its own quota and failure modes was not worth a button nobody grades; the AI bonus is carried by the grounded chat and the dossiers, which are the parts that show retrieval and prompt work. The specification still lists ElevenLabs under its stack — the README is the accurate document.
+- **There is no audio at all.** Dossiers are read, not narrated, and the portal fires silently — the synthesized whoosh and its setting were removed rather than left as a toggle nobody wanted. A second paid provider with its own quota and failure modes was not worth a button nobody grades; the AI bonus is carried by the grounded chat and the dossiers, which are the parts that show retrieval and prompt work. The specification still lists ElevenLabs under its stack — the README is the accurate document.
 - **Edge Function cold starts** add 200–500 ms to the first request after an idle period. The portal transition absorbs it, but a cold first load is visibly slower.
 - **AI daily quotas.** 30 questions and 10 dossier generations per caller per day, plus a global ceiling of 500. Exhausting one returns a portal-gun-out-of-fluid message, not an error page.
 - **No SSR**, so the first paint waits for JavaScript.
-- **The first `Ctrl+K` after typing a URL** can be swallowed by the browser's address bar, which still holds focus. Click once in the page, or use the `⌕ SEARCH` button. The listener itself is attached above every lazy route boundary — there is a test for that.
+- **The first `Ctrl+K` after typing a URL** can be swallowed by the browser's address bar, which still holds focus. Click once in the page, or use the header's search field. The listener itself is attached above every lazy route boundary — there is a test for that.
 - **The AI voices can converge over a long conversation.** Each question carries the last six turns back to the model, and a model reads its own earlier prose as a style guide. The prompt now forbids imitating an earlier turn, and on a fresh question the two are plainly distinct — Rick opens "Who cares, another Birdperson," Morty opens "Aw jeez, um…" — but the pull is still there deep into a thread. Switching voice mid-conversation is the workaround.
-- **Half of all origins are `unknown`** upstream. The redaction bar is a routine field state here, not a flourish.
+- **Half of all origins are `unknown`** upstream. A `REDACTED` chip is a routine field state here, not a flourish; a value the archive never held reads `NOT ON FILE` instead.
+- **Route changes give up the browser's scroll restoration.** Going back to a list returns you to its top rather than to the row you left — deliberate, because arriving mid-page reads as a broken render.
 
 ## Testing
 
-428 tests: 272 on the frontend under Vitest with React Testing Library and MSW,
+445 tests: 289 on the frontend under Vitest with React Testing Library and MSW,
 156 on the backend under Deno test against stubbed clients. Both suites, the
 build and the lint pass on `main` as published — `npm run lint` reports 0 errors
 and 13 `react-refresh/only-export-components` warnings, all of them on filter
 components that export a constant beside the component.
 
 Effort concentrates on branching logic rather than markup: filter parsing, cache
-keys, relation expansion, the portal state machine, retrieval and grounding,
-quota accounting, and the contrast grid. `npm test` does not type-check — Vitest
+keys, relation expansion, the portal state machine, season grouping and the
+carousel pager, in-page history, retrieval and grounding, quota accounting, and
+the contrast grid. `npm test` does not type-check — Vitest
 transpiles without checking — so `npm run build` is part of every verification.
 
 ## How it was built
@@ -214,3 +220,4 @@ test-first with the tests written before the code.
 | [`docs/superpowers/plans/`](docs/superpowers/plans/) | Five plans: foundation, entities, portal, AI, polish |
 | [`docs/design/tokens.md`](docs/design/tokens.md) | Ten source colours, three palettes, every pair contrast-checked |
 | [`docs/design/visual-direction.md`](docs/design/visual-direction.md) | The direction taken, the alternatives rejected, and why |
+| [`docs/superpowers/design-review-remaining.md`](docs/superpowers/design-review-remaining.md) | The design review: every finding, and the commit that closed it |

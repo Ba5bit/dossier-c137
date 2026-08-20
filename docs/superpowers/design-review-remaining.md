@@ -1,10 +1,10 @@
-# Design review — what is fixed and what is left
+# Design review — findings and what closed them
 
-Run 2026-08-20 against the dev server at 1280px and 375px, with the live API
-behind it. Five findings fixed and committed; the rest are recorded here with
-the evidence, so the next session can pick them up without re-measuring.
+Two passes, both run against the dev server at 1280px and 375px with the live
+API behind it. Every finding below is closed; the evidence is kept so a later
+session can tell a deliberate decision from an accident.
 
-## Fixed
+## Pass one — 2026-08-20, findings 001–005
 
 | ID | Finding | Commit |
 |---|---|---|
@@ -14,43 +14,33 @@ the evidence, so the next session can pick them up without re-measuring.
 | 004 | Character field list had no measure cap; label at x=348, value at x=1256 | `ba3b911` |
 | 005 | The AI field assessment sat below 51 episode rows | `ba3b911` |
 
-## Left, in impact order
+## Pass two — 2026-08-20, findings 006–012
 
-**FINDING-006 — pagination buttons are both called "JUMP" (medium).**
-`src/shared/ui/Pagination.tsx`. Previous and next read `← JUMP` and `JUMP →`,
-so direction lives entirely in an arrow glyph, and the disabled previous
-button is near-invisible against the surface. Give them distinct labels and
-raise the disabled contrast.
+| ID | Finding | What closed it |
+|---|---|---|
+| 006 | Both pagination buttons read `JUMP`, and the disabled one was invisible at 40% opacity | `← PREV` / `NEXT →`, and the disabled state keeps its border and takes `--muted` instead of fading out |
+| 007 | Filter labels were sentence-case Space Grotesk beside uppercase mono placeholders | Every filter label is uppercase mono with the same tracking as the rest of the site |
+| 008 | The hub rendered in six colours, three of them green, and used neither `--link` nor `--highlight` | The three registry counts on the hub are `--link` |
+| 009 | The hub search and the ask input had a placeholder and no visible label | Both carry a printed label that survives typing |
+| 010 | Two source cards both read `Birdperson` (ids 47 and 599) | Source chips print the registry number beside the name |
+| 011 | Cards redacted an empty value with a bar; detail pages used an em dash | One treatment: `REDACTED` for a withheld value, `NOT ON FILE` for one that was never held |
+| 012 | `unknown` sat lowercase beside `Alive` and `Dead` | Normalised at the display layer |
 
-**FINDING-007 — the filter bar mixes two type systems (medium).**
-`CharacterFilters.tsx`, `LocationFilters.tsx`, `EpisodeFilters.tsx`. Labels
-render sentence-case in Space Grotesk ("Search by name", "Status") while every
-other label on the site is uppercase JetBrains Mono. The placeholders inside
-those same fields are uppercase mono. Pick one, and it should be the mono.
+## Same pass — reported from use rather than from measurement
 
-**FINDING-008 — the site is green, which its own tokens forbid (medium).**
-`docs/design/tokens.md` states the governing rule "the site must not be green"
-and budgets 5–8% for Rick blue and Morty yellow. Measured on the hub, the
-whole page renders in six colours, three of them green, and neither `--link`
-nor `--highlight` appears at all. FINDING-002 put the first blue on the ask
-page. The hub still needs it: the figures, the registry numbers, or the
-active nav item are the natural candidates.
-
-**FINDING-009 — placeholder is the only visible label (medium).**
-The hub search and the ask input carry `aria-label` but no visible label, so
-the prompt disappears the moment the visitor types. Screen readers are fine;
-sighted users lose the context.
-
-**FINDING-010 — duplicate source cards are indistinguishable (polish).**
-Asking "Who is Birdperson?" returns two cards both reading `Birdperson`
-(ids 47 and 599). Add the registry number or the species to disambiguate.
-
-**FINDING-011 — two empty-value treatments (polish).**
-Character cards use a redaction bar for an unresolved origin; the detail page
-uses an em dash for an empty type. One of them should win.
-
-**FINDING-012 — "unknown" is lowercase beside "Alive" and "Dead" (polish).**
-Upstream casing, rendered raw. Normalise at the display layer.
+| Finding | What closed it |
+|---|---|
+| A solid bar of `--fg` read as a broken image, not as a censored field — a black rectangle in the light dimension, a white one in the dark | `RedactionBar` is a word inside a dashed outline |
+| The search overlay floated on a translucent scrim, so the page headline read straight through its hint text | The dialog owns an opaque panel; the scrim is `--bg` at 85% with a blur |
+| The settings panel printed five settings at once, tall enough to cover the page, and was laid into the header flow so opening it pushed the page down | Three tabs — dimension, AI voice, motion — in a popover anchored to the header controls, dismissed by Escape or a click outside |
+| The portal transition took the whole viewport for the length of every navigation | A 132px badge over a light blurred scrim |
+| `⌘K` printed on the search control is a key a Windows visitor does not have | `CTRL K`, with the Mac glyph only on Apple platforms |
+| The header gave the search control the leftovers of a nav row, and `ASK` was the fourth link in a row of registries | Search is a wide field and ask is an accent-bordered control beside it; on a phone the pair takes a full-width row of its own |
+| Fifty-one episode rows on a character dossier, a hundred residents on a location | One carousel: a slide per season for episodes, pages of eight for a roster. Arrows on a desktop, swipe on a phone |
+| Fifty-one episodes were reachable only by paging | A season chip row on the episodes page, on top of the title and code fields |
+| A new page opened wherever the last one was scrolled to | Every route change, pagination included, starts at the top |
+| Navigation depended on the browser's own back button | An in-page back/forward bar with a trail, under the header on every route but the hub |
+| Portal SFX | Removed outright, along with its setting and its module |
 
 ## Not a finding, but worth knowing
 
