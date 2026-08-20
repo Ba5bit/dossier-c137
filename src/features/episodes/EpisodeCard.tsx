@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { PortalLink } from '../../shared/portal/PortalLink'
 import type { Episode } from '../../shared/api/types'
 
 type EpisodeCardProps = {
@@ -7,8 +7,9 @@ type EpisodeCardProps = {
 
 export function EpisodeCard({ episode }: EpisodeCardProps) {
   return (
-    <Link
+    <PortalLink
       to={`/episodes/${episode.id}`}
+      variant="short"
       className="block border border-line bg-surface p-4 transition-colors hover:border-accent"
     >
       <span className="inline-block border border-line px-2 py-1 font-mono text-xs text-accent">
@@ -27,6 +28,6 @@ export function EpisodeCard({ episode }: EpisodeCardProps) {
           <dd className="text-fg">{episode.characterCount}</dd>
         </div>
       </dl>
-    </Link>
+    </PortalLink>
   )
 }

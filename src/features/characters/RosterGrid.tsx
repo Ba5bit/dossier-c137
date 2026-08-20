@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { PortalLink } from '../../shared/portal/PortalLink'
 import { StatusIndicator } from './StatusIndicator'
 import type { CharacterSummary } from '../../shared/api/types'
 
@@ -20,8 +20,9 @@ export function RosterGrid({ title, people }: RosterGridProps) {
         <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {people.map((person) => (
             <li key={person.id}>
-              <Link
+              <PortalLink
                 to={`/characters/${person.id}`}
+                variant="short"
                 className="flex items-center gap-3 border border-line bg-surface p-2 transition-colors hover:border-accent"
               >
                 <img
@@ -36,7 +37,7 @@ export function RosterGrid({ title, people }: RosterGridProps) {
                   <span className="text-fg block truncate text-sm">{person.name}</span>
                   <StatusIndicator status={person.status} />
                 </span>
-              </Link>
+              </PortalLink>
             </li>
           ))}
         </ul>

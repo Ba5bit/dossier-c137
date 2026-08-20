@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { PortalLink } from '../../shared/portal/PortalLink'
 import { RedactionBar } from '../../shared/ui/RedactionBar'
 import type { Location } from '../../shared/api/types'
 
@@ -10,8 +10,9 @@ export function LocationCard({ location }: LocationCardProps) {
   const dimensionUnknown = location.dimension.toLowerCase() === 'unknown'
 
   return (
-    <Link
+    <PortalLink
       to={`/locations/${location.id}`}
+      variant="short"
       className="block border border-line bg-surface p-4 transition-colors hover:border-accent"
     >
       <p className="font-mono text-xs text-muted">
@@ -40,6 +41,6 @@ export function LocationCard({ location }: LocationCardProps) {
           <dd className="text-fg">{location.residentCount}</dd>
         </div>
       </dl>
-    </Link>
+    </PortalLink>
   )
 }

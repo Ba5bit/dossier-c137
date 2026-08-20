@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { PortalLink } from '../../shared/portal/PortalLink'
 import { StatusIndicator } from './StatusIndicator'
 import { RedactionBar } from '../../shared/ui/RedactionBar'
 import { Stamp } from '../../shared/ui/Stamp'
@@ -15,12 +15,13 @@ function Relation({ relation }: { relation: RelationRef }) {
   }
 
   return (
-    <Link
+    <PortalLink
       to={`/locations/${relation.id}`}
+      variant="short"
       className="text-link underline-offset-4 hover:underline"
     >
       {relation.name}
-    </Link>
+    </PortalLink>
   )
 }
 
@@ -85,13 +86,14 @@ export function CharacterDossier({ detail }: CharacterDossierProps) {
         <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {episodes.map((episode) => (
             <li key={episode.id}>
-              <Link
+              <PortalLink
                 to={`/episodes/${episode.id}`}
+                variant="short"
                 className="flex items-center justify-between gap-3 border border-line bg-surface px-3 py-2 transition-colors hover:border-accent"
               >
                 <span className="text-fg truncate text-sm">{episode.name}</span>
                 <span className="font-mono text-xs text-muted">{episode.episode}</span>
-              </Link>
+              </PortalLink>
             </li>
           ))}
         </ul>

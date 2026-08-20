@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { PortalLink } from '../../shared/portal/PortalLink'
 import { StatusIndicator } from './StatusIndicator'
 import type { Character } from '../../shared/api/types'
 import { RedactionBar } from '../../shared/ui/RedactionBar'
@@ -16,8 +16,9 @@ export function CharacterCard({ character }: CharacterCardProps) {
   const originUnknown = character.origin.id === null
 
   return (
-    <Link
+    <PortalLink
       to={`/characters/${character.id}`}
+      variant="short"
       data-deceased={deceased}
       className="group block border border-line bg-surface transition-colors hover:border-accent data-[deceased=true]:opacity-80"
     >
@@ -54,6 +55,6 @@ export function CharacterCard({ character }: CharacterCardProps) {
           </div>
         </dl>
       </div>
-    </Link>
+    </PortalLink>
   )
 }
