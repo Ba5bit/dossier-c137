@@ -2,6 +2,7 @@ import { createRouter } from './router.ts'
 import { createRmClient } from './clients/rmClient.ts'
 import { createCache, createPostgresStore } from './lib/cache.ts'
 import { createCharacterService } from './services/characters.ts'
+import { createLocationService } from './services/locations.ts'
 
 const ALLOWED_ORIGIN_PATTERNS = [
   /^http:\/\/localhost:\d+$/,
@@ -26,6 +27,7 @@ const client = createRmClient()
 const cache = createCache(store)
 const route = createRouter({
   characters: createCharacterService(client, cache),
+  locations: createLocationService(client, cache),
 })
 
 Deno.serve(async (request) => {

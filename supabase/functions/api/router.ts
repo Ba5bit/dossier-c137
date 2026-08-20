@@ -3,12 +3,18 @@ import {
   handleListCharacters,
   type CharacterService,
 } from './handlers/characters.ts'
+import {
+  handleGetLocation,
+  handleListLocations,
+  type LocationService,
+} from './handlers/locations.ts'
 import { AppError } from './lib/errors.ts'
 
 const JSON_HEADERS = { 'content-type': 'application/json' }
 
 export type Services = {
   characters: CharacterService
+  locations: LocationService
 }
 
 /**
@@ -66,11 +72,23 @@ export function createRouter(services: Services) {
         return json(body, 200, staleHeaders(stale))
       }
 
+      if (path === '/locations') {
+        const { body, stale } = await handleListLocations(url, services.locations)
+        return json(body, 200, staleHeaders(stale))
+      }
+
       // The id segment is matched loosely so that a malformed id reaches the
       // validator and answers 400, rather than falling through to a 404.
-      const detail = path.match(/^\/(characters)\/([^/]+)$/)
+      const detail = path.match(/^\/(characters|locations)\/([^/]+)$/)
       if (detail) {
-        const { body, stale } = await handleGetCharacter(detail[2], services.characters)
+        const [, section, rawId] = detail
+
+        if (section === 'characters') {
+          const { body, stale } = await handleGetCharacter(rawId, services.characters)
+          return json(body, 200, staleHeaders(stale))
+        }
+
+        const { body, stale } = await handleGetLocation(rawId, services.locations)
         return json(body, 200, staleHeaders(stale))
       }
 

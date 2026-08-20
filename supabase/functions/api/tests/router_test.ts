@@ -41,6 +41,22 @@ function services(overrides: Partial<StubServices> = {}): StubServices {
         stale: false,
       }),
     },
+    locations: {
+      listLocations: async () => ({ payload: emptyList, stale: false }),
+      getLocation: async (id: number) => ({
+        payload: {
+          location: {
+            id,
+            name: 'Earth (C-137)',
+            type: 'Planet',
+            dimension: 'Dimension C-137',
+            residentCount: 0,
+          },
+          residents: [],
+        },
+        stale: false,
+      }),
+    },
     ...overrides,
   }
 }
@@ -160,4 +176,32 @@ Deno.test('returns 404 for an unknown route', async () => {
   const response = await router(new Request('https://x.test/api/nope'))
 
   assertEquals(response.status, 404)
+})
+
+Deno.test('routes location list requests to the service', async () => {
+  const router = createRouter(services())
+
+  const response = await router(new Request('https://x.test/api/locations?page=2'))
+
+  assertEquals(response.status, 200)
+})
+
+Deno.test('routes a location detail request by id', async () => {
+  const router = createRouter(services())
+
+  const response = await router(new Request('https://x.test/api/locations/3'))
+  const body = await response.json()
+
+  assertEquals(response.status, 200)
+  assertEquals(body.location.id, 3)
+})
+
+Deno.test('returns 400 for a non-numeric location id', async () => {
+  const router = createRouter(services())
+
+  const response = await router(new Request('https://x.test/api/locations/earth'))
+  const body = await response.json()
+
+  assertEquals(response.status, 400)
+  assertEquals(body.error.code, 'INVALID_PARAMETER')
 })
