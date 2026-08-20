@@ -150,3 +150,22 @@ Sampled from `references/portal.webp` and `references/portal_2.jpg` for the canv
 | `--portal-core` | `#D6E88A` | The lighter, yellower center vortex |
 | `--portal-spark` | `#FFFFFF` | Rim specular points |
 | `--portal-grit` | `#7A6033` | Brown flecks near the core |
+
+## Plan 5 contrast correction
+
+Every token is now checked against all three surfaces by
+`src/shared/design/contrast.test.ts`, which parses `src/index.css` — there is
+no second copy of the palette to drift.
+
+Three values were lifted to clear 4.5:1 on `--raised`, where small `text-accent`
+and `text-dead` type sits in the chat, the dossier block and the error states:
+
+| Dimension | Token | Was | Now | Worst ratio |
+|---|---|---|---|---|
+| `c-137` | `--dead` | `#DB958C` | `#E8AEA6` | 4.58 |
+| `cronenberg` | `--accent` | `#C07E72` | `#E0A99E` | 5.04 |
+| `cronenberg` | `--accent-hover` | `#D29387` | `#EBC4BB` | 6.03 |
+| `cronenberg` | `--dead` | `#C07E72` | `#E0A99E` | 5.04 |
+
+The tightest pass in the whole grid is now `c-137`'s `--muted` on `--raised`,
+at 4.72.

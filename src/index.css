@@ -13,7 +13,7 @@
   --link: #A2D0E4;
   --highlight: #F3EF7C;
   --alive: #A7CB56;
-  --dead: #DB958C;
+  --dead: #E8AEA6;
   --unknown: #BAC1B4;
 }
 
@@ -40,12 +40,12 @@
   --line: #49573D;
   --fg: #E4E2DA;
   --muted: #B4B0A3;
-  --accent: #C07E72;
-  --accent-hover: #D29387;
+  --accent: #E0A99E;
+  --accent-hover: #EBC4BB;
   --link: #A2D0E4;
   --highlight: #CBCA78;
   --alive: #A7CB56;
-  --dead: #C07E72;
+  --dead: #E0A99E;
   --unknown: #B4B0A3;
 }
 

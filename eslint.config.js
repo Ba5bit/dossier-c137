@@ -23,6 +23,21 @@ export default tseslint.config(
         'warn',
         { allowConstantExport: true },
       ],
+      // Node types are on for the whole app project so a test can read a
+      // source file from disk. Shipped code must not follow them into the
+      // bundle, so the import itself is what gets forbidden.
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['node:*'],
+              message:
+                'Node builtins do not exist in the browser. Only test files may read from disk.',
+            },
+          ],
+        },
+      ],
       'no-restricted-syntax': [
         'error',
         {
@@ -36,6 +51,14 @@ export default tseslint.config(
             'The frontend must never contact rickandmortyapi.com directly. All external calls go through the Edge Function. See spec section 3.1.',
         },
       ],
+    },
+  },
+  {
+    // Tests run under Vitest in Node, so reading a source file from disk is
+    // legitimate there and nowhere else.
+    files: ['src/**/*.test.{ts,tsx}', 'src/test/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': 'off',
     },
   },
 )
