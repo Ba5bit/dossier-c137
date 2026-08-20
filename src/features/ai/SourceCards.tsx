@@ -24,9 +24,12 @@ export function SourceCards({ sources }: { sources: AskSource[] }) {
             <PortalLink
               to={`/${SECTIONS[source.type]}/${source.id}`}
               variant="short"
-              className="text-fg inline-block border border-line px-3 py-1 font-mono text-xs transition-colors hover:border-accent hover:text-accent"
+              className="text-fg inline-flex items-baseline gap-2 border border-line px-3 py-1 font-mono text-xs transition-colors hover:border-accent hover:text-accent"
             >
-              {source.name}
+              <span>{source.name}</span>
+              {/* Two records can carry the same name — Birdperson is both 47
+                  and 599 — and a pair of identical chips is not a citation. */}
+              <span className="text-muted">#{source.id}</span>
             </PortalLink>
           </li>
         ))}

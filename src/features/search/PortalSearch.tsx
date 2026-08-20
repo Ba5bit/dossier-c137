@@ -28,6 +28,8 @@ type PortalSearchProps = {
   suggestions?: boolean
   /** Two of these can be on the page at once; they must not share a name. */
   label?: string
+  /** Two of these can be on the page at once; they must not share an id. */
+  inputId?: string
 }
 
 type Row = {
@@ -65,6 +67,7 @@ export function PortalSearch({
   initialDraft = '',
   suggestions = true,
   label = COPY.search.label,
+  inputId = 'portal-search',
 }: PortalSearchProps) {
   const [draft, setDraft] = useState(initialDraft)
   // Committed starts seeded as well: a draft that arrived with the page has
@@ -135,12 +138,21 @@ export function PortalSearch({
 
   return (
     <div className="w-full">
+      {/* FINDING-009: the placeholder was the only prompt, and it left the
+          moment the visitor typed. The label stays. */}
+      <label
+        htmlFor={inputId}
+        className="mb-2 block font-mono text-xs tracking-widest text-muted"
+      >
+        {label}
+      </label>
+
       <div className="flex gap-2">
         <input
+          id={inputId}
           type="search"
           value={draft}
           autoFocus={autoFocus}
-          aria-label={label}
           placeholder={placeholder}
           onChange={(event) => {
             setDraft(event.target.value)
@@ -156,7 +168,7 @@ export function PortalSearch({
             if (query === '') return
             go(`/ask?q=${encodeURIComponent(query)}`)
           }}
-          className="shrink-0 border border-line px-4 font-mono text-xs text-muted transition-colors hover:border-accent hover:text-accent"
+          className="shrink-0 border border-accent bg-accent/10 px-4 font-mono text-xs tracking-widest text-accent transition-colors hover:bg-accent/20"
         >
           {COPY.search.ask}
         </button>

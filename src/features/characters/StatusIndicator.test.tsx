@@ -15,7 +15,7 @@ describe('StatusIndicator', () => {
 
   it('shows a text label for unknown', () => {
     render(<StatusIndicator status="unknown" />)
-    expect(screen.getByText('unknown')).toBeInTheDocument()
+    expect(screen.getByText('Unknown')).toBeInTheDocument()
   })
 
   it('applies the alive color token', () => {

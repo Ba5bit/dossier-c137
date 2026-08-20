@@ -55,7 +55,7 @@ export function HubPage() {
       <PortalGun onOpenSettings={() => setSettingsOpen(true)} />
 
       <div className="mx-auto w-full max-w-[640px]">
-        <PortalSearch label={COPY.search.hubLabel} />
+        <PortalSearch label={COPY.search.hubLabel} inputId="hub-search" />
       </div>
 
       {settingsOpen && (
@@ -78,7 +78,7 @@ export function HubPage() {
                   <span className="block font-mono text-xs tracking-widest text-muted">
                     {destination.label}
                   </span>
-                  <span className="text-fg mt-3 block text-3xl font-bold">
+                  <span className="mt-3 block text-3xl font-bold text-link">
                     {data ? (
                       data[destination.key].total
                     ) : (

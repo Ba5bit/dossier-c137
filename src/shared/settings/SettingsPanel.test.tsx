@@ -19,19 +19,39 @@ function stored() {
 
 beforeEach(() => localStorage.clear())
 
+/** Every setting but the dimension now lives behind a tab. */
+async function openTab(name: string) {
+  await userEvent.click(screen.getByRole('tab', { name }))
+}
+
 describe('SettingsPanel', () => {
-  it('presents the four settings the spec names', () => {
+  it('presents one tab per group of settings', async () => {
     renderPanel()
 
-    expect(screen.getByText('PORTAL GUN SETTINGS')).toBeInTheDocument()
-    expect(screen.getByText('DIMENSION')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'PORTAL SFX' })).toBeInTheDocument()
+    expect(screen.getByText('PORTAL SETTINGS')).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'DIMENSION' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'AI VOICE' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'MOTION' })).toBeInTheDocument()
+
+    // The dimension tab is the one that opens.
+    expect(screen.getByRole('radio', { name: 'C-137' })).toBeInTheDocument()
+
+    await openTab('MOTION')
     expect(
       screen.getByRole('button', { name: 'PORTAL TRANSITIONS' }),
     ).toBeInTheDocument()
     expect(
       screen.getByRole('button', { name: 'REDUCED MOTION' }),
     ).toBeInTheDocument()
+  })
+
+  it('carries no sound control any more', async () => {
+    renderPanel()
+    await openTab('MOTION')
+
+    expect(
+      screen.queryByRole('button', { name: 'PORTAL SFX' }),
+    ).not.toBeInTheDocument()
   })
 
   it('marks the active dimension and only that one', () => {
@@ -50,20 +70,9 @@ describe('SettingsPanel', () => {
     expect(stored().dimension).toBe('cronenberg')
   })
 
-  it('turns portal sound on, which is off by default', async () => {
-    renderPanel()
-    const toggle = screen.getByRole('button', { name: 'PORTAL SFX' })
-
-    expect(toggle).toHaveTextContent('OFF')
-
-    await userEvent.click(toggle)
-
-    expect(toggle).toHaveTextContent('ON')
-    expect(stored().portalSfx).toBe(true)
-  })
-
   it('turns portal transitions off, which are on by default', async () => {
     renderPanel()
+    await openTab('MOTION')
     const toggle = screen.getByRole('button', { name: 'PORTAL TRANSITIONS' })
 
     expect(toggle).toHaveTextContent('ON')
@@ -76,6 +85,7 @@ describe('SettingsPanel', () => {
 
   it('cycles reduced motion through its three states', async () => {
     renderPanel()
+    await openTab('MOTION')
     const toggle = screen.getByRole('button', { name: 'REDUCED MOTION' })
 
     expect(toggle).toHaveTextContent('AUTO')
@@ -102,6 +112,7 @@ describe('SettingsPanel', () => {
   it('switches the persona', async () => {
     const user = userEvent.setup()
     renderPanel()
+    await user.click(screen.getByRole('tab', { name: 'AI VOICE' }))
 
     await user.click(screen.getByRole('radio', { name: 'Morty' }))
 

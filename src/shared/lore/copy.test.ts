@@ -27,8 +27,9 @@ describe('COPY', () => {
       '/characters',
       '/locations',
       '/episodes',
-      '/ask',
     ])
+    // Ask is its own emphasised control beside the search box, not a section.
+    expect(COPY.layout.askButton).toBe('ASK AI')
     expect(COPY.hub.stamp).toBe('DOSSIER C-137 // CLEARANCE: UNRESTRICTED')
     expect(COPY.hub.figures).toHaveLength(3)
   })

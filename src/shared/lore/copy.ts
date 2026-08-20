@@ -26,21 +26,25 @@ export const COPY = {
     label: 'Pagination',
     previous: 'Previous page',
     next: 'Next page',
-    previousText: '← JUMP',
-    nextText: 'JUMP →',
+    previousText: '← PREV',
+    nextText: 'NEXT →',
     position: (page: number, pageCount: number) => `DIMENSION ${page} / ${pageCount}`,
   },
   refresh: {
     label: 'Refreshing',
   },
   search: {
-    label: 'Search the archive',
-    hubLabel: 'Archive coordinates',
+    label: 'SEARCH THE ARCHIVE',
+    hubLabel: 'ARCHIVE COORDINATES',
+    // FINDING-009: a placeholder disappears the moment the visitor types, so
+    // the prompt it carried has to be printed somewhere that stays.
+    visibleLabel: 'ARCHIVE COORDINATES',
     placeholder: 'ENTER COORDINATES OR ASK A QUESTION',
     ask: 'ASK ▸',
     tooShort: 'Two characters minimum. The archive is big, not psychic.',
     nothing: 'Nothing on file. Try a different dimension.',
     hint: '↑ ↓ TO AIM · ENTER TO FIRE · ESC TO ABORT',
+    overlayTitle: 'SEARCH THE ARCHIVE',
     overlayLabel: 'Search the archive',
     pageLabel: 'ARCHIVE SEARCH',
     pageEmpty: 'Enter coordinates above. Two characters minimum.',
@@ -71,6 +75,7 @@ export const COPY = {
       'What is Planet Squanch?',
     ],
     inputLabel: 'Ask a question',
+    visibleInputLabel: 'YOUR QUESTION',
     inputPlaceholder: 'ASK ABOUT ANYTHING ON FILE',
     send: 'SEND ▸',
     groundedIn: 'GROUNDED IN',
@@ -82,16 +87,30 @@ export const COPY = {
   layout: {
     brand: 'DOSSIER C-137',
     navLabel: 'Sections',
+    // ASK is not in this list any more. It is the one section that answers
+    // back, so it sits beside the search box as its own emphasised control
+    // rather than as the fourth entry in a row of registries.
     sections: [
       { to: '/characters', label: 'CHARACTERS' },
       { to: '/locations', label: 'LOCATIONS' },
       { to: '/episodes', label: 'EPISODES' },
-      { to: '/ask', label: 'ASK' },
     ],
-    searchButton: '⌕ SEARCH',
+    searchButton: 'SEARCH THE ARCHIVE',
+    // A phone header carries three controls; the long form truncates there.
+    searchButtonShort: 'SEARCH',
     searchButtonLabel: 'Search',
-    gunButton: '◎ GUN',
-    gunButtonLabel: 'Portal gun',
+    // The hotkey is Cmd on a Mac and Ctrl everywhere else; printing the Mac
+    // glyph to a Windows visitor is a symbol they have no key for.
+    searchHint: 'CTRL K',
+    searchHintApple: '⌘ K',
+    askButton: 'ASK AI',
+    askButtonLabel: 'Ask the archive',
+    gunButton: '◎ PORTAL',
+    gunButtonLabel: 'Portal settings',
+    back: '← BACK',
+    backLabel: 'Go back',
+    forward: 'FORWARD →',
+    forwardLabel: 'Go forward',
   },
   hub: {
     stamp: CLEARANCE_STAMP,
@@ -119,18 +138,31 @@ export const COPY = {
     tagline:
       'Answers come from the records only. Whoever is answering will tell you when there are none — in their own way.',
   },
+  // FINDING-007: every other label on the site is uppercase mono, and these
+  // used to be sentence-case sans. One type system, and it is the mono one.
   filters: {
-    name: 'Search by name',
+    name: 'SEARCH BY NAME',
     namePlaceholder: 'ENTER DESIGNATION',
     titlePlaceholder: 'ENTER TITLE',
-    species: 'Species',
-    status: 'Status',
-    gender: 'Gender',
-    type: 'Type',
-    dimension: 'Dimension',
-    code: 'Season or episode code',
-    codePlaceholder: 'S01 OR S01E01',
+    species: 'SPECIES',
+    status: 'STATUS',
+    gender: 'GENDER',
+    type: 'TYPE',
+    dimension: 'DIMENSION',
+    code: 'EPISODE CODE',
+    codePlaceholder: 'S01E01',
+    season: 'SEASON',
+    seasonAll: 'ALL',
     any: 'ANY',
     clear: 'CLEAR',
+  },
+  carousel: {
+    previous: 'Previous',
+    next: 'Next',
+    position: (page: number, pageCount: number) => `${page} / ${pageCount}`,
+  },
+  redaction: {
+    redacted: 'REDACTED',
+    notOnFile: 'NOT ON FILE',
   },
 } as const

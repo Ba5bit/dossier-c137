@@ -11,9 +11,11 @@ function Probe() {
   return (
     <div>
       <span data-testid="dimension">{settings.dimension}</span>
-      <span data-testid="sfx">{String(settings.portalSfx)}</span>
+      <span data-testid="transitions">{String(settings.portalTransitions)}</span>
       <button onClick={() => setSetting('dimension', 'citadel')}>go citadel</button>
-      <button onClick={() => setSetting('portalSfx', true)}>sfx on</button>
+      <button onClick={() => setSetting('portalTransitions', false)}>
+        transitions off
+      </button>
     </div>
   )
 }
@@ -34,7 +36,7 @@ describe('SettingsProvider', () => {
     expect(screen.getByTestId('dimension')).toHaveTextContent(
       DEFAULT_SETTINGS.dimension,
     )
-    expect(screen.getByTestId('sfx')).toHaveTextContent('false')
+    expect(screen.getByTestId('transitions')).toHaveTextContent('true')
   })
 
   it('reads settings already in localStorage', () => {
@@ -59,9 +61,9 @@ describe('SettingsProvider', () => {
       </SettingsProvider>,
     )
 
-    await userEvent.click(screen.getByText('sfx on'))
+    await userEvent.click(screen.getByText('transitions off'))
 
-    expect(screen.getByTestId('sfx')).toHaveTextContent('true')
+    expect(screen.getByTestId('transitions')).toHaveTextContent('false')
     expect(screen.getByTestId('dimension')).toHaveTextContent('c-137')
   })
 

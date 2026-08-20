@@ -106,8 +106,18 @@ export function ChatPanel({ initialQuestion }: ChatPanelProps) {
         ))}
       </ol>
 
-      <form onSubmit={onSubmit} className="flex gap-2">
+      <form onSubmit={onSubmit} className="space-y-2">
+        {/* FINDING-009: the placeholder was the only prompt this field had. */}
+        <label
+          htmlFor="ask-input"
+          className="block font-mono text-xs tracking-widest text-muted"
+        >
+          {COPY.ai.visibleInputLabel}
+        </label>
+
+        <div className="flex gap-2">
         <input
+          id="ask-input"
           type="text"
           value={draft}
           aria-label={COPY.ai.inputLabel}
@@ -118,10 +128,11 @@ export function ChatPanel({ initialQuestion }: ChatPanelProps) {
         <button
           type="submit"
           disabled={streaming}
-          className="shrink-0 border border-line px-4 font-mono text-xs text-muted transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
+          className="shrink-0 border border-accent bg-accent/10 px-4 font-mono text-xs tracking-widest text-accent transition-colors hover:bg-accent/20 disabled:opacity-50"
         >
           {COPY.ai.send}
         </button>
+        </div>
       </form>
     </section>
   )

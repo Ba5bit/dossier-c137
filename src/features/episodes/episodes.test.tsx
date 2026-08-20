@@ -99,7 +99,7 @@ function setupFilters(overrides = {}) {
 describe('EpisodeFilters', () => {
   it('shows the current episode code', () => {
     setupFilters({ filters: { page: 1, episode: 'S03' } })
-    expect(screen.getByLabelText('Season or episode code')).toHaveValue('S03')
+    expect(screen.getByLabelText('EPISODE CODE')).toHaveValue('S03')
   })
 
   it('hides the clear control when no filter is active', () => {
@@ -111,5 +111,29 @@ describe('EpisodeFilters', () => {
     const { onClear } = setupFilters({ filters: { page: 1, episode: 'S03' } })
     await userEvent.click(screen.getByRole('button', { name: /clear/i }))
     expect(onClear).toHaveBeenCalledOnce()
+  })
+
+  it('filters by season from the chip row', async () => {
+    const { onChange } = setupFilters()
+    await userEvent.click(screen.getByRole('button', { name: 'S03' }))
+    expect(onChange).toHaveBeenCalledWith('episode', 'S03')
+  })
+
+  it('marks the season a typed episode code belongs to', () => {
+    setupFilters({ filters: { page: 1, episode: 'S03E07' } })
+    expect(screen.getByRole('button', { name: 'S03' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+    expect(screen.getByRole('button', { name: 'ALL' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    )
+  })
+
+  it('clears the season filter from ALL', async () => {
+    const { onChange } = setupFilters({ filters: { page: 1, episode: 'S03' } })
+    await userEvent.click(screen.getByRole('button', { name: 'ALL' }))
+    expect(onChange).toHaveBeenCalledWith('episode', undefined)
   })
 })

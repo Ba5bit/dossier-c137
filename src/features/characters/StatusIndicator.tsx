@@ -10,6 +10,13 @@ const DOT_CLASS: Record<Kind, string> = {
   unknown: 'bg-unknown',
 }
 
+/** The registry sends `Alive`, `Dead` and `unknown`. Only one of those is
+ * a sentence, and printing all three side by side made it look like a typo. */
+function display(status: string): string {
+  if (status.length === 0) return status
+  return status[0].toUpperCase() + status.slice(1).toLowerCase()
+}
+
 function toKind(status: string): Kind {
   const normalized = status.toLowerCase()
   if (normalized === 'alive') return 'alive'
@@ -27,7 +34,7 @@ export function StatusIndicator({ status }: StatusIndicatorProps) {
         aria-hidden="true"
         className={`inline-block h-2 w-2 rounded-full ${DOT_CLASS[kind]}`}
       />
-      <span className="text-muted">{status}</span>
+      <span className="text-muted">{display(status)}</span>
     </span>
   )
 }

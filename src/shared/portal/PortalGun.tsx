@@ -12,7 +12,7 @@ export function PortalGun({ onOpenSettings }: PortalGunProps) {
   return (
     <div className="flex flex-col items-center gap-6">
       <div className="portal-idle">
-        <PortalCanvas size={280} />
+        <PortalCanvas size={220} />
       </div>
 
       <button
@@ -20,7 +20,7 @@ export function PortalGun({ onOpenSettings }: PortalGunProps) {
         onClick={onOpenSettings}
         className="border border-line px-4 py-2 font-mono text-xs tracking-widest text-fg transition-colors hover:border-accent hover:text-accent"
       >
-        PORTAL GUN SETTINGS
+        PORTAL SETTINGS
       </button>
     </div>
   )

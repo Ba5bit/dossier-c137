@@ -55,7 +55,7 @@ describe('CharactersPage', () => {
   it('shows the empty state when a filter matches nothing', async () => {
     renderPage()
     await screen.findByText('Character Page 1')
-    await userEvent.selectOptions(screen.getByLabelText('Status'), 'dead')
+    await userEvent.selectOptions(screen.getByLabelText('STATUS'), 'dead')
     await waitFor(() =>
       expect(screen.getByText('NO RECORDS FOUND')).toBeInTheDocument(),
     )

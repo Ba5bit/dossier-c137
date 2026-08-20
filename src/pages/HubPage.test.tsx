@@ -99,7 +99,7 @@ describe('HubPage', () => {
     renderHub()
 
     await userEvent.click(
-      screen.getByRole('button', { name: 'PORTAL GUN SETTINGS' }),
+      screen.getByRole('button', { name: 'PORTAL SETTINGS' }),
     )
 
     expect(screen.getByRole('dialog')).toBeInTheDocument()

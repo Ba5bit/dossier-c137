@@ -110,7 +110,7 @@ function setupFilters(overrides = {}) {
 describe('LocationFilters', () => {
   it('shows the current dimension value', () => {
     setupFilters({ filters: { page: 1, dimension: 'C-137' } })
-    expect(screen.getByLabelText('Dimension')).toHaveValue('C-137')
+    expect(screen.getByLabelText('DIMENSION')).toHaveValue('C-137')
   })
 
   it('hides the clear control when no filter is active', () => {

@@ -27,7 +27,7 @@ export function LocationDossier({ detail }: LocationDossierProps) {
             <dt className="font-mono text-xs text-muted">DIMENSION</dt>
             <dd className="text-fg text-sm">
               {dimensionUnknown ? (
-                <RedactionBar label="Dimension redacted" className="w-28" />
+                <RedactionBar label="Dimension redacted" />
               ) : (
                 location.dimension
               )}

@@ -186,3 +186,13 @@ body {
     min-width: 44px;
   }
 }
+
+/* The carousel track is a real scroll container so a phone can swipe it. The
+   bar itself is noise under a row of cards that already has arrows. */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

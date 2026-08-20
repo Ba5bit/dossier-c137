@@ -94,7 +94,11 @@ export function SearchPage() {
     <main className="mx-auto max-w-[1280px] space-y-8 px-4 py-10 sm:px-6">
       <header className="space-y-4">
         <p className="font-mono text-xs tracking-widest text-muted">{COPY.search.pageLabel}</p>
-        <PortalSearch initialDraft={query} suggestions={false} />
+        <PortalSearch
+          initialDraft={query}
+          suggestions={false}
+          inputId="page-search"
+        />
       </header>
 
       {trimmed === '' && (

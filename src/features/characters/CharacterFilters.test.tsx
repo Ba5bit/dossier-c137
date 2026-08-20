@@ -32,7 +32,7 @@ function renderFilters(filters: Parameters<typeof CharacterFilters>[0]['filters'
 describe('CharacterFilters', () => {
   it('emits the typed name once the typing settles', async () => {
     const { onChange } = setup()
-    await userEvent.type(screen.getByLabelText('Search by name'), 'rick')
+    await userEvent.type(screen.getByLabelText('SEARCH BY NAME'), 'rick')
     await waitFor(() =>
       expect(onChange).toHaveBeenCalledWith('name', 'rick'),
     )
@@ -42,47 +42,47 @@ describe('CharacterFilters', () => {
     // The filters prop never updates here, mimicking a slow round trip
     // through the router. The draft must survive it.
     setup()
-    const input = screen.getByLabelText('Search by name')
+    const input = screen.getByLabelText('SEARCH BY NAME')
     await userEvent.type(input, 'morty')
     expect(input).toHaveValue('morty')
   })
 
   it('does not navigate on every keystroke', async () => {
     const { onChange } = setup()
-    await userEvent.type(screen.getByLabelText('Search by name'), 'rick')
+    await userEvent.type(screen.getByLabelText('SEARCH BY NAME'), 'rick')
     await waitFor(() => expect(onChange).toHaveBeenCalled())
     expect(onChange).toHaveBeenCalledTimes(1)
   })
 
   it('adopts a name cleared from outside the component', async () => {
     const { rerender } = renderFilters({ page: 1, name: 'rick' })
-    expect(screen.getByLabelText('Search by name')).toHaveValue('rick')
+    expect(screen.getByLabelText('SEARCH BY NAME')).toHaveValue('rick')
     rerender({ page: 1 })
     await waitFor(() =>
-      expect(screen.getByLabelText('Search by name')).toHaveValue(''),
+      expect(screen.getByLabelText('SEARCH BY NAME')).toHaveValue(''),
     )
   })
 
   it('shows the current name value', () => {
     setup({ filters: { page: 1, name: 'morty' } })
-    expect(screen.getByLabelText('Search by name')).toHaveValue('morty')
+    expect(screen.getByLabelText('SEARCH BY NAME')).toHaveValue('morty')
   })
 
   it('emits the selected status', async () => {
     const { onChange } = setup()
-    await userEvent.selectOptions(screen.getByLabelText('Status'), 'dead')
+    await userEvent.selectOptions(screen.getByLabelText('STATUS'), 'dead')
     expect(onChange).toHaveBeenCalledWith('status', 'dead')
   })
 
   it('emits undefined when a select is reset to any', async () => {
     const { onChange } = setup({ filters: { page: 1, status: 'dead' } })
-    await userEvent.selectOptions(screen.getByLabelText('Status'), '')
+    await userEvent.selectOptions(screen.getByLabelText('STATUS'), '')
     expect(onChange).toHaveBeenCalledWith('status', undefined)
   })
 
   it('emits the selected gender', async () => {
     const { onChange } = setup()
-    await userEvent.selectOptions(screen.getByLabelText('Gender'), 'female')
+    await userEvent.selectOptions(screen.getByLabelText('GENDER'), 'female')
     expect(onChange).toHaveBeenCalledWith('gender', 'female')
   })
 

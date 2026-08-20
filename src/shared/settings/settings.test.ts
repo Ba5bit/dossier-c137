@@ -23,7 +23,6 @@ describe('parseSettings', () => {
     const stored = {
       dimension: 'citadel',
       persona: 'morty',
-      portalSfx: true,
       portalTransitions: false,
       reducedMotion: 'on',
     }
@@ -35,7 +34,6 @@ describe('parseSettings', () => {
     const stored = {
       dimension: 'froopyland',
       persona: 'rick',
-      portalSfx: true,
       portalTransitions: false,
       reducedMotion: 'off',
     }
@@ -43,7 +41,6 @@ describe('parseSettings', () => {
     expect(parseSettings(JSON.stringify(stored))).toEqual({
       dimension: 'c-137',
       persona: 'rick',
-      portalSfx: true,
       portalTransitions: false,
       reducedMotion: 'off',
     })
@@ -53,7 +50,6 @@ describe('parseSettings', () => {
     const settings = {
       dimension: 'cronenberg' as const,
       persona: 'morty' as const,
-      portalSfx: true,
       portalTransitions: true,
       reducedMotion: 'auto' as const,
     }

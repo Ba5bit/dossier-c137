@@ -1,8 +1,11 @@
 import type { ReactNode } from 'react'
 import { PortalLink } from '../../shared/portal/PortalLink'
 import { StatusIndicator } from './StatusIndicator'
-import { RedactionBar } from '../../shared/ui/RedactionBar'
+import { NotOnFile, RedactionBar } from '../../shared/ui/RedactionBar'
 import { Stamp } from '../../shared/ui/Stamp'
+import { Carousel } from '../../shared/ui/Carousel'
+import type { CarouselPage } from '../../shared/ui/Carousel'
+import { groupBySeason } from '../episodes/seasons'
 import type { CharacterDetail, RelationRef } from '../../shared/api/types'
 
 type CharacterDossierProps = {
@@ -18,7 +21,7 @@ type CharacterDossierProps = {
 
 function Relation({ relation }: { relation: RelationRef }) {
   if (!relation.resolved) {
-    return <RedactionBar label={`${relation.name} — redacted`} className="w-28" />
+    return <RedactionBar label={`${relation.name} — redacted`} />
   }
 
   return (
@@ -44,6 +47,27 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 export function CharacterDossier({ detail, children }: CharacterDossierProps) {
   const { character, origin, location, episodes } = detail
   const deceased = character.status.toLowerCase() === 'dead'
+
+  const seasonPages: CarouselPage[] = groupBySeason(episodes).map((group) => ({
+    key: group.season,
+    label: group.season,
+    content: (
+      <ul className="grid grid-cols-1 gap-2 pr-px sm:grid-cols-2">
+        {group.items.map((episode) => (
+          <li key={episode.id}>
+            <PortalLink
+              to={`/episodes/${episode.id}`}
+              variant="short"
+              className="flex items-center justify-between gap-3 border border-line bg-surface px-3 py-2 transition-colors hover:border-accent"
+            >
+              <span className="text-fg truncate text-sm">{episode.name}</span>
+              <span className="font-mono text-xs text-muted">{episode.episode}</span>
+            </PortalLink>
+          </li>
+        ))}
+      </ul>
+    ),
+  }))
 
   return (
     <div className="space-y-8">
@@ -74,7 +98,9 @@ export function CharacterDossier({ detail, children }: CharacterDossierProps) {
 
           <dl className="max-w-md">
             <Field label="SPECIES">{character.species}</Field>
-            <Field label="TYPE">{character.type || '—'}</Field>
+            <Field label="TYPE">
+              {character.type || <NotOnFile label="Type not on file" />}
+            </Field>
             <Field label="GENDER">{character.gender}</Field>
             <Field label="ORIGIN">
               <Relation relation={origin} />
@@ -88,25 +114,18 @@ export function CharacterDossier({ detail, children }: CharacterDossierProps) {
 
       {children}
 
-      <section className="space-y-3">
-        <h2 className="font-mono text-xs tracking-widest text-muted">
-          EPISODES ON RECORD
-        </h2>
-        <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {episodes.map((episode) => (
-            <li key={episode.id}>
-              <PortalLink
-                to={`/episodes/${episode.id}`}
-                variant="short"
-                className="flex items-center justify-between gap-3 border border-line bg-surface px-3 py-2 transition-colors hover:border-accent"
-              >
-                <span className="text-fg truncate text-sm">{episode.name}</span>
-                <span className="font-mono text-xs text-muted">{episode.episode}</span>
-              </PortalLink>
-            </li>
-          ))}
-        </ul>
-      </section>
+      {/* Fifty-one rows of links used to sit under every dossier. The same
+          records, one season per slide: arrows on a desktop, swipe on a
+          phone, and the season code says which slice you are looking at. */}
+      <Carousel
+        title="EPISODES ON RECORD"
+        pages={seasonPages}
+        empty={
+          <p className="border border-line bg-surface px-4 py-8 text-center font-mono text-xs text-muted">
+            NO EPISODES ON RECORD
+          </p>
+        }
+      />
     </div>
   )
 }

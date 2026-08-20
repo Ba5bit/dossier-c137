@@ -8,7 +8,7 @@ const FIELD =
   'border border-line bg-surface px-3 py-2 font-mono text-xs text-fg ' +
   'outline-none focus:border-accent'
 
-const LABEL = 'font-mono text-xs text-muted'
+const LABEL = 'font-mono text-xs tracking-widest text-muted'
 
 type TextFilterProps = {
   id: string

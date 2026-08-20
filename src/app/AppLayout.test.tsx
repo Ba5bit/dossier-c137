@@ -149,14 +149,14 @@ describe('AppLayout', () => {
   it('opens the settings panel from the mini gun', async () => {
     renderAt('/characters')
 
-    await userEvent.click(screen.getByRole('button', { name: 'Portal gun' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Portal settings' }))
 
     expect(screen.getByRole('dialog')).toBeInTheDocument()
   })
 
   it('closes the panel on Escape and gives focus back to the gun', async () => {
     renderAt('/characters')
-    const gun = screen.getByRole('button', { name: 'Portal gun' })
+    const gun = screen.getByRole('button', { name: 'Portal settings' })
 
     await userEvent.click(gun)
     await userEvent.keyboard('{Escape}')
