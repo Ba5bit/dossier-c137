@@ -1,6 +1,6 @@
 import { assertEquals } from 'jsr:@std/assert'
 import { normalizePath, createRouter } from '../router.ts'
-import { NotFoundError, RateLimitError } from '../lib/errors.ts'
+import { AiError, NotFoundError, RateLimitError } from '../lib/errors.ts'
 
 const emptyList = {
   items: [],
@@ -108,6 +108,11 @@ function services(overrides: Partial<StubServices> = {}): StubServices {
         promptVersion: 1,
         cached: true,
       }),
+    },
+    ask: {
+      ask: async function* () {
+        yield { type: 'sources' as const, sources: [] }
+      },
     },
     quota: {
       check: async () => {},
@@ -376,4 +381,108 @@ Deno.test('still answers 404 for an unknown POST path', async () => {
   )
 
   assertEquals(response.status, 404)
+})
+
+async function readSse(response: Response): Promise<string> {
+  const reader = response.body!.getReader()
+  const decoder = new TextDecoder()
+  let out = ''
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    out += decoder.decode(value, { stream: true })
+  }
+  return out
+}
+
+Deno.test('streams an ask response as Server-Sent Events', async () => {
+  const route = createRouter({
+    ...services(),
+    ask: {
+      ask: async function* () {
+        yield {
+          type: 'sources' as const,
+          sources: [{ type: 'character' as const, id: 1, name: 'Rick Sanchez' }],
+        }
+        yield { type: 'token' as const, text: 'Wubba' }
+      },
+    },
+  })
+
+  const response = await route(
+    new Request('https://x.test/api/ask', {
+      method: 'POST',
+      body: JSON.stringify({ q: 'who is Rick?' }),
+    }),
+  )
+  const text = await readSse(response)
+
+  assertEquals(response.status, 200)
+  assertEquals(response.headers.get('content-type'), 'text/event-stream')
+  assertEquals(text.includes('event: sources'), true)
+  assertEquals(text.includes('"name":"Rick Sanchez"'), true)
+  assertEquals(text.includes('event: token'), true)
+  assertEquals(text.includes('"text":"Wubba"'), true)
+})
+
+Deno.test('answers 400 as JSON for a two-character question', async () => {
+  const route = createRouter(services())
+
+  const response = await route(
+    new Request('https://x.test/api/ask', {
+      method: 'POST',
+      body: JSON.stringify({ q: 'hi' }),
+    }),
+  )
+  const body = await response.json()
+
+  assertEquals(response.status, 400)
+  assertEquals(body.error.code, 'INVALID_PARAMETER')
+})
+
+Deno.test('answers 429 as JSON when the ask allowance is gone', async () => {
+  const route = createRouter({
+    ...services(),
+    quota: {
+      check: async () => {
+        throw new RateLimitError('out of fluid')
+      },
+    },
+  })
+
+  const response = await route(
+    new Request('https://x.test/api/ask', {
+      method: 'POST',
+      body: JSON.stringify({ q: 'who is Rick?' }),
+    }),
+  )
+  const body = await response.json()
+
+  assertEquals(response.status, 429)
+  assertEquals(body.error.code, 'RATE_LIMITED')
+})
+
+Deno.test('turns a mid-stream provider failure into an error event', async () => {
+  const route = createRouter({
+    ...services(),
+    ask: {
+      ask: async function* () {
+        yield { type: 'token' as const, text: 'Wub' }
+        throw new AiError('Grok returned 500')
+      },
+    },
+  })
+
+  const response = await route(
+    new Request('https://x.test/api/ask', {
+      method: 'POST',
+      body: JSON.stringify({ q: 'who is Rick?' }),
+    }),
+  )
+  const text = await readSse(response)
+
+  // The status was already sent as 200; the failure has to travel in-band.
+  assertEquals(response.status, 200)
+  assertEquals(text.includes('event: error'), true)
+  assertEquals(text.includes('AI_UNAVAILABLE'), true)
 })

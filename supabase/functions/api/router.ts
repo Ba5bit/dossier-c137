@@ -16,6 +16,8 @@ import {
 import { handleGetStats, type StatsService } from './handlers/stats.ts'
 import { handleSearch, type SearchService } from './handlers/search.ts'
 import { handleDossier, type DossierService, type QuotaLike } from './handlers/dossier.ts'
+import { prepareAsk, type AskService } from './handlers/ask.ts'
+import type { AskEvent } from './types.ts'
 import { AppError } from './lib/errors.ts'
 
 const JSON_HEADERS = { 'content-type': 'application/json' }
@@ -27,6 +29,7 @@ export type Services = {
   stats: StatsService
   search: SearchService
   dossier: DossierService
+  ask: AskService
   quota: QuotaLike
 }
 
@@ -63,6 +66,47 @@ function errorResponse(error: unknown): Response {
   )
 }
 
+const SSE_HEADERS = {
+  'content-type': 'text/event-stream',
+  'cache-control': 'no-cache',
+  connection: 'keep-alive',
+}
+
+function frame(event: AskEvent): string {
+  return `event: ${event.type}
+data: ${JSON.stringify(event)}
+
+`
+}
+
+/**
+ * A failure after the first byte cannot change the status code, so it is
+ * emitted in-band as an error event. The frontend renders it inside the
+ * conversation; the rest of the page is untouched.
+ */
+function sse(events: AsyncGenerator<AskEvent>): Response {
+  const encoder = new TextEncoder()
+
+  const stream = new ReadableStream({
+    async start(controller) {
+      try {
+        for await (const event of events) {
+          controller.enqueue(encoder.encode(frame(event)))
+        }
+      } catch (error) {
+        const failure: AskEvent = error instanceof AppError
+          ? { type: 'error', code: error.code, message: error.message }
+          : { type: 'error', code: 'INTERNAL', message: 'Unexpected failure' }
+        controller.enqueue(encoder.encode(frame(failure)))
+      } finally {
+        controller.close()
+      }
+    },
+  })
+
+  return new Response(stream, { status: 200, headers: SSE_HEADERS })
+}
+
 export function createRouter(services: Services) {
   return async function route(request: Request): Promise<Response> {
     const url = new URL(request.url)
@@ -77,6 +121,11 @@ export function createRouter(services: Services) {
         if (path === '/dossier') {
           const { body } = await handleDossier(request, services.dossier, services.quota)
           return json(body)
+        }
+
+        if (path === '/ask') {
+          const input = await prepareAsk(request, services.quota)
+          return sse(services.ask.ask(input))
         }
 
         return json(
