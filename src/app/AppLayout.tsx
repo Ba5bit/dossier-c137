@@ -7,6 +7,8 @@ import { DimensionWave } from '../shared/settings/DimensionWave'
 import { RefreshBar } from '../shared/ui/RefreshBar'
 import { SearchOverlay } from '../features/search/SearchOverlay'
 import { useSearchHotkey } from '../features/search/useSearchHotkey'
+import { useKonami } from '../shared/hooks/useKonami'
+import { useSettings } from '../shared/settings/useSettings'
 import { COPY } from '../shared/lore/copy'
 
 export function AppLayout() {
@@ -16,8 +18,18 @@ export function AppLayout() {
   const [searchOpen, setSearchOpen] = useState(false)
   const searchRef = useRef<HTMLButtonElement | null>(null)
 
+  const { setSetting } = useSettings()
+
   const openSearch = useCallback(() => setSearchOpen(true), [])
   useSearchHotkey(openSearch)
+
+  // Spec section 11.3. It writes through the ordinary setter, so the choice
+  // persists and the dimension wave plays exactly as it does from the panel.
+  const toCronenberg = useCallback(
+    () => setSetting('dimension', 'cronenberg'),
+    [setSetting],
+  )
+  useKonami(toCronenberg)
 
   function closeSearch() {
     setSearchOpen(false)

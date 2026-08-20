@@ -84,6 +84,15 @@ describe('AppLayout', () => {
     expect(await screen.findByRole('dialog')).toBeInTheDocument()
   })
 
+  it('switches to cronenberg when the phrase is typed', async () => {
+    const user = userEvent.setup()
+    renderAt('/characters')
+
+    await user.keyboard('wubbalubbadubdub')
+
+    expect(document.documentElement).toHaveAttribute('data-dimension', 'cronenberg')
+  })
+
   it('releases the page when the overlay closes', async () => {
     const user = userEvent.setup()
     renderAt('/characters')
