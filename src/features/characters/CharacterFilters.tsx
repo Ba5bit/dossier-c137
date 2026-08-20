@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { CharacterFilters as Filters } from '../../shared/api/types'
 import type { FilterKey } from '../../shared/hooks/useUrlFilters'
 
@@ -16,6 +17,74 @@ const FIELD =
 
 const LABEL = 'font-mono text-xs text-muted'
 
+// Long enough that a burst of typing produces one navigation, short enough
+// that the grid still feels like it reacts to the keyboard.
+export const FILTER_DEBOUNCE_MS = 300
+
+type TextFilterProps = {
+  id: string
+  label: string
+  placeholder: string
+  value: string | undefined
+  width: string
+  onCommit: (value: string | undefined) => void
+}
+
+/**
+ * A text filter keeps its own draft and pushes it upward on a debounce.
+ *
+ * Binding the input straight to the URL loses keystrokes: the round trip
+ * through the router is asynchronous, so React restores the stale value into
+ * the DOM while the next character is already being typed.
+ */
+function TextFilter({
+  id,
+  label,
+  placeholder,
+  value,
+  width,
+  onCommit,
+}: TextFilterProps) {
+  const external = value ?? ''
+  const [draft, setDraft] = useState(external)
+  const committed = useRef(external)
+
+  useEffect(() => {
+    // Ignore the echo of our own commit; adopt anything else — the clear
+    // button, the back button, a pasted URL.
+    if (external === committed.current) return
+    committed.current = external
+    setDraft(external)
+  }, [external])
+
+  useEffect(() => {
+    if (draft === committed.current) return
+
+    const timer = setTimeout(() => {
+      committed.current = draft
+      onCommit(draft || undefined)
+    }, FILTER_DEBOUNCE_MS)
+
+    return () => clearTimeout(timer)
+  }, [draft, onCommit])
+
+  return (
+    <div className="flex flex-col gap-1">
+      <label htmlFor={id} className={LABEL}>
+        {label}
+      </label>
+      <input
+        id={id}
+        type="text"
+        value={draft}
+        placeholder={placeholder}
+        onChange={(event) => setDraft(event.target.value)}
+        className={`${FIELD} ${width}`}
+      />
+    </div>
+  )
+}
+
 export function CharacterFilters({
   filters,
   onChange,
@@ -26,23 +95,25 @@ export function CharacterFilters({
     filters.name || filters.status || filters.species || filters.gender,
   )
 
+  const commitName = useCallback(
+    (value: string | undefined) => onChange('name', value),
+    [onChange],
+  )
+  const commitSpecies = useCallback(
+    (value: string | undefined) => onChange('species', value),
+    [onChange],
+  )
+
   return (
     <div className="flex flex-wrap items-end gap-4 border border-line bg-surface p-4">
-      <div className="flex flex-col gap-1">
-        <label htmlFor="filter-name" className={LABEL}>
-          Search by name
-        </label>
-        <input
-          id="filter-name"
-          type="text"
-          value={filters.name ?? ''}
-          placeholder="ENTER DESIGNATION"
-          onChange={(event) =>
-            onChange('name', event.target.value || undefined)
-          }
-          className={`${FIELD} w-56`}
-        />
-      </div>
+      <TextFilter
+        id="filter-name"
+        label="Search by name"
+        placeholder="ENTER DESIGNATION"
+        value={filters.name}
+        width="w-56"
+        onCommit={commitName}
+      />
 
       <div className="flex flex-col gap-1">
         <label htmlFor="filter-status" className={LABEL}>
@@ -65,21 +136,14 @@ export function CharacterFilters({
         </select>
       </div>
 
-      <div className="flex flex-col gap-1">
-        <label htmlFor="filter-species" className={LABEL}>
-          Species
-        </label>
-        <input
-          id="filter-species"
-          type="text"
-          value={filters.species ?? ''}
-          placeholder="ANY"
-          onChange={(event) =>
-            onChange('species', event.target.value || undefined)
-          }
-          className={`${FIELD} w-40`}
-        />
-      </div>
+      <TextFilter
+        id="filter-species"
+        label="Species"
+        placeholder="ANY"
+        value={filters.species}
+        width="w-40"
+        onCommit={commitSpecies}
+      />
 
       <div className="flex flex-col gap-1">
         <label htmlFor="filter-gender" className={LABEL}>

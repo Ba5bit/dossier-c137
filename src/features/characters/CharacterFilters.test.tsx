@@ -1,6 +1,5 @@
-import { useState } from 'react'
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { CharacterFilters } from './CharacterFilters'
 
@@ -18,29 +17,50 @@ function setup(overrides = {}) {
   return { onChange, onClear }
 }
 
+function renderFilters(filters: Parameters<typeof CharacterFilters>[0]['filters']) {
+  const view = render(
+    <CharacterFilters filters={filters} onChange={vi.fn()} onClear={vi.fn()} />,
+  )
+  return {
+    rerender: (next: typeof filters) =>
+      view.rerender(
+        <CharacterFilters filters={next} onChange={vi.fn()} onClear={vi.fn()} />,
+      ),
+  }
+}
+
 describe('CharacterFilters', () => {
-  it('emits the typed name', async () => {
-    // The input is controlled, so the caller has to feed the value back in —
-    // exactly what the URL filter state does in the running app.
-    const onChange = vi.fn()
-
-    function Harness() {
-      const [name, setName] = useState<string | undefined>(undefined)
-      return (
-        <CharacterFilters
-          filters={{ page: 1, name }}
-          onChange={(key, value) => {
-            onChange(key, value)
-            if (key === 'name') setName(value)
-          }}
-          onClear={() => {}}
-        />
-      )
-    }
-
-    render(<Harness />)
+  it('emits the typed name once the typing settles', async () => {
+    const { onChange } = setup()
     await userEvent.type(screen.getByLabelText('Search by name'), 'rick')
-    expect(onChange).toHaveBeenLastCalledWith('name', 'rick')
+    await waitFor(() =>
+      expect(onChange).toHaveBeenCalledWith('name', 'rick'),
+    )
+  })
+
+  it('keeps every keystroke even though the URL lags behind', async () => {
+    // The filters prop never updates here, mimicking a slow round trip
+    // through the router. The draft must survive it.
+    setup()
+    const input = screen.getByLabelText('Search by name')
+    await userEvent.type(input, 'morty')
+    expect(input).toHaveValue('morty')
+  })
+
+  it('does not navigate on every keystroke', async () => {
+    const { onChange } = setup()
+    await userEvent.type(screen.getByLabelText('Search by name'), 'rick')
+    await waitFor(() => expect(onChange).toHaveBeenCalled())
+    expect(onChange).toHaveBeenCalledTimes(1)
+  })
+
+  it('adopts a name cleared from outside the component', async () => {
+    const { rerender } = renderFilters({ page: 1, name: 'rick' })
+    expect(screen.getByLabelText('Search by name')).toHaveValue('rick')
+    rerender({ page: 1 })
+    await waitFor(() =>
+      expect(screen.getByLabelText('Search by name')).toHaveValue(''),
+    )
   })
 
   it('shows the current name value', () => {
