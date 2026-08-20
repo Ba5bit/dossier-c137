@@ -1,5 +1,5 @@
 import { assertEquals, assertThrows } from 'jsr:@std/assert'
-import { parseCharacterQuery } from '../lib/validate.ts'
+import { parseCharacterQuery, parseId } from '../lib/validate.ts'
 import { ValidationError } from '../lib/errors.ts'
 
 Deno.test('defaults to page 1 when no page is supplied', () => {
@@ -49,4 +49,16 @@ Deno.test('omits absent optional filters', () => {
   assertEquals(result.status, undefined)
   assertEquals(result.species, undefined)
   assertEquals(result.gender, undefined)
+})
+
+Deno.test('accepts a numeric id', () => {
+  assertEquals(parseId('42'), 42)
+})
+
+Deno.test('rejects a non-numeric id', () => {
+  assertThrows(() => parseId('rick'), ValidationError)
+})
+
+Deno.test('rejects a zero id', () => {
+  assertThrows(() => parseId('0'), ValidationError)
 })

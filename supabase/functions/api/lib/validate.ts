@@ -51,3 +51,14 @@ export function parseCharacterQuery(params: URLSearchParams): CharacterQuery {
     gender: parseEnum(params.get('gender'), GENDERS, 'gender'),
   }
 }
+
+export function parseId(raw: string): number {
+  if (!/^\d+$/.test(raw)) {
+    throw new ValidationError(`id must be a positive integer, received "${raw}"`)
+  }
+  const id = Number(raw)
+  if (id < 1) {
+    throw new ValidationError(`id must be at least 1, received ${id}`)
+  }
+  return id
+}

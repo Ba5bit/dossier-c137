@@ -22,8 +22,11 @@ const store = createPostgresStore(
   Deno.env.get('SUPABASE_URL')!,
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
 )
-const service = createCharacterService(createRmClient(), createCache(store))
-const route = createRouter(service)
+const client = createRmClient()
+const cache = createCache(store)
+const route = createRouter({
+  characters: createCharacterService(client, cache),
+})
 
 Deno.serve(async (request) => {
   const cors = corsHeaders(request.headers.get('origin'))

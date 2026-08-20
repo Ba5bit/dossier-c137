@@ -1,5 +1,56 @@
 import { assertEquals } from 'jsr:@std/assert'
 import { normalizePath, createRouter } from '../router.ts'
+import { NotFoundError } from '../lib/errors.ts'
+
+const emptyList = {
+  items: [],
+  pagination: { page: 1, pageCount: 0, total: 0, pageSize: 20 },
+}
+
+const character = {
+  id: 1,
+  name: 'Rick Sanchez',
+  status: 'Alive',
+  species: 'Human',
+  type: '',
+  gender: 'Male',
+  image: 'https://example.test/1.jpeg',
+  origin: { name: 'Earth (C-137)', id: 1 },
+  location: { name: 'Citadel of Ricks', id: 3 },
+  episodeCount: 51,
+}
+
+// Typed against the router's own bundle so that an override with the wrong
+// shape fails type-checking rather than at runtime.
+type StubServices = Parameters<typeof createRouter>[0]
+
+function services(overrides: Partial<StubServices> = {}): StubServices {
+  return {
+    characters: {
+      listCharacters: async (query: { page: number }) => ({
+        payload: { ...emptyList, pagination: { ...emptyList.pagination, page: query.page, pageCount: 42 } },
+        stale: false,
+      }),
+      getCharacter: async (id: number) => ({
+        payload: {
+          character: { ...character, id },
+          origin: { id: 1, name: 'Earth (C-137)', resolved: true },
+          location: { id: 3, name: 'Citadel of Ricks', resolved: true },
+          episodes: [],
+        },
+        stale: false,
+      }),
+    },
+    ...overrides,
+  }
+}
+
+const detail = {
+  character,
+  origin: { id: 1, name: 'Earth (C-137)', resolved: true },
+  location: { id: 3, name: 'Citadel of Ricks', resolved: true },
+  episodes: [],
+}
 
 Deno.test('strips the function name prefix from the path', () => {
   assertEquals(normalizePath('/api/characters'), '/characters')
@@ -16,12 +67,7 @@ Deno.test('leaves an already-normalized path alone', () => {
 })
 
 Deno.test('answers health checks', async () => {
-  const router = createRouter({
-    listCharacters: async () => ({
-      payload: { items: [], pagination: { page: 1, pageCount: 0, total: 0, pageSize: 20 } },
-      stale: false,
-    }),
-  })
+  const router = createRouter(services())
 
   const response = await router(new Request('https://x.test/api/health'))
 
@@ -30,15 +76,7 @@ Deno.test('answers health checks', async () => {
 })
 
 Deno.test('routes character list requests to the service', async () => {
-  const router = createRouter({
-    listCharacters: async (query) => ({
-      payload: {
-        items: [],
-        pagination: { page: query.page, pageCount: 42, total: 826, pageSize: 20 },
-      },
-      stale: false,
-    }),
-  })
+  const router = createRouter(services())
 
   const response = await router(
     new Request('https://x.test/api/characters?page=5'),
@@ -50,13 +88,54 @@ Deno.test('routes character list requests to the service', async () => {
   assertEquals(body.pagination.pageCount, 42)
 })
 
-Deno.test('marks a stale response with a header', async () => {
-  const router = createRouter({
-    listCharacters: async () => ({
-      payload: { items: [], pagination: { page: 1, pageCount: 0, total: 0, pageSize: 20 } },
-      stale: true,
+Deno.test('routes a character detail request by id', async () => {
+  const router = createRouter(services())
+
+  const response = await router(new Request('https://x.test/api/characters/7'))
+  const body = await response.json()
+
+  assertEquals(response.status, 200)
+  assertEquals(body.character.id, 7)
+})
+
+Deno.test('returns 400 for a non-numeric detail id', async () => {
+  const router = createRouter(services())
+
+  const response = await router(new Request('https://x.test/api/characters/rick'))
+  const body = await response.json()
+
+  assertEquals(response.status, 400)
+  assertEquals(body.error.code, 'INVALID_PARAMETER')
+})
+
+Deno.test('returns 404 when the service reports a missing entity', async () => {
+  const router = createRouter(
+    services({
+      characters: {
+        listCharacters: async () => ({ payload: emptyList, stale: false }),
+        getCharacter: async () => {
+          throw new NotFoundError('No record at /character/99999')
+        },
+      },
     }),
-  })
+  )
+
+  const response = await router(new Request('https://x.test/api/characters/99999'))
+  const body = await response.json()
+
+  assertEquals(response.status, 404)
+  assertEquals(body.error.code, 'NOT_FOUND')
+})
+
+Deno.test('marks a stale response with a header', async () => {
+  const router = createRouter(
+    services({
+      characters: {
+        listCharacters: async () => ({ payload: emptyList, stale: true }),
+        getCharacter: async () => ({ payload: detail, stale: true }),
+      },
+    }),
+  )
 
   const response = await router(new Request('https://x.test/api/characters'))
 
@@ -64,12 +143,7 @@ Deno.test('marks a stale response with a header', async () => {
 })
 
 Deno.test('returns 400 with a typed code for an invalid parameter', async () => {
-  const router = createRouter({
-    listCharacters: async () => ({
-      payload: { items: [], pagination: { page: 1, pageCount: 0, total: 0, pageSize: 20 } },
-      stale: false,
-    }),
-  })
+  const router = createRouter(services())
 
   const response = await router(
     new Request('https://x.test/api/characters?status=undead'),
@@ -81,12 +155,7 @@ Deno.test('returns 400 with a typed code for an invalid parameter', async () => 
 })
 
 Deno.test('returns 404 for an unknown route', async () => {
-  const router = createRouter({
-    listCharacters: async () => ({
-      payload: { items: [], pagination: { page: 1, pageCount: 0, total: 0, pageSize: 20 } },
-      stale: false,
-    }),
-  })
+  const router = createRouter(services())
 
   const response = await router(new Request('https://x.test/api/nope'))
 

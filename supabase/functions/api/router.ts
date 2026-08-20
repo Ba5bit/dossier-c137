@@ -1,7 +1,15 @@
-import { handleListCharacters, type CharacterService } from './handlers/characters.ts'
+import {
+  handleGetCharacter,
+  handleListCharacters,
+  type CharacterService,
+} from './handlers/characters.ts'
 import { AppError } from './lib/errors.ts'
 
 const JSON_HEADERS = { 'content-type': 'application/json' }
+
+export type Services = {
+  characters: CharacterService
+}
 
 /**
  * Supabase routes requests to `/functions/v1/<name>/...`, so the function
@@ -19,6 +27,10 @@ function json(body: unknown, status = 200, extra: Record<string, string> = {}) {
   })
 }
 
+function staleHeaders(stale: boolean): Record<string, string> {
+  return stale ? { 'X-Cache': 'stale' } : {}
+}
+
 function errorResponse(error: unknown): Response {
   if (error instanceof AppError) {
     return json(
@@ -32,7 +44,7 @@ function errorResponse(error: unknown): Response {
   )
 }
 
-export function createRouter(service: CharacterService) {
+export function createRouter(services: Services) {
   return async function route(request: Request): Promise<Response> {
     const url = new URL(request.url)
     const path = normalizePath(url.pathname)
@@ -42,9 +54,24 @@ export function createRouter(service: CharacterService) {
         return json({ status: 'ok' })
       }
 
-      if (path === '/characters' && request.method === 'GET') {
-        const { body, stale } = await handleListCharacters(url, service)
-        return json(body, 200, stale ? { 'X-Cache': 'stale' } : {})
+      if (request.method !== 'GET') {
+        return json(
+          { error: { code: 'NOT_FOUND', message: `No route for ${path}` } },
+          404,
+        )
+      }
+
+      if (path === '/characters') {
+        const { body, stale } = await handleListCharacters(url, services.characters)
+        return json(body, 200, staleHeaders(stale))
+      }
+
+      // The id segment is matched loosely so that a malformed id reaches the
+      // validator and answers 400, rather than falling through to a 404.
+      const detail = path.match(/^\/(characters)\/([^/]+)$/)
+      if (detail) {
+        const { body, stale } = await handleGetCharacter(detail[2], services.characters)
+        return json(body, 200, staleHeaders(stale))
       }
 
       return json(
