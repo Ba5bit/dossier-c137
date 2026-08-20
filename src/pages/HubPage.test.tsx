@@ -104,4 +104,10 @@ describe('HubPage', () => {
 
     expect(screen.getByRole('dialog')).toBeInTheDocument()
   })
+
+  it('carries the coordinate input beside the gun', async () => {
+    renderHub()
+
+    expect(await screen.findByRole('searchbox')).toBeInTheDocument()
+  })
 })

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useStats } from '../features/stats/useStats'
 import { PortalGun } from '../shared/portal/PortalGun'
+import { PortalSearch } from '../features/search/PortalSearch'
 import { PortalLink } from '../shared/portal/PortalLink'
 import { SettingsPanel } from '../shared/settings/SettingsPanel'
 import { Skeleton } from '../shared/ui/Skeleton'
@@ -58,6 +59,10 @@ export function HubPage() {
       </header>
 
       <PortalGun onOpenSettings={() => setSettingsOpen(true)} />
+
+      <div className="mx-auto w-full max-w-[640px]">
+        <PortalSearch />
+      </div>
 
       {settingsOpen && (
         <div className="flex justify-center">
