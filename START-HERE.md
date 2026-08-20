@@ -1,6 +1,6 @@
 # Start Here
 
-Handoff note for a fresh session. Last updated 2026-08-20, after plans 1 and 2 shipped in full. Plan 3 has not been written yet.
+Handoff note for a fresh session. Last updated 2026-08-20, after plans 1 and 2 shipped in full and plan 3 was written. Plan 3 is written but not started.
 
 ## What this project is
 
@@ -15,6 +15,7 @@ The assignment requires a public GitHub repository, a thorough README, and that 
 | `docs/superpowers/specs/2026-08-19-dossier-c137-design.md` | The full design. Architecture, endpoints, component tree, error handling, deployment. Includes a requirements traceability table mapping every assignment requirement to a section |
 | `docs/superpowers/plans/2026-08-20-dossier-c137-foundation.md` | Plan 1 of 5, complete. Twenty-three TDD tasks with complete code in every step |
 | `docs/superpowers/plans/2026-08-20-dossier-c137-entities.md` | Plan 2 of 5, complete. Twenty TDD tasks: locations, episodes, and all three detail pages |
+| `docs/superpowers/plans/2026-08-20-dossier-c137-portal.md` | **Plan 3 of 5, the one to execute now.** Twenty-two TDD tasks: `/api/stats`, the settings layer, the three dimensions, the portal transition system, the hub, and the real header |
 | `docs/design/tokens.md` | Ten source colors expanded into three palettes, every pair contrast-checked |
 | `docs/design/visual-direction.md` | The direction, the rejected alternatives, and why each reference was weighted as it was |
 | `design-brief/STEP-2-PROMPTS.md` | Per-screen layout descriptions, detailed enough to build from directly |
@@ -46,7 +47,9 @@ Verified against the live deployment: all seven endpoints return real data; the 
 
 ## Immediate next step
 
-**Write plan 3**, then execute it. It does not exist yet. Plan 3 owns the hub page, the portal transitions, the header with the mini portal gun, the settings panel, and the dimensions — spec §8, §9, and §11.5. Use the superpowers `writing-plans` skill against the spec, matching the shape of plans 1 and 2: bite-sized TDD tasks, complete code in every step, one commit per task, an expected test count after each.
+**Execute plan 3**, `docs/superpowers/plans/2026-08-20-dossier-c137-portal.md`, starting at task 1. Nothing in it needs anything from the user.
+
+Open the session with the superpowers `executing-plans` skill (or `subagent-driven-development` if subagents are available), then work task by task in order. Each task ends in a commit; do not batch them.
 
 Before touching anything, confirm the inherited state is green:
 
@@ -57,12 +60,24 @@ npm run test:api          # expect 79 passing
 npm run lint && npm run build
 ```
 
-If those four are green, the handoff is intact. If they are not, stop and say so — plan 3 will assume plan 2's numbers as its baseline.
+Run them one at a time. Chaining all four in a single command has produced one run where Vitest reported fifteen errors with the tests themselves executing in 191 ms — workers failing to start under load on this machine, not assertions failing. Re-running alone gave 124/124 twice. If you see that shape — a pile of errors and a suspiciously short test duration — re-run before believing it.
+
+If those four are green, the handoff is intact and plan 3's task 1 can start. If they are not, stop and say so — plan 3 assumes plan 2's numbers as its baseline, and it carries a table of the expected test count after every task.
+
+Five things about plan 3 worth reading before the first commit:
+
+- **It opens with the plan's own "Three things that will bite" section.** Read it. jsdom has neither `matchMedia` nor a canvas 2D context, the portal's quote and ceiling timers must be measured from the shot rather than from the phase, and the entity cards are rendered in their tests with no providers at all — so `useSettings` and `usePortalNavigation` are written to degrade rather than throw.
+- **Task 2 widens the router's services bundle, and the same edit must widen `router_test.ts`'s `services()` helper.** That exact omission cost a mid-plan detour in plan 2; the task says so in place.
+- **Task 3 deploys `/api/stats` mid-plan** and verifies it with curl. Deliberate — spec §13.1 forbids saving deployment for the end. The backend half of plan 3 is that one endpoint and nothing else.
+- **Tasks 18 and 19 are adjacent on purpose.** The refresh bar lands first because the header renders it.
+- **Task 22 tags `plan-3-portal`** and updates this file.
+
+Two deviations from the spec are decided in the plan, with reasons, and should not be relitigated: Framer Motion is not used — CSS keyframes are, because the state machine already owns every duration and the visual is a canvas — and the hub's statistics strip reports locations rather than distinct dimensions, because nothing aggregates dimension strings and §6.2 forbids hardcoding a count. Plan 3 adds **no new dependencies**.
 
 Two things plan 3 inherits and should not fight:
 
-- **`AppLayout` is a placeholder.** `src/app/AppLayout.tsx` is a plain nav bar, written so the sections were reachable before the hub existed. Plan 3 replaces it with the real header; its three tests go with it.
-- **The lint carries three `react-refresh/only-export-components` warnings**, one per filter bar, because each exports its `*_FILTER_KEYS` constant alongside its component. They are warnings, not errors, and the lint still exits 0. Moving the constants to their own module would silence them if plan 3 wants that.
+- **`AppLayout` is a placeholder.** `src/app/AppLayout.tsx` is a plain nav bar, written so the sections were reachable before the hub existed. Plan 3 task 19 replaces it with the real header; its three tests are rewritten as six, so the suite grows by three and not by six.
+- **The lint carries three `react-refresh/only-export-components` warnings**, one per filter bar, because each exports its `*_FILTER_KEYS` constant alongside its component. They are warnings, not errors, and the lint still exits 0. Plan 3 does not add a fourth — it keeps its two new context objects in their own files for exactly that reason.
 
 Vercel rebuilds on every push to `main`. The Edge Function does not: it needs `npx supabase functions deploy api --no-verify-jwt`.
 
