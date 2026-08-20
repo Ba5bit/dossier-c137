@@ -1,7 +1,7 @@
 import { createRouter } from './router.ts'
 import { createRmClient } from './clients/rmClient.ts'
 import { createCache, createPostgresStore } from './lib/cache.ts'
-import { createRickMortyService } from './services/rickMorty.ts'
+import { createCharacterService } from './services/characters.ts'
 
 const ALLOWED_ORIGIN_PATTERNS = [
   /^http:\/\/localhost:\d+$/,
@@ -22,7 +22,7 @@ const store = createPostgresStore(
   Deno.env.get('SUPABASE_URL')!,
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
 )
-const service = createRickMortyService(createRmClient(), createCache(store))
+const service = createCharacterService(createRmClient(), createCache(store))
 const route = createRouter(service)
 
 Deno.serve(async (request) => {

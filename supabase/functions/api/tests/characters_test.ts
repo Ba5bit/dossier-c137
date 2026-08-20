@@ -1,5 +1,5 @@
 import { assertEquals } from 'jsr:@std/assert'
-import { createRickMortyService } from '../services/rickMorty.ts'
+import { createCharacterService } from '../services/characters.ts'
 import type { RawCharacter, RmListResponse } from '../clients/rmClient.ts'
 
 function rawCharacter(overrides: Partial<RawCharacter> = {}): RawCharacter {
@@ -41,7 +41,7 @@ const passthroughCache = {
 }
 
 Deno.test('extracts the numeric id from a relation URL', async () => {
-  const service = createRickMortyService(
+  const service = createCharacterService(
     stubClient({ info: { count: 1, pages: 1 }, results: [rawCharacter()] }),
     passthroughCache,
   )
@@ -53,7 +53,7 @@ Deno.test('extracts the numeric id from a relation URL', async () => {
 })
 
 Deno.test('marks a relation without a URL as unresolvable', async () => {
-  const service = createRickMortyService(
+  const service = createCharacterService(
     stubClient({
       info: { count: 1, pages: 1 },
       results: [rawCharacter({ origin: { name: 'unknown', url: '' } })],
@@ -67,7 +67,7 @@ Deno.test('marks a relation without a URL as unresolvable', async () => {
 })
 
 Deno.test('counts episodes rather than passing URLs through', async () => {
-  const service = createRickMortyService(
+  const service = createCharacterService(
     stubClient({ info: { count: 1, pages: 1 }, results: [rawCharacter()] }),
     passthroughCache,
   )
@@ -78,7 +78,7 @@ Deno.test('counts episodes rather than passing URLs through', async () => {
 })
 
 Deno.test('takes pagination totals from the upstream info block', async () => {
-  const service = createRickMortyService(
+  const service = createCharacterService(
     stubClient({ info: { count: 826, pages: 42 }, results: [] }),
     passthroughCache,
   )
@@ -102,7 +102,7 @@ Deno.test('builds a cache key covering every supplied filter', async () => {
     },
   }
 
-  const service = createRickMortyService(
+  const service = createCharacterService(
     stubClient({ info: { count: 0, pages: 0 }, results: [] }),
     recordingCache,
   )

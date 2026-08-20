@@ -1,14 +1,7 @@
 import { buildCacheKey, type Resolved } from '../lib/cache.ts'
+import { PAGE_SIZE, TTL_SECONDS, toRef } from './refs.ts'
 import type { RawCharacter, RmListResponse } from '../clients/rmClient.ts'
-import type {
-  Character,
-  CharacterQuery,
-  CharacterRef,
-  ListResponse,
-} from '../types.ts'
-
-const PAGE_SIZE = 20
-const TTL_SECONDS = 24 * 60 * 60
+import type { Character, CharacterQuery, ListResponse } from '../types.ts'
 
 type CharacterClient = {
   listCharacters(query: CharacterQuery): Promise<RmListResponse<RawCharacter>>
@@ -22,17 +15,7 @@ type CacheLike = {
   ): Promise<Resolved<T>>
 }
 
-/**
- * Relations arrive as URLs ending in a numeric id, or as an empty string
- * when the entity has no record — `origin: "unknown"` is common enough that
- * half of any given page carries it.
- */
-function toRef(relation: { name: string; url: string }): CharacterRef {
-  const match = relation.url.match(/\/(\d+)$/)
-  return { name: relation.name, id: match ? Number(match[1]) : null }
-}
-
-function toCharacter(raw: RawCharacter): Character {
+export function toCharacter(raw: RawCharacter): Character {
   return {
     id: raw.id,
     name: raw.name,
@@ -47,7 +30,7 @@ function toCharacter(raw: RawCharacter): Character {
   }
 }
 
-export function createRickMortyService(client: CharacterClient, cache: CacheLike) {
+export function createCharacterService(client: CharacterClient, cache: CacheLike) {
   async function listCharacters(
     query: CharacterQuery,
   ): Promise<Resolved<ListResponse<Character>>> {
