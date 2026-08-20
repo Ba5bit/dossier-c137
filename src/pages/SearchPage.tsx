@@ -1,6 +1,6 @@
 import { useSearchParams } from 'react-router-dom'
 import { PortalSearch } from '../features/search/PortalSearch'
-import { useSearch } from '../features/search/useSearch'
+import { useSearch, SEARCH_MIN } from '../features/search/useSearch'
 import { PortalLink } from '../shared/portal/PortalLink'
 import { EmptyState } from '../shared/ui/EmptyState'
 import { ErrorState } from '../shared/ui/ErrorState'
@@ -75,7 +75,12 @@ function groupsOf(data: SearchResponse) {
 export function SearchPage() {
   const [params] = useSearchParams()
   const query = params.get('q') ?? ''
+  const trimmed = query.trim()
   const { data, isPending, isError, refetch } = useSearch(query)
+
+  // A disabled query reports `pending` forever, so the length check has to
+  // come first: below the minimum nothing is on the way and skeletons lie.
+  const tooShort = trimmed.length > 0 && trimmed.length < SEARCH_MIN
 
   const rows = data ? groupsOf(data) : null
   const nothing =
@@ -88,18 +93,24 @@ export function SearchPage() {
     <main className="mx-auto max-w-[1280px] space-y-8 px-6 py-10">
       <header className="space-y-4">
         <p className="font-mono text-xs tracking-widest text-muted">ARCHIVE SEARCH</p>
-        <PortalSearch />
+        <PortalSearch initialDraft={query} suggestions={false} />
       </header>
 
-      {query.trim() === '' && (
+      {trimmed === '' && (
         <p className="text-muted">
           Enter coordinates above. Two characters minimum.
         </p>
       )}
 
-      {query.trim() !== '' && isError && <ErrorState onRetry={() => refetch()} />}
+      {tooShort && (
+        <p className="text-muted">
+          Two characters minimum. The archive is big, not psychic.
+        </p>
+      )}
 
-      {query.trim() !== '' && isPending && (
+      {trimmed !== '' && !tooShort && isError && <ErrorState onRetry={() => refetch()} />}
+
+      {trimmed !== '' && !tooShort && isPending && (
         <div className="space-y-3">
           <Skeleton className="h-6 w-40" />
           <Skeleton className="h-32 w-full" />

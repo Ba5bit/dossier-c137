@@ -51,6 +51,21 @@ describe('SearchPage', () => {
     expect(await screen.findByText(/no records found/i)).toBeInTheDocument()
   })
 
+  it('asks for a second character instead of loading forever', () => {
+    renderPage('/search?q=r')
+
+    expect(screen.getByText(/two characters minimum/i)).toBeInTheDocument()
+    // A query disabled below the minimum reports `pending` forever, so the
+    // skeletons it used to render were promising something never sent.
+    expect(screen.queryAllByRole('status')).toHaveLength(0)
+  })
+
+  it('prefills the box from the URL so a query can be refined', async () => {
+    renderPage('/search?q=rick')
+
+    expect(await screen.findByRole('searchbox')).toHaveValue('rick')
+  })
+
   it('asks for a query when the URL carries none', () => {
     renderPage('/search')
 

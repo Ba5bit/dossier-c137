@@ -17,6 +17,14 @@ type PortalSearchProps = {
   /** Called after a navigation, so an overlay can close itself. */
   onNavigate?: () => void
   placeholder?: string
+  /** Seeds the box, so a query carried in the URL can be refined rather than retyped. */
+  initialDraft?: string
+  /**
+   * The search page renders the full result groups itself, so the box there is
+   * an input and nothing else — a dropdown of the same names above them is
+   * two answers to one question.
+   */
+  suggestions?: boolean
 }
 
 type Row = {
@@ -51,9 +59,14 @@ export function PortalSearch({
   autoFocus = false,
   onNavigate,
   placeholder = 'ENTER COORDINATES OR ASK A QUESTION',
+  initialDraft = '',
+  suggestions = true,
 }: PortalSearchProps) {
-  const [draft, setDraft] = useState('')
-  const [committed, setCommitted] = useState('')
+  const [draft, setDraft] = useState(initialDraft)
+  // Committed starts seeded as well: a draft that arrived with the page has
+  // nothing to debounce, and waiting 300 ms to show its own results is a
+  // flicker with no purpose.
+  const [committed, setCommitted] = useState(initialDraft)
   const [highlight, setHighlight] = useState(-1)
   const navigateThroughPortal = usePortalNavigation()
 
@@ -65,7 +78,8 @@ export function PortalSearch({
   }, [draft])
 
   const { data, isFetching } = useSearch(committed)
-  const rows = useMemo(() => rowsFrom(data), [data])
+  const allRows = useMemo(() => rowsFrom(data), [data])
+  const rows = suggestions ? allRows : []
 
   function go(to: string) {
     navigateThroughPortal(to, 'short')
@@ -107,8 +121,13 @@ export function PortalSearch({
     }
   }
 
-  const tooShort = draft.trim().length > 0 && draft.trim().length < SEARCH_MIN
-  const empty = committed.trim().length >= SEARCH_MIN && !isFetching && rows.length === 0
+  const tooShort =
+    suggestions && draft.trim().length > 0 && draft.trim().length < SEARCH_MIN
+  const empty =
+    suggestions &&
+    committed.trim().length >= SEARCH_MIN &&
+    !isFetching &&
+    rows.length === 0
 
   return (
     <div className="w-full">
