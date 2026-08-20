@@ -93,3 +93,60 @@ body {
 .dimension-wave {
   animation: dimension-wave 250ms ease-out both;
 }
+
+@keyframes portal-open {
+  0% {
+    transform: scale(0.05);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes portal-close {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.05);
+    opacity: 0;
+  }
+}
+
+@keyframes portal-quote-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.portal-vortex {
+  will-change: transform;
+}
+
+/* The durations mirror portalTimings.ts. The portal does not change shape as
+   it opens — it scales up with a slight overshoot and nothing else. */
+[data-phase='firing'] .portal-vortex {
+  animation: portal-open 400ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+[data-phase='firing'][data-variant='short'] .portal-vortex {
+  animation-duration: 250ms;
+}
+
+[data-phase='collapsing'] .portal-vortex {
+  animation: portal-close 350ms ease-in both;
+}
+
+.portal-quote {
+  animation: portal-quote-in 250ms ease-out both;
+}
