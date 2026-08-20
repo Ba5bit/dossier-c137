@@ -29,3 +29,17 @@ export class UpstreamError extends AppError {
     this.name = 'UpstreamError'
   }
 }
+
+export class AiError extends AppError {
+  constructor(message: string) {
+    super('AI_UNAVAILABLE', message, 502)
+    this.name = 'AiError'
+  }
+}
+
+export class RateLimitError extends AppError {
+  constructor(message: string) {
+    super('RATE_LIMITED', message, 429)
+    this.name = 'RateLimitError'
+  }
+}
