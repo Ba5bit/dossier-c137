@@ -103,3 +103,16 @@ export type EpisodeDetail = {
   episode: Episode
   characters: CharacterSummary[]
 }
+
+export type EntityCount = {
+  total: number
+  pages: number
+}
+
+export type Stats = {
+  characters: EntityCount
+  locations: EntityCount
+  episodes: EntityCount
+  ricks: number
+  mortys: number
+}
