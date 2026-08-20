@@ -130,3 +130,31 @@ export type SearchResponse = {
     episodes: SearchGroup<Episode>
   }
 }
+
+export type Persona = 'rick' | 'morty'
+
+export type Dossier = {
+  entityType: string
+  entityId: number
+  persona: Persona
+  text: string
+  model: string
+  promptVersion: number
+  cached: boolean
+}
+
+export type AskSource = {
+  type: 'character' | 'location' | 'episode'
+  id: number
+  name: string
+}
+
+export type AskEvent =
+  | { type: 'sources'; sources: AskSource[] }
+  | { type: 'token'; text: string }
+  | { type: 'error'; code: string; message: string }
+
+export type ChatTurn = {
+  role: 'user' | 'assistant'
+  content: string
+}
