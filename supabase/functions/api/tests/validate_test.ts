@@ -1,5 +1,10 @@
 import { assertEquals, assertThrows } from 'jsr:@std/assert'
-import { parseCharacterQuery, parseId, parseLocationQuery } from '../lib/validate.ts'
+import {
+  parseCharacterQuery,
+  parseEpisodeQuery,
+  parseId,
+  parseLocationQuery,
+} from '../lib/validate.ts'
 import { ValidationError } from '../lib/errors.ts'
 
 Deno.test('defaults to page 1 when no page is supplied', () => {
@@ -86,4 +91,14 @@ Deno.test('rejects a malformed location page', () => {
     () => parseLocationQuery(new URLSearchParams('page=abc')),
     ValidationError,
   )
+})
+
+Deno.test('reads every episode filter out of the query string', () => {
+  const query = parseEpisodeQuery(new URLSearchParams('page=3&name=pilot&episode=S01'))
+
+  assertEquals(query, { page: 3, name: 'pilot', episode: 'S01' })
+})
+
+Deno.test('defaults the episode page to 1', () => {
+  assertEquals(parseEpisodeQuery(new URLSearchParams('')).page, 1)
 })

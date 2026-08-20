@@ -3,6 +3,7 @@ import type {
   CharacterGender,
   CharacterQuery,
   CharacterStatus,
+  EpisodeQuery,
   LocationQuery,
 } from '../types.ts'
 
@@ -70,5 +71,13 @@ export function parseLocationQuery(params: URLSearchParams): LocationQuery {
     name: parseText(params.get('name')),
     type: parseText(params.get('type')),
     dimension: parseText(params.get('dimension')),
+  }
+}
+
+export function parseEpisodeQuery(params: URLSearchParams): EpisodeQuery {
+  return {
+    page: parsePage(params.get('page')),
+    name: parseText(params.get('name')),
+    episode: parseText(params.get('episode')),
   }
 }
