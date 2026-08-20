@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { StatusIndicator } from './StatusIndicator'
 import type { Character } from '../../shared/api/types'
+import { RedactionBar } from '../../shared/ui/RedactionBar'
 
 type CharacterCardProps = {
   character: Character
@@ -45,11 +46,7 @@ export function CharacterCard({ character }: CharacterCardProps) {
             <dt className="text-muted">ORIGIN</dt>
             <dd className="text-fg truncate">
               {originUnknown ? (
-                <span
-                  data-testid="redacted-origin"
-                  aria-label="Origin redacted"
-                  className="inline-block h-3 w-20 bg-fg align-middle"
-                />
+                <RedactionBar label="Origin redacted" testId="redacted-origin" />
               ) : (
                 character.origin.name
               )}
