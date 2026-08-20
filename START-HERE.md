@@ -1,6 +1,6 @@
 # Start Here
 
-Handoff note for a fresh session. Last updated 2026-08-20, after plan 1 shipped in full.
+Handoff note for a fresh session. Last updated 2026-08-20, after plan 1 shipped in full and plan 2 was written. Plan 2 is written but not started.
 
 ## What this project is
 
@@ -13,7 +13,8 @@ The assignment requires a public GitHub repository, a thorough README, and that 
 | Document | What it settles |
 |---|---|
 | `docs/superpowers/specs/2026-08-19-dossier-c137-design.md` | The full design. Architecture, endpoints, component tree, error handling, deployment. Includes a requirements traceability table mapping every assignment requirement to a section |
-| `docs/superpowers/plans/2026-08-20-dossier-c137-foundation.md` | Plan 1 of 5. Twenty-three TDD tasks with complete code in every step |
+| `docs/superpowers/plans/2026-08-20-dossier-c137-foundation.md` | Plan 1 of 5, complete. Twenty-three TDD tasks with complete code in every step |
+| `docs/superpowers/plans/2026-08-20-dossier-c137-entities.md` | **Plan 2 of 5, the one to execute now.** Twenty TDD tasks: locations, episodes, and all three detail pages |
 | `docs/design/tokens.md` | Ten source colors expanded into three palettes, every pair contrast-checked |
 | `docs/design/visual-direction.md` | The direction, the rejected alternatives, and why each reference was weighted as it was |
 | `design-brief/STEP-2-PROMPTS.md` | Per-screen layout descriptions, detailed enough to build from directly |
@@ -43,9 +44,28 @@ Verified against the live deployment: real data and images, shareable filtered U
 
 ## Immediate next step
 
-Start plan 2. It has not been written yet — write it before implementing.
+**Execute plan 2**, `docs/superpowers/plans/2026-08-20-dossier-c137-entities.md`, starting at task 1. Nothing in it needs anything from the user.
 
-Vercel rebuilds on every push to `main`, so no separate deploy step is needed.
+Open the session with the superpowers `executing-plans` skill (or `subagent-driven-development` if subagents are available), then work task by task in order. Each task ends in a commit; do not batch them.
+
+Before touching anything, confirm the inherited state is green:
+
+```bash
+git status                # expect a clean tree on main
+npm test                  # expect 61 passing
+npm run test:api          # expect 33 passing
+npm run lint && npm run build
+```
+
+If those four are green, the handoff is intact and plan 2's task 1 can start. If they are not, stop and say so — plan 2 assumes plan 1's numbers as its baseline, and every task in it states the expected test count after that task.
+
+Three things about plan 2 worth reading before the first commit:
+
+- **Task 2 renames `services/rickMorty.ts` to `services/characters.ts`.** It is a pure refactor with the existing tests as the safety net; the count must be identical before and after.
+- **Task 10 deploys the Edge Function mid-plan** and verifies the five new endpoints with curl. That is deliberate — spec §13.1 forbids saving deployment for the end.
+- **Task 20 tags `plan-2-entities`** and updates this file.
+
+Vercel rebuilds on every push to `main`. The Edge Function does not: it needs `npx supabase functions deploy api --no-verify-jwt`.
 
 ## Commands that are not obvious
 
@@ -64,7 +84,13 @@ npm run build
 - **The project was renamed** from Citadel Archive to Dossier C-137, after the deploy. The `citadel` dimension token is unrelated and unchanged
 - **`ApiError` declares `code` as a field, not a constructor parameter property.** `tsconfig` runs with `erasableSyntaxOnly`, which rejects the shorthand
 - **`vercel.json` added** with a catch-all rewrite to `index.html`. Without it Vercel resolved `/characters` against the filesystem and returned its own 404, so no deep link or shared filtered URL worked
-- **Text filters are debounced and hold a local draft.** The plan bound the name and species inputs straight to the URL, which dropped keystrokes on the deployed build: typing `morty` produced `?name=moy`, because the router round trip is asynchronous and React restored the stale value into the DOM mid-typing. The commit delay is 300 ms, and external changes (clear, back button, pasted URL) are still adopted
+- **Text filters are debounced and hold a local draft.** The plan bound the name and species inputs straight to the URL, which dropped keystrokes on the deployed build: typing `morty` produced `?name=moy`, because the router round trip is asynchronous and React restored the stale value into the DOM mid-typing. The commit delay is 300 ms, and external changes (clear, back button, pasted URL) are still adopted. Plan 2 task 5 of the entities plan moves this component to `src/shared/ui/TextFilter.tsx` so that all three filter bars share it
+
+## Conventions plan 2 relies on
+
+- **New UI copy stays inline**, in the same voice as plan 1. Spec §7.3 wants it all in `src/shared/lore/copy.ts`; plan 5 owns that move. Introducing it mid-flight would leave three places to reconcile instead of one
+- **`shared/` knows nothing about specific entity types.** That is why `RosterGrid` lives in `features/characters/` even though the location and episode dossiers both use it
+- **Every list page follows the same shape:** `useUrlFilters(KEYS) -> use<Entity>(filters) -> <Filters/> <Grid/> <Pagination/>`, with the page composing only
 
 ## Still needed from the user, later
 
