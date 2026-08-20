@@ -75,7 +75,9 @@ describe('streamAsk', () => {
       }),
     )
 
-    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit]
+    // The stub takes no declared parameters, so its recorded call tuple is
+    // typed as empty; the real fetch signature has to be asserted through unknown.
+    const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit]
     expect(init.method).toBe('POST')
     expect(JSON.parse(init.body as string)).toEqual({
       q: 'and then?',
