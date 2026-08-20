@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSettings } from './useSettings'
 import { useReducedMotion } from './useReducedMotion'
 
@@ -13,20 +13,26 @@ const WAVE_MS = 250
 export function DimensionWave() {
   const { settings } = useSettings()
   const reducedMotion = useReducedMotion()
-  const previous = useRef(settings.dimension)
-  const [playing, setPlaying] = useState(false)
+  const [previousDimension, setPreviousDimension] = useState(settings.dimension)
+  // Zero means nothing is playing; any other value identifies the current run,
+  // so a second switch mid-wave restarts the timer rather than being swallowed.
+  const [wave, setWave] = useState(0)
+
+  // Adjusted during render, which is React's own answer to "react to a changed
+  // value" — an effect that calls setState synchronously cascades renders.
+  if (previousDimension !== settings.dimension) {
+    setPreviousDimension(settings.dimension)
+    if (!reducedMotion) setWave((current) => current + 1)
+  }
 
   useEffect(() => {
-    if (previous.current === settings.dimension) return
-    previous.current = settings.dimension
-    if (reducedMotion) return
+    if (wave === 0) return
 
-    setPlaying(true)
-    const timer = setTimeout(() => setPlaying(false), WAVE_MS)
+    const timer = setTimeout(() => setWave(0), WAVE_MS)
     return () => clearTimeout(timer)
-  }, [settings.dimension, reducedMotion])
+  }, [wave])
 
-  if (!playing) return null
+  if (wave === 0) return null
 
   return (
     <div

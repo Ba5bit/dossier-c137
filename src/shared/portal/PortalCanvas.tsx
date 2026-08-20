@@ -12,15 +12,16 @@ export function PortalCanvas({ size = 320 }: PortalCanvasProps) {
     const canvas = canvasRef.current
     if (!canvas) return
 
-    // Held in a const so the null check narrows inside the nested render
-    // function; a captured `let` would widen straight back to null.
     const context = canvas.getContext('2d')
     if (!context) return
 
     let frame = 0
     let origin = 0
 
-    function render(timestamp: number) {
+    // An arrow const rather than a function declaration: a declaration is
+    // hoisted above the null check, so TypeScript would not carry the
+    // narrowing of `context` into it.
+    const render = (timestamp: number) => {
       // Spec section 12.2: no frames at all while the tab is hidden.
       if (document.hidden) {
         frame = 0

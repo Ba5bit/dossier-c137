@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import { useIsFetching } from '@tanstack/react-query'
 import { PortalContext } from './PortalContext'
@@ -9,7 +9,10 @@ import { pickQuote } from '../lore/quotes'
 export function PortalProvider({ children }: { children: ReactNode }) {
   const { phase, variant, showQuote, open, arrive } = usePortalMachine()
   const fetching = useIsFetching()
-  const [quote, setQuote] = useState<string | null>(null)
+
+  // Derived during render rather than pushed into state from an effect: the
+  // line is a function of showQuote and nothing else.
+  const quote = useMemo(() => (showQuote ? pickQuote() : null), [showQuote])
 
   /**
    * The request is whatever the destination page starts. When nothing is in
@@ -22,10 +25,6 @@ export function PortalProvider({ children }: { children: ReactNode }) {
     if (fetching > 0) return
     arrive()
   }, [phase, fetching, arrive])
-
-  useEffect(() => {
-    setQuote(showQuote ? pickQuote() : null)
-  }, [showQuote])
 
   const value = useMemo(() => ({ open }), [open])
 
