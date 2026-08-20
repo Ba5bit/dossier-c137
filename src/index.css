@@ -73,3 +73,23 @@ body {
   color: var(--fg);
   font-family: var(--font-sans);
 }
+
+/* The wave radiates from the settings panel, which sits at the top right of
+   the header in every viewport wide enough to show it. */
+:root {
+  --wave-x: 88%;
+  --wave-y: 6%;
+}
+
+@keyframes dimension-wave {
+  from {
+    clip-path: circle(0% at var(--wave-x) var(--wave-y));
+  }
+  to {
+    clip-path: circle(150% at var(--wave-x) var(--wave-y));
+  }
+}
+
+.dimension-wave {
+  animation: dimension-wave 250ms ease-out both;
+}
