@@ -196,3 +196,18 @@ body {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* The browser's default ring is a white box that reads as a rendering fault
+   against the archive's greens, and it landed on the carousel arrows every
+   time one was clicked. Keyboard focus still has to be obvious, so it is the
+   accent, offset clear of the element's own border. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* A click is not keyboard navigation. Chrome keeps :focus on a clicked
+   button, and the arrows are clicked constantly. */
+:focus:not(:focus-visible) {
+  outline: none;
+}

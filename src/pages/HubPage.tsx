@@ -1,9 +1,7 @@
-import { useState } from 'react'
 import { useStats } from '../features/stats/useStats'
 import { PortalGun } from '../shared/portal/PortalGun'
 import { PortalSearch } from '../features/search/PortalSearch'
 import { PortalLink } from '../shared/portal/PortalLink'
-import { SettingsPanel } from '../shared/settings/SettingsPanel'
 import { Skeleton } from '../shared/ui/Skeleton'
 import { ErrorState } from '../shared/ui/ErrorState'
 import { COPY } from '../shared/lore/copy'
@@ -35,7 +33,6 @@ function indexedTotal(stats: Stats | undefined): number | undefined {
 }
 
 export function HubPage() {
-  const [settingsOpen, setSettingsOpen] = useState(false)
   const { data, isError, refetch } = useStats()
 
   return (
@@ -52,17 +49,11 @@ export function HubPage() {
         </p>
       </header>
 
-      <PortalGun onOpenSettings={() => setSettingsOpen(true)} />
+      <PortalGun />
 
       <div className="mx-auto w-full max-w-[640px]">
         <PortalSearch label={COPY.search.hubLabel} inputId="hub-search" />
       </div>
-
-      {settingsOpen && (
-        <div className="flex justify-center">
-          <SettingsPanel onClose={() => setSettingsOpen(false)} />
-        </div>
-      )}
 
       {isError ? (
         <ErrorState onRetry={() => refetch()} />

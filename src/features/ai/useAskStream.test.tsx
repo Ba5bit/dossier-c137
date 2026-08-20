@@ -19,6 +19,7 @@ function stream(events: AskEvent[]) {
 
 beforeEach(() => {
   streamAsk.mockReset()
+  sessionStorage.clear()
 })
 
 describe('useAskStream', () => {
@@ -37,14 +38,14 @@ describe('useAskStream', () => {
 
     expect(result.current.messages).toEqual([
       { role: 'user', content: 'who is Rick?' },
-      { role: 'assistant', content: 'Wubba lubba', sources: [] },
+      { role: 'assistant', content: 'Wubba lubba', persona: 'rick', sources: [] },
     ])
   })
 
   it('attaches the sources to the answer', async () => {
     streamAsk.mockImplementation(
       stream([
-        { type: 'sources', sources: [{ type: 'character', id: 1, name: 'Rick Sanchez' }] },
+        { type: 'sources', sources: [{ type: 'character', id: 1, name: 'Rick Sanchez' }], citable: [] },
         { type: 'token', text: 'Me.' },
       ]),
     )
@@ -77,6 +78,7 @@ describe('useAskStream', () => {
         { role: 'user', content: 'who is Rick?' },
         { role: 'assistant', content: 'ok' },
       ],
+      focus: undefined,
     })
   })
 

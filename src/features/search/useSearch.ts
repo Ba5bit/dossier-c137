@@ -15,6 +15,10 @@ export function useSearch(query: string) {
     staleTime: 5 * 60 * 1000,
     // Keep the previous groups on screen while the next ones arrive; the
     // list flickering under the cursor is worse than one stale row.
-    placeholderData: (previous) => previous,
+    //
+    // But only while there is still something to search for. An emptied box
+    // left the last query's results standing under it, which reads as the
+    // archive refusing to let go rather than as a stale row.
+    placeholderData: (previous) => (trimmed.length >= SEARCH_MIN ? previous : undefined),
   })
 }

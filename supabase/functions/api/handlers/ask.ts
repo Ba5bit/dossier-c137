@@ -1,9 +1,9 @@
 import { parseAskBody, readJsonBody } from '../lib/validate.ts'
 import type { QuotaLike } from './dossier.ts'
-import type { AskEvent, ChatTurn, Persona } from '../types.ts'
+import type { AskEvent, AskFocus, ChatTurn, Persona } from '../types.ts'
 
 export type AskService = {
-  ask(input: { q: string; persona: Persona; history: ChatTurn[] }): AsyncGenerator<AskEvent>
+  ask(input: { q: string; persona: Persona; history: ChatTurn[]; focus?: AskFocus }): AsyncGenerator<AskEvent>
 }
 
 /**
@@ -14,7 +14,7 @@ export type AskService = {
 export async function prepareAsk(
   request: Request,
   quota: QuotaLike,
-): Promise<{ q: string; persona: Persona; history: ChatTurn[] }> {
+): Promise<{ q: string; persona: Persona; history: ChatTurn[]; focus?: AskFocus }> {
   const body = parseAskBody(await readJsonBody(request))
   await quota.check(request, 'ask')
   return body

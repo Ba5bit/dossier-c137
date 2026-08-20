@@ -1,5 +1,10 @@
 import { assertEquals, assertStringIncludes } from 'jsr:@std/assert'
-import { createAskService, extractTerms, MAX_SOURCES } from '../services/ask.ts'
+import {
+  createAskService,
+  extractTerms,
+  MAX_SOURCES,
+  parseSuggestions,
+} from '../services/ask.ts'
 import type { ChatMessage } from '../clients/grokClient.ts'
 import type { AskEvent, SearchResponse } from '../types.ts'
 
@@ -78,6 +83,19 @@ function withCharacters(query: string, items: ReturnType<typeof character>[]): S
   }
 }
 
+/** The tokens carry no frame boundaries of their own, only the answer does. */
+function text(events: AskEvent[]): string {
+  return events
+    .filter((event) => event.type === 'token')
+    .map((event) => (event.type === 'token' ? event.text : ''))
+    .join('')
+}
+
+function suggestions(events: AskEvent[]): string[] {
+  const event = events.find((candidate) => candidate.type === 'suggestions')
+  return event && event.type === 'suggestions' ? event.suggestions : []
+}
+
 Deno.test('drops stopwords and punctuation when extracting terms', () => {
   assertEquals(extractTerms('who is Birdperson?'), ['birdperson'])
   assertEquals(extractTerms('what happened to Rick and Morty in the Citadel'), [
@@ -105,11 +123,9 @@ Deno.test('emits the sources before the first token', async () => {
   assertEquals(events[0], {
     type: 'sources',
     sources: [{ type: 'character', id: 47, name: 'Birdperson' }],
+    citable: [],
   })
-  assertEquals(events.slice(1), [
-    { type: 'token', text: 'Bird' },
-    { type: 'token', text: 'person.' },
-  ])
+  assertEquals(text(events), 'Birdperson.')
 })
 
 Deno.test('falls back to the extracted terms when the whole question matches nothing', async () => {
@@ -127,6 +143,7 @@ Deno.test('falls back to the extracted terms when the whole question matches not
   assertEquals(events[0], {
     type: 'sources',
     sources: [{ type: 'character', id: 47, name: 'Birdperson' }],
+    citable: [],
   })
 })
 
@@ -202,6 +219,193 @@ Deno.test('says so in the context when nothing matched, rather than skipping the
     service.ask({ q: 'who is Gandalf?', persona: 'rick', history: [] }),
   )
 
-  assertEquals(events[0], { type: 'sources', sources: [] })
-  assertStringIncludes(grok.calls[0][1].content, 'no records matched')
+  assertEquals(events[0], { type: 'sources', sources: [], citable: [] })
+  assertStringIncludes(grok.calls[0][1].content, 'no matching records')
+})
+
+Deno.test('keeps the SUGGEST tail out of the answer and emits it as follow-ups', async () => {
+  const search = stubSearch({})
+  const grok = stubGrok([
+    'A bird. A pers',
+    'on. Keep up.\nSUGG',
+    'EST: Who runs the Citadel? | Why doe',
+    's Rick drink? | What is a Meeseeks?',
+  ])
+  const service = createAskService(search.service, grok.client)
+
+  const events = await collect(service.ask({ q: 'birdperson', persona: 'rick', history: [] }))
+
+  assertEquals(text(events).trim(), 'A bird. A person. Keep up.')
+  assertEquals(suggestions(events), [
+    'Who runs the Citadel?',
+    'Why does Rick drink?',
+    'What is a Meeseeks?',
+  ])
+})
+
+Deno.test('emits an empty follow-up list when the model omits the marker', async () => {
+  const search = stubSearch({})
+  const grok = stubGrok(['Just', ' an answer.'])
+  const service = createAskService(search.service, grok.client)
+
+  const events = await collect(service.ask({ q: 'anything', persona: 'rick', history: [] }))
+
+  assertEquals(text(events), 'Just an answer.')
+  assertEquals(suggestions(events), [])
+})
+
+Deno.test('strips list decoration and drops follow-ups that cannot be questions', () => {
+  assertEquals(parseSuggestions(' 1. Who is Evil Morty? | - ok | Why? '), [
+    'Who is Evil Morty?',
+  ])
+  assertEquals(parseSuggestions(' a | b | c | d | e ').length, 0)
+})
+
+function stubDetails() {
+  return {
+    character: (id: number) =>
+      Promise.resolve({
+        payload: {
+          character: character(id, 'Evil Morty'),
+          origin: { id: null, name: 'unknown', resolved: false },
+          location: { id: 3, name: 'Citadel of Ricks', resolved: true },
+          episodes: [
+            { id: 10, name: 'Close Rick-counters of the Rick Kind', episode: 'S01E10' },
+            { id: 28, name: 'The Ricklantis Mixup', episode: 'S03E07' },
+          ],
+        },
+        stale: false,
+      }),
+    location: (id: number) =>
+      Promise.resolve({
+        payload: {
+          location: location(id, 'Citadel of Ricks'),
+          residents: [{ id: 1, name: 'Rick Sanchez', status: 'Alive', image: '' }],
+        },
+        stale: false,
+      }),
+    episode: (id: number) =>
+      Promise.resolve({
+        payload: {
+          episode: {
+            id,
+            name: 'The Ricklantis Mixup',
+            airDate: 'September 10, 2017',
+            episode: 'S03E07',
+            characterCount: 2,
+          },
+          characters: [{ id: 118, name: 'Evil Morty', status: 'Alive', image: '' }],
+        },
+        stale: false,
+      }),
+  }
+}
+
+Deno.test('puts the record on screen at the head of the context, relations and all', async () => {
+  const search = stubSearch({})
+  const grok = stubGrok()
+  const service = createAskService(search.service, grok.client, stubDetails())
+
+  const events = await collect(
+    service.ask({
+      q: 'where did he appear?',
+      persona: 'rick',
+      history: [],
+      focus: { type: 'character', id: 118 },
+    }),
+  )
+
+  const prompt = grok.calls[0][1].content
+  assertStringIncludes(prompt, 'ON SCREEN')
+  assertStringIncludes(prompt, 'S03E07 The Ricklantis Mixup')
+  assertEquals(events[0], {
+    type: 'sources',
+    sources: [{ type: 'character', id: 118, name: 'Evil Morty' }],
+    citable: [
+      { type: 'episode', id: 10, name: 'Close Rick-counters of the Rick Kind' },
+      { type: 'episode', id: 28, name: 'The Ricklantis Mixup' },
+    ],
+  })
+})
+
+Deno.test('never cites the focused record twice', async () => {
+  const search = stubSearch({
+    'evil morty': withCharacters('evil morty', [character(118, 'Evil Morty')]),
+  })
+  const grok = stubGrok()
+  const service = createAskService(search.service, grok.client, stubDetails())
+
+  const events = await collect(
+    service.ask({
+      q: 'evil morty',
+      persona: 'rick',
+      history: [],
+      focus: { type: 'character', id: 118 },
+    }),
+  )
+
+  const sources = events[0].type === 'sources' ? events[0].sources : []
+  assertEquals(sources.length, 1)
+})
+
+Deno.test('answers anyway when the focused record will not resolve', async () => {
+  const search = stubSearch({})
+  const grok = stubGrok()
+  const details = {
+    ...stubDetails(),
+    character: () => Promise.reject(new Error('404')),
+  }
+  const service = createAskService(search.service, grok.client, details)
+
+  const events = await collect(
+    service.ask({
+      q: 'anything',
+      persona: 'rick',
+      history: [],
+      focus: { type: 'character', id: 9999 },
+    }),
+  )
+
+  assertEquals(events[0], { type: 'sources', sources: [], citable: [] })
+  assertEquals(text(events), 'Birdperson.')
+})
+
+Deno.test('does not widen a focused question into a name search', async () => {
+  const search = stubSearch({})
+  const grok = stubGrok()
+  const service = createAskService(search.service, grok.client, stubDetails())
+
+  await collect(
+    service.ask({
+      q: 'who lives here?',
+      persona: 'rick',
+      history: [],
+      focus: { type: 'location', id: 3 },
+    }),
+  )
+
+  // The loose words of a question asked with a record open used to drag in
+  // whatever the registry matched — "Hole in the Wall Where the Men Can See
+  // it All" was cited as an answer to "who lives here?".
+  assertEquals(search.queries, ['who lives here?'])
+})
+
+Deno.test('offers the residents of a focused location as citable records', async () => {
+  const search = stubSearch({})
+  const grok = stubGrok()
+  const service = createAskService(search.service, grok.client, stubDetails())
+
+  const events = await collect(
+    service.ask({
+      q: 'who lives here?',
+      persona: 'rick',
+      history: [],
+      focus: { type: 'location', id: 3 },
+    }),
+  )
+
+  const first = events[0]
+  assertEquals(first.type === 'sources' ? first.citable : [], [
+    { type: 'character', id: 1, name: 'Rick Sanchez' },
+  ])
 })

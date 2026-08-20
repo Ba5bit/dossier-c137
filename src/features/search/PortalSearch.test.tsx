@@ -56,6 +56,22 @@ describe('PortalSearch', () => {
     expect(screen.getByText('Pilot')).toBeInTheDocument()
   })
 
+
+  it('drops the results when the box is emptied', async () => {
+    const user = userEvent.setup()
+    renderSearch()
+
+    const box = screen.getByRole('searchbox')
+    await user.type(box, 'rick')
+    expect(await screen.findByText('Rick Sanchez')).toBeInTheDocument()
+
+    await user.clear(box)
+
+    // The last query's results used to stay standing under an empty box.
+    await waitFor(() =>
+      expect(screen.queryByText('Rick Sanchez')).not.toBeInTheDocument(),
+    )
+  })
   it('says so when nothing matches', async () => {
     const user = userEvent.setup()
     renderSearch()

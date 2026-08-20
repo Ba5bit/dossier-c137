@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { http, HttpResponse } from 'msw'
@@ -95,14 +94,12 @@ describe('HubPage', () => {
     expect(await screen.findByText('REGISTRY UNREACHABLE')).toBeInTheDocument()
   })
 
-  it('opens the settings panel from the gun', async () => {
+  it('leaves the portal as decoration, with no second way into settings', () => {
     renderHub()
 
-    await userEvent.click(
-      screen.getByRole('button', { name: 'PORTAL SETTINGS' }),
-    )
-
-    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'PORTAL SETTINGS' }),
+    ).not.toBeInTheDocument()
   })
 
   it('carries the coordinate input beside the gun', async () => {

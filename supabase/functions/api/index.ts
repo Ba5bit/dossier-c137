@@ -56,10 +56,13 @@ const grok = grokKey
     },
   }
 
+const locations = createLocationService(client, cache)
+const episodes = createEpisodeService(client, cache)
+
 const route = createRouter({
   characters,
-  locations: createLocationService(client, cache),
-  episodes: createEpisodeService(client, cache),
+  locations,
+  episodes,
   stats: createStatsService(client, cache),
   search,
   dossier: createDossierService(
@@ -67,7 +70,11 @@ const route = createRouter({
     grok,
     createPostgresDossierStore(supabaseUrl, serviceKey),
   ),
-  ask: createAskService(search, grok),
+  ask: createAskService(search, grok, {
+    character: characters.getCharacter,
+    location: locations.getLocation,
+    episode: episodes.getEpisode,
+  }),
   quota: createQuota(createPostgresUsageStore(supabaseUrl, serviceKey), hashSalt),
 })
 

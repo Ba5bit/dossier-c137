@@ -147,8 +147,9 @@ export type AskSource = {
 }
 
 export type AskEvent =
-  | { type: 'sources'; sources: AskSource[] }
+  | { type: 'sources'; sources: AskSource[]; citable: AskSource[] }
   | { type: 'token'; text: string }
+  | { type: 'suggestions'; suggestions: string[] }
   | { type: 'error'; code: string; message: string }
 
 export type ChatTurn = {
@@ -160,4 +161,11 @@ export type AskRequest = {
   q: string
   persona: Persona
   history: ChatTurn[]
+  focus?: AskFocus
+}
+
+/** The record the visitor has open while they ask. */
+export type AskFocus = {
+  type: 'character' | 'location' | 'episode'
+  id: number
 }

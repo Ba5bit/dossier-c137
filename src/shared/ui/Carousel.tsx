@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { COPY } from '../lore/copy'
 
@@ -16,6 +16,9 @@ type CarouselProps = {
   empty?: ReactNode
 }
 
+/** Long enough for a smooth scroll to finish, short enough to feel instant. */
+const SETTLE_MS = 120
+
 const ARROW =
   'flex h-8 w-8 items-center justify-center border border-line font-mono ' +
   'text-xs text-muted transition-colors hover:border-accent hover:text-accent ' +
@@ -31,6 +34,11 @@ const ARROW =
 export function Carousel({ title, pages, empty }: CarouselProps) {
   const trackRef = useRef<HTMLDivElement | null>(null)
   const [index, setIndex] = useState(0)
+  const settleRef = useRef<number | null>(null)
+
+  useEffect(() => () => {
+    if (settleRef.current !== null) clearTimeout(settleRef.current)
+  }, [])
 
   const pageCount = pages.length
   const current = Math.min(index, Math.max(pageCount - 1, 0))
@@ -49,10 +57,23 @@ export function Carousel({ title, pages, empty }: CarouselProps) {
     }
   }
 
+  /**
+   * A scroll is read once it stops, not while it runs. The browser emits an
+   * event per frame of both a swipe and its own smooth scroll, and setting
+   * the index off those intermediate positions walked the counter through
+   * pages nobody asked for and flickered the arrows in and out of disabled
+   * under the cursor. Waiting for the rest also means a swipe that overtakes
+   * an arrow is read correctly: whatever it settles on is the answer.
+   */
   function onScroll() {
-    const track = trackRef.current
-    if (!track || track.clientWidth === 0) return
-    setIndex(Math.round(track.scrollLeft / track.clientWidth))
+    if (settleRef.current !== null) clearTimeout(settleRef.current)
+
+    settleRef.current = window.setTimeout(() => {
+      settleRef.current = null
+      const track = trackRef.current
+      if (!track || track.clientWidth === 0) return
+      setIndex(Math.round(track.scrollLeft / track.clientWidth))
+    }, SETTLE_MS)
   }
 
   return (

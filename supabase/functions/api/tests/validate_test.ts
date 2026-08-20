@@ -194,3 +194,28 @@ Deno.test('keeps only the last six turns of history', () => {
   assertEquals(parsed.history.length, 6)
   assertEquals(parsed.history[5].content, 'turn 11')
 })
+
+Deno.test('reads the record the visitor had open', () => {
+  const parsed = parseAskBody({
+    q: 'who lives here?',
+    focus: { type: 'location', id: 3 },
+  })
+
+  assertEquals(parsed.focus, { type: 'location', id: 3 })
+})
+
+Deno.test('drops a focus it cannot read rather than rejecting the question', () => {
+  const cases = [
+    undefined,
+    null,
+    'characters/3',
+    { type: 'dimension', id: 3 },
+    { type: 'character', id: 0 },
+    { type: 'character', id: 'three' },
+    { type: 'character' },
+  ]
+
+  for (const focus of cases) {
+    assertEquals(parseAskBody({ q: 'anything at all', focus }).focus, undefined)
+  }
+})

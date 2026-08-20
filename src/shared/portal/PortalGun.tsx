@@ -1,27 +1,17 @@
 import { PortalCanvas } from './PortalCanvas'
 
-type PortalGunProps = {
-  onOpenSettings: () => void
-}
-
 /**
  * The hub's central object. It draws the same vortex the transition overlay
- * uses, at rest — the archive's one permitted piece of visual drama.
+ * uses, at rest — the archive's one permitted piece of visual drama. It is
+ * decoration only: settings live behind the gun in the header, and a second
+ * way in competed with the search box for the first click on the page.
  */
-export function PortalGun({ onOpenSettings }: PortalGunProps) {
+export function PortalGun() {
   return (
-    <div className="flex flex-col items-center gap-6">
+    <div className="flex justify-center">
       <div className="portal-idle">
         <PortalCanvas size={220} />
       </div>
-
-      <button
-        type="button"
-        onClick={onOpenSettings}
-        className="border border-line px-4 py-2 font-mono text-xs tracking-widest text-fg transition-colors hover:border-accent hover:text-accent"
-      >
-        PORTAL SETTINGS
-      </button>
     </div>
   )
 }

@@ -7,7 +7,7 @@ import type {
   EpisodeQuery,
   LocationQuery,
 } from '../types.ts'
-import type { ChatTurn, Persona } from '../types.ts'
+import type { AskFocus, ChatTurn, Persona } from '../types.ts'
 
 const STATUSES: CharacterStatus[] = ['alive', 'dead', 'unknown']
 const GENDERS: CharacterGender[] = ['female', 'male', 'genderless', 'unknown']
@@ -115,6 +115,27 @@ export type AskBody = {
   q: string
   persona: Persona
   history: ChatTurn[]
+  focus?: AskFocus
+}
+
+const FOCUS_TYPES = ['character', 'location', 'episode']
+
+/**
+ * The page the visitor is on, as the browser reports it. An unreadable focus
+ * is dropped rather than rejected: it is an enrichment, and losing it costs
+ * the answer precision, not correctness.
+ */
+function parseFocus(raw: unknown): AskFocus | undefined {
+  if (typeof raw !== 'object' || raw === null) return undefined
+  const candidate = raw as Record<string, unknown>
+
+  if (typeof candidate.type !== 'string') return undefined
+  if (!FOCUS_TYPES.includes(candidate.type)) return undefined
+
+  const id = Number(candidate.id)
+  if (!Number.isInteger(id) || id < 1) return undefined
+
+  return { type: candidate.type as AskFocus['type'], id }
 }
 
 function asRecord(raw: unknown): Record<string, unknown> {
@@ -178,5 +199,10 @@ export function parseAskBody(raw: unknown): AskBody {
     .slice(-MAX_HISTORY)
     .map((turn) => ({ role: turn.role, content: turn.content.slice(0, ASK_MAX) }))
 
-  return { q, persona: parsePersona(body.persona), history }
+  return {
+    q,
+    persona: parsePersona(body.persona),
+    history,
+    focus: parseFocus(body.focus),
+  }
 }

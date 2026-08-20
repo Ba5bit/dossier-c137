@@ -4,7 +4,6 @@ import { PortalProvider } from '../shared/portal/PortalProvider'
 import { PortalLink } from '../shared/portal/PortalLink'
 import { SettingsPanel } from '../shared/settings/SettingsPanel'
 import { DimensionWave } from '../shared/settings/DimensionWave'
-import { HistoryNav } from '../shared/ui/HistoryNav'
 import { RefreshBar } from '../shared/ui/RefreshBar'
 import { SearchOverlay } from '../features/search/SearchOverlay'
 import { useSearchHotkey } from '../features/search/useSearchHotkey'
@@ -17,6 +16,20 @@ import { COPY } from '../shared/lore/copy'
 function isApplePlatform(): boolean {
   if (typeof navigator === 'undefined') return false
   return /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent)
+}
+
+/**
+ * A dossier route, as the focus parameter the ask page understands. Asking
+ * from a record the visitor already has open should be a question about that
+ * record, not a fresh name search that returns every clone sharing a word
+ * with it.
+ */
+export function askHref(pathname: string): string {
+  const [section, id] = pathname.split('/').filter(Boolean)
+  const focusable = section === 'characters' || section === 'locations' || section === 'episodes'
+
+  if (!focusable || !/^\d+$/.test(id ?? '')) return '/ask'
+  return `/ask?focus=${section}/${id}`
 }
 
 export function AppLayout() {
@@ -140,7 +153,7 @@ export function AppLayout() {
                 </button>
 
                 <PortalLink
-                  to="/ask"
+                  to={askHref(pathname)}
                   aria-label={COPY.layout.askButtonLabel}
                   aria-current={pathname.startsWith('/ask') ? 'page' : undefined}
                   className="tap-target shrink-0 border border-accent bg-accent/10 px-3 py-2 font-mono text-xs tracking-widest text-accent transition-colors hover:bg-accent/20"
@@ -169,8 +182,6 @@ export function AppLayout() {
               </div>
             </nav>
           </header>
-
-          <HistoryNav />
 
           <Outlet />
         </div>

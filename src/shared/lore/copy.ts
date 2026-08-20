@@ -60,23 +60,28 @@ export const COPY = {
       morty: 'MORTY SMITH',
     },
     greetings: {
-      rick: 'Ask something. Preferably something the archive actually knows.',
-      morty: 'Aw jeez, okay — I-I can look stuff up in the archive. Ask me something?',
+      rick: 'Ask me anything about the show. Try to make it interesting.',
+      morty: 'Aw jeez, okay — I-I know the show pretty well, I guess. Ask me something?',
     },
     voiceLabel: 'AI voice',
     you: 'YOU',
     openersLabel: 'TRY ASKING',
-    // Each one is a name the archive actually holds, so a first-time visitor
-    // never opens with a question that has no records behind it.
+    clear: 'WIPE LOG',
+    askAbout: 'ASK AI ABOUT THIS',
+    focusLabel: 'QUESTIONS ARE ABOUT',
+    focusHint: 'Its full record — relations included — goes in with every question. Ask elsewhere for anything else.',
+    nextLabel: 'ASK NEXT',
+    // Openers that need an opinion, not a lookup — the first answer a visitor
+    // sees should show the guide can actually talk about the show.
     openers: [
-      'Who is Birdperson?',
-      'What is the Citadel of Ricks?',
-      'Tell me about Evil Morty',
-      'What is Planet Squanch?',
+      'What makes Evil Morty so compelling?',
+      'Why did Birdperson matter to Rick?',
+      'What is the point of the Citadel?',
+      'Is Rick actually the smartest man alive?',
     ],
     inputLabel: 'Ask a question',
     visibleInputLabel: 'YOUR QUESTION',
-    inputPlaceholder: 'ASK ABOUT ANYTHING ON FILE',
+    inputPlaceholder: 'ASK ABOUT ANYONE IN THE SHOW',
     send: 'SEND ▸',
     groundedIn: 'GROUNDED IN',
     dossierTitle: 'FIELD ASSESSMENT',
@@ -109,8 +114,6 @@ export const COPY = {
     gunButtonLabel: 'Portal settings',
     back: '← BACK',
     backLabel: 'Go back',
-    forward: 'FORWARD →',
-    forwardLabel: 'Go forward',
   },
   hub: {
     stamp: CLEARANCE_STAMP,

@@ -150,11 +150,22 @@ export type AskSource = {
 }
 
 export type AskEvent =
-  | { type: 'sources'; sources: AskSource[] }
+  | { type: 'sources'; sources: AskSource[]; citable: AskSource[] }
   | { type: 'token'; text: string }
+  | { type: 'suggestions'; suggestions: string[] }
   | { type: 'error'; code: string; message: string }
 
 export type ChatTurn = {
   role: 'user' | 'assistant'
   content: string
+}
+
+/**
+ * The record the visitor has open while they ask. It is resolved in full,
+ * relations included, so a question about what is already on screen is not
+ * answered off a name search.
+ */
+export type AskFocus = {
+  type: 'character' | 'location' | 'episode'
+  id: number
 }

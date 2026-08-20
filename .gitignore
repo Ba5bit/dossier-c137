@@ -56,3 +56,6 @@ supabase/functions/.env
 .vercel
 .env*
 !.env.example
+
+# gstack local workspace state.
+.gstack/
