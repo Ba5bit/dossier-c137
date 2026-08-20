@@ -1,8 +1,11 @@
+import type { Persona } from '../api/types'
+
 export type Dimension = 'c-137' | 'citadel' | 'cronenberg'
 export type MotionPreference = 'auto' | 'on' | 'off'
 
 export type Settings = {
   dimension: Dimension
+  persona: Persona
   portalSfx: boolean
   portalTransitions: boolean
   reducedMotion: MotionPreference
@@ -23,10 +26,18 @@ export const DIMENSION_LABELS: Record<Dimension, string> = {
   cronenberg: 'Cronenberg-1',
 }
 
+export const PERSONAS: Persona[] = ['rick', 'morty']
+
+export const PERSONA_LABELS: Record<Persona, string> = {
+  rick: 'Rick',
+  morty: 'Morty',
+}
+
 export const MOTION_PREFERENCES: MotionPreference[] = ['auto', 'on', 'off']
 
 export const DEFAULT_SETTINGS: Settings = {
   dimension: 'c-137',
+  persona: 'rick',
   portalSfx: false,
   portalTransitions: true,
   reducedMotion: 'auto',
@@ -34,6 +45,10 @@ export const DEFAULT_SETTINGS: Settings = {
 
 function isDimension(value: unknown): value is Dimension {
   return typeof value === 'string' && (DIMENSIONS as string[]).includes(value)
+}
+
+function isPersona(value: unknown): value is Persona {
+  return typeof value === 'string' && (PERSONAS as string[]).includes(value)
 }
 
 function isMotionPreference(value: unknown): value is MotionPreference {
@@ -68,6 +83,7 @@ export function parseSettings(raw: string | null): Settings {
     dimension: isDimension(value.dimension)
       ? value.dimension
       : DEFAULT_SETTINGS.dimension,
+    persona: isPersona(value.persona) ? value.persona : DEFAULT_SETTINGS.persona,
     portalSfx: booleanOr(value.portalSfx, DEFAULT_SETTINGS.portalSfx),
     portalTransitions: booleanOr(
       value.portalTransitions,

@@ -1,6 +1,12 @@
 import { useEffect, useRef } from 'react'
 import { useSettings } from './useSettings'
-import { DIMENSIONS, DIMENSION_LABELS, MOTION_PREFERENCES } from './settings'
+import {
+  DIMENSIONS,
+  DIMENSION_LABELS,
+  MOTION_PREFERENCES,
+  PERSONAS,
+  PERSONA_LABELS,
+} from './settings'
 import type { MotionPreference } from './settings'
 
 type SettingsPanelProps = {
@@ -79,6 +85,30 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
               className={`${CONTROL} ${settings.dimension === dimension ? ACTIVE : ''}`}
             >
               {DIMENSION_LABELS[dimension]}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className={ROW}>
+        <span className={LABEL} id="settings-persona">
+          AI VOICE
+        </span>
+        <div
+          role="radiogroup"
+          aria-labelledby="settings-persona"
+          className="flex gap-2"
+        >
+          {PERSONAS.map((persona) => (
+            <button
+              key={persona}
+              type="button"
+              role="radio"
+              aria-checked={settings.persona === persona}
+              onClick={() => setSetting('persona', persona)}
+              className={`${CONTROL} ${settings.persona === persona ? ACTIVE : ''}`}
+            >
+              {PERSONA_LABELS[persona]}
             </button>
           ))}
         </div>

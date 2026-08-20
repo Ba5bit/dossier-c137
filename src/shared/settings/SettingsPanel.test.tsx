@@ -98,4 +98,16 @@ describe('SettingsPanel', () => {
 
     expect(onClose).toHaveBeenCalledOnce()
   })
+
+  it('switches the persona', async () => {
+    const user = userEvent.setup()
+    renderPanel()
+
+    await user.click(screen.getByRole('radio', { name: 'Morty' }))
+
+    expect(screen.getByRole('radio', { name: 'Morty' })).toHaveAttribute(
+      'aria-checked',
+      'true',
+    )
+  })
 })
