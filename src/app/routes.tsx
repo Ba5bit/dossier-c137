@@ -42,6 +42,9 @@ const EpisodeDetailPage = lazy(() =>
 const SearchPage = lazy(() =>
   import('../pages/SearchPage').then((module) => ({ default: module.SearchPage })),
 )
+const AskPage = lazy(() =>
+  import('../pages/AskPage').then((module) => ({ default: module.AskPage })),
+)
 const NotFoundPage = lazy(() =>
   import('../pages/NotFoundPage').then((module) => ({
     default: module.NotFoundPage,
@@ -76,6 +79,7 @@ export const router = createBrowserRouter([
       { path: '/episodes', element: lazyRoute(<EpisodesPage />) },
       { path: '/episodes/:id', element: lazyRoute(<EpisodeDetailPage />) },
       { path: '/search', element: lazyRoute(<SearchPage />) },
+      { path: '/ask', element: lazyRoute(<AskPage />) },
       { path: '*', element: lazyRoute(<NotFoundPage />) },
     ],
   },
