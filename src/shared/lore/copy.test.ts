@@ -10,6 +10,17 @@ describe('COPY', () => {
     expect(COPY.states.notFoundHeading).toBe("This dimension doesn't exist.")
   })
 
+  it('carries both AI voices by name and greeting', () => {
+    expect(COPY.ai.personaNames.rick).toBe('RICK C-137')
+    expect(COPY.ai.personaNames.morty).toBe('MORTY SMITH')
+    expect(COPY.ai.greetings.morty).toMatch(/aw jeez/i)
+  })
+
+  it('carries the search microcopy', () => {
+    expect(COPY.search.tooShort).toMatch(/two characters minimum/i)
+    expect(COPY.search.hint).toBe('↑ ↓ TO AIM · ENTER TO FIRE · ESC TO ABORT')
+  })
+
   it('holds no empty strings', () => {
     const walk = (value: unknown): void => {
       if (typeof value === 'string') {

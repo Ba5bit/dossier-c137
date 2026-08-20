@@ -1,6 +1,6 @@
 import { useDossier } from './useDossier'
 import { BurpText } from './BurpText'
-import { PERSONA_NAMES } from './persona'
+import { COPY } from '../../shared/lore/copy'
 import { useSettings } from '../../shared/settings/useSettings'
 import { Skeleton } from '../../shared/ui/Skeleton'
 import { ApiError } from '../../shared/api/client'
@@ -11,7 +11,7 @@ type DossierBlockProps = {
 
 function messageFor(error: unknown): string {
   if (error instanceof ApiError) return error.message
-  return 'The dossier never arrived. The archive is not saying why.'
+  return COPY.ai.dossierFailed
 }
 
 export function DossierBlock({ entityId }: DossierBlockProps) {
@@ -22,10 +22,10 @@ export function DossierBlock({ entityId }: DossierBlockProps) {
     <section className="space-y-3 border border-line bg-surface p-6">
       <div className="flex items-baseline justify-between gap-4">
         <h2 className="font-mono text-xs tracking-widest text-muted">
-          FIELD ASSESSMENT
+          {COPY.ai.dossierTitle}
         </h2>
         <span className="font-mono text-xs text-accent">
-          {PERSONA_NAMES[settings.persona]}
+          {COPY.ai.personaNames[settings.persona]}
         </span>
       </div>
 
@@ -55,7 +55,7 @@ export function DossierBlock({ entityId }: DossierBlockProps) {
           onClick={() => mutate()}
           className="border border-line px-4 py-2 font-mono text-xs text-fg transition-colors hover:border-accent hover:text-accent"
         >
-          {isError ? 'TRY AGAIN' : 'GENERATE DOSSIER'}
+          {isError ? COPY.ai.dossierRetry : COPY.ai.dossierGenerate}
         </button>
       )}
     </section>

@@ -1,4 +1,5 @@
 import { PortalLink } from '../../shared/portal/PortalLink'
+import { COPY } from '../../shared/lore/copy'
 import type { AskSource } from '../../shared/api/types'
 
 const SECTIONS: Record<AskSource['type'], string> = {
@@ -16,7 +17,7 @@ export function SourceCards({ sources }: { sources: AskSource[] }) {
 
   return (
     <div className="mt-3 space-y-2">
-      <p className="font-mono text-xs tracking-widest text-muted">GROUNDED IN</p>
+      <p className="font-mono text-xs tracking-widest text-muted">{COPY.ai.groundedIn}</p>
       <ul className="flex flex-wrap gap-2">
         {sources.map((source) => (
           <li key={`${source.type}/${source.id}`}>

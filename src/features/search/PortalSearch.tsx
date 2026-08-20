@@ -4,6 +4,7 @@ import { PortalLink } from '../../shared/portal/PortalLink'
 import { usePortalNavigation } from '../../shared/portal/usePortalNavigation'
 import { useSearch, SEARCH_MIN } from './useSearch'
 import { isQuestion } from './question'
+import { COPY } from '../../shared/lore/copy'
 import type { SearchResponse } from '../../shared/api/types'
 
 /** Five per group is what fits under the input without scrolling. */
@@ -60,10 +61,10 @@ function rowsFrom(data: SearchResponse | undefined): Row[] {
 export function PortalSearch({
   autoFocus = false,
   onNavigate,
-  placeholder = 'ENTER COORDINATES OR ASK A QUESTION',
+  placeholder = COPY.search.placeholder,
   initialDraft = '',
   suggestions = true,
-  label = 'Search the archive',
+  label = COPY.search.label,
 }: PortalSearchProps) {
   const [draft, setDraft] = useState(initialDraft)
   // Committed starts seeded as well: a draft that arrived with the page has
@@ -157,19 +158,19 @@ export function PortalSearch({
           }}
           className="shrink-0 border border-line px-4 font-mono text-xs text-muted transition-colors hover:border-accent hover:text-accent"
         >
-          ASK ▸
+          {COPY.search.ask}
         </button>
       </div>
 
       {tooShort && (
         <p className="mt-2 font-mono text-xs text-muted">
-          Two characters minimum. The archive is big, not psychic.
+          {COPY.search.tooShort}
         </p>
       )}
 
       {empty && (
         <p className="mt-2 font-mono text-xs text-muted">
-          Nothing on file. Try a different dimension.
+          {COPY.search.nothing}
         </p>
       )}
 

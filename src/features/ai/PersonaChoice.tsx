@@ -1,5 +1,6 @@
 import { useSettings } from '../../shared/settings/useSettings'
 import { PERSONAS, PERSONA_LABELS } from '../../shared/settings/settings'
+import { COPY } from '../../shared/lore/copy'
 
 /**
  * The same setting the portal gun panel writes, surfaced where it is used.
@@ -9,7 +10,7 @@ export function PersonaChoice() {
   const { settings, setSetting } = useSettings()
 
   return (
-    <div role="radiogroup" aria-label="AI voice" className="flex gap-2">
+    <div role="radiogroup" aria-label={COPY.ai.voiceLabel} className="flex gap-2">
       {PERSONAS.map((persona) => (
         <button
           key={persona}

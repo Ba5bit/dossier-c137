@@ -4,7 +4,7 @@ import { useAskStream } from './useAskStream'
 import { SourceCards } from './SourceCards'
 import { PersonaChoice } from './PersonaChoice'
 import { BurpText } from './BurpText'
-import { PERSONA_GREETINGS, PERSONA_NAMES } from './persona'
+import { COPY } from '../../shared/lore/copy'
 import { useSettings } from '../../shared/settings/useSettings'
 
 type ChatPanelProps = {
@@ -42,20 +42,22 @@ export function ChatPanel({ initialQuestion }: ChatPanelProps) {
     <section className="space-y-4">
       <header className="flex items-center justify-between gap-4 border-b border-line pb-3">
         <p className="font-mono text-xs tracking-widest text-accent">
-          {PERSONA_NAMES[settings.persona]}
+          {COPY.ai.personaNames[settings.persona]}
         </p>
         <PersonaChoice />
       </header>
 
       {messages.length === 0 && (
-        <p className="text-muted text-sm">{PERSONA_GREETINGS[settings.persona]}</p>
+        <p className="text-muted text-sm">{COPY.ai.greetings[settings.persona]}</p>
       )}
 
       <ol className="space-y-6">
         {messages.map((message, index) => (
           <li key={index} className="space-y-1">
             <p className="font-mono text-xs tracking-widest text-muted">
-              {message.role === 'user' ? 'YOU' : PERSONA_NAMES[settings.persona]}
+              {message.role === 'user'
+                ? COPY.ai.you
+                : COPY.ai.personaNames[settings.persona]}
             </p>
 
             {message.role === 'user' ? (
@@ -84,8 +86,8 @@ export function ChatPanel({ initialQuestion }: ChatPanelProps) {
         <input
           type="text"
           value={draft}
-          aria-label="Ask a question"
-          placeholder="ASK ABOUT ANYTHING ON FILE"
+          aria-label={COPY.ai.inputLabel}
+          placeholder={COPY.ai.inputPlaceholder}
           onChange={(event) => setDraft(event.target.value)}
           className="text-fg placeholder:text-muted w-full border border-line bg-surface px-4 py-3 font-mono text-sm outline-none focus:border-accent"
         />
@@ -94,7 +96,7 @@ export function ChatPanel({ initialQuestion }: ChatPanelProps) {
           disabled={streaming}
           className="shrink-0 border border-line px-4 font-mono text-xs text-muted transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
         >
-          SEND ▸
+          {COPY.ai.send}
         </button>
       </form>
     </section>
