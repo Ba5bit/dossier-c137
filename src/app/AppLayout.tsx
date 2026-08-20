@@ -40,70 +40,76 @@ export function AppLayout() {
       <div className="min-h-screen">
         <RefreshBar />
 
-        <header className="border-b border-line bg-surface">
-          <nav
-            aria-label="Sections"
-            className="mx-auto flex max-w-[1280px] items-center gap-6 px-6 py-4"
-          >
-            <PortalLink
-              to="/"
-              className="font-mono text-xs tracking-widest text-accent"
+        {/* Spec section 12.1 wants the overlay to trap focus. `inert` is the
+            whole trap: the shell leaves both the tab order and the
+            accessibility tree, so Tab cannot reach the page behind the dialog
+            and the hub's own search box stops answering to the same name. */}
+        <div data-testid="page-shell" inert={searchOpen}>
+          <header className="border-b border-line bg-surface">
+            <nav
+              aria-label="Sections"
+              className="mx-auto flex max-w-[1280px] items-center gap-6 px-6 py-4"
             >
-              DOSSIER C-137
-            </PortalLink>
+              <PortalLink
+                to="/"
+                className="font-mono text-xs tracking-widest text-accent"
+              >
+                DOSSIER C-137
+              </PortalLink>
 
-            <ul className="flex items-center gap-4">
-              {SECTIONS.map((section) => {
-                const active = pathname.startsWith(section.to)
+              <ul className="flex items-center gap-4">
+                {SECTIONS.map((section) => {
+                  const active = pathname.startsWith(section.to)
 
-                return (
-                  <li key={section.to}>
-                    <PortalLink
-                      to={section.to}
-                      aria-current={active ? 'page' : undefined}
-                      className={`font-mono text-xs transition-colors hover:text-accent ${
-                        active ? 'text-accent' : 'text-muted'
-                      }`}
-                    >
-                      {section.label}
-                    </PortalLink>
-                  </li>
-                )
-              })}
-            </ul>
+                  return (
+                    <li key={section.to}>
+                      <PortalLink
+                        to={section.to}
+                        aria-current={active ? 'page' : undefined}
+                        className={`font-mono text-xs transition-colors hover:text-accent ${
+                          active ? 'text-accent' : 'text-muted'
+                        }`}
+                      >
+                        {section.label}
+                      </PortalLink>
+                    </li>
+                  )
+                })}
+              </ul>
 
-            <button
-              ref={searchRef}
-              type="button"
-              aria-label="Search"
-              onClick={openSearch}
-              className="ml-auto border border-line px-3 py-1 font-mono text-xs text-muted transition-colors hover:border-accent hover:text-accent"
-            >
-              &#8981; SEARCH
-            </button>
+              <button
+                ref={searchRef}
+                type="button"
+                aria-label="Search"
+                onClick={openSearch}
+                className="ml-auto border border-line px-3 py-1 font-mono text-xs text-muted transition-colors hover:border-accent hover:text-accent"
+              >
+                &#8981; SEARCH
+              </button>
 
-            <button
-              ref={gunRef}
-              type="button"
-              aria-label="Portal gun"
-              aria-expanded={settingsOpen}
-              onClick={() => setSettingsOpen((open) => !open)}
-              className="border border-line px-3 py-1 font-mono text-xs text-muted transition-colors hover:border-accent hover:text-accent"
-            >
-              &#9678; GUN
-            </button>
-          </nav>
+              <button
+                ref={gunRef}
+                type="button"
+                aria-label="Portal gun"
+                aria-expanded={settingsOpen}
+                onClick={() => setSettingsOpen((open) => !open)}
+                className="border border-line px-3 py-1 font-mono text-xs text-muted transition-colors hover:border-accent hover:text-accent"
+              >
+                &#9678; GUN
+              </button>
+            </nav>
 
-          {settingsOpen && (
-            <div className="mx-auto flex max-w-[1280px] justify-end px-6 pb-4">
-              <SettingsPanel onClose={closeSettings} />
-            </div>
-          )}
-        </header>
+            {settingsOpen && (
+              <div className="mx-auto flex max-w-[1280px] justify-end px-6 pb-4">
+                <SettingsPanel onClose={closeSettings} />
+              </div>
+            )}
+          </header>
+
+          <Outlet />
+        </div>
 
         {searchOpen && <SearchOverlay onClose={closeSearch} />}
-
-        <Outlet />
         <DimensionWave />
       </div>
     </PortalProvider>

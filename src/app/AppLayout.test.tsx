@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { describe, it, expect, beforeAll, afterEach, afterAll, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -36,6 +37,63 @@ function renderAt(path: string) {
 }
 
 describe('AppLayout', () => {
+  it('makes the page inert while the search overlay is open', async () => {
+    const user = userEvent.setup()
+    renderAt('/characters')
+
+    expect(screen.getByTestId('page-shell')).not.toHaveAttribute('inert')
+
+    await user.click(screen.getByRole('button', { name: 'Search' }))
+
+    expect(screen.getByTestId('page-shell')).toHaveAttribute('inert')
+  })
+
+  it('answers the hotkey while a route chunk is still pending', async () => {
+    const user = userEvent.setup()
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    // A child that never resolves stands in for a route chunk still on the
+    // wire. If the overlay opens anyway, the listener lives above the lazy
+    // boundary and a missed first press is not this component's doing.
+    const Never = lazy(() => new Promise<never>(() => {}))
+
+    render(
+      <QueryClientProvider client={client}>
+        <SettingsProvider>
+          <MemoryRouter initialEntries={['/characters']}>
+            <Routes>
+              <Route element={<AppLayout />}>
+                <Route
+                  path="/characters"
+                  element={
+                    <Suspense fallback={<p>loading chunk</p>}>
+                      <Never />
+                    </Suspense>
+                  }
+                />
+              </Route>
+            </Routes>
+          </MemoryRouter>
+        </SettingsProvider>
+      </QueryClientProvider>,
+    )
+
+    expect(screen.getByText('loading chunk')).toBeInTheDocument()
+
+    await user.keyboard('{Control>}k{/Control}')
+
+    expect(await screen.findByRole('dialog')).toBeInTheDocument()
+  })
+
+  it('releases the page when the overlay closes', async () => {
+    const user = userEvent.setup()
+    renderAt('/characters')
+
+    await user.click(screen.getByRole('button', { name: 'Search' }))
+    await user.keyboard('{Escape}')
+
+    expect(screen.getByTestId('page-shell')).not.toHaveAttribute('inert')
+  })
+
   it('offers a link to each section', () => {
     renderAt('/characters')
 

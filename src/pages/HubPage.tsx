@@ -61,7 +61,7 @@ export function HubPage() {
       <PortalGun onOpenSettings={() => setSettingsOpen(true)} />
 
       <div className="mx-auto w-full max-w-[640px]">
-        <PortalSearch />
+        <PortalSearch label="Archive coordinates" />
       </div>
 
       {settingsOpen && (

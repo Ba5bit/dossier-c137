@@ -25,6 +25,8 @@ type PortalSearchProps = {
    * two answers to one question.
    */
   suggestions?: boolean
+  /** Two of these can be on the page at once; they must not share a name. */
+  label?: string
 }
 
 type Row = {
@@ -61,6 +63,7 @@ export function PortalSearch({
   placeholder = 'ENTER COORDINATES OR ASK A QUESTION',
   initialDraft = '',
   suggestions = true,
+  label = 'Search the archive',
 }: PortalSearchProps) {
   const [draft, setDraft] = useState(initialDraft)
   // Committed starts seeded as well: a draft that arrived with the page has
@@ -136,7 +139,7 @@ export function PortalSearch({
           type="search"
           value={draft}
           autoFocus={autoFocus}
-          aria-label="Search the archive"
+          aria-label={label}
           placeholder={placeholder}
           onChange={(event) => {
             setDraft(event.target.value)
