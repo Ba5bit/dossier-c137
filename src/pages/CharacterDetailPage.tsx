@@ -28,10 +28,9 @@ export function CharacterDetailPage() {
         ))}
 
       {data && (
-        <div className="space-y-8">
-          <CharacterDossier detail={data} />
+        <CharacterDossier detail={data}>
           <DossierBlock entityId={data.character.id} />
-        </div>
+        </CharacterDossier>
       )}
     </main>
   )

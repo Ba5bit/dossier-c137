@@ -7,6 +7,13 @@ import type { CharacterDetail, RelationRef } from '../../shared/api/types'
 
 type CharacterDossierProps = {
   detail: CharacterDetail
+  /**
+   * Rendered between the field list and the episode roll. The AI assessment
+   * goes here: appended after the episodes it sat below fifty rows of links,
+   * which on a phone is ten screens of scrolling before the reader meets the
+   * one part of the page that was written for them.
+   */
+  children?: ReactNode
 }
 
 function Relation({ relation }: { relation: RelationRef }) {
@@ -34,7 +41,7 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   )
 }
 
-export function CharacterDossier({ detail }: CharacterDossierProps) {
+export function CharacterDossier({ detail, children }: CharacterDossierProps) {
   const { character, origin, location, episodes } = detail
   const deceased = character.status.toLowerCase() === 'dead'
 
@@ -65,7 +72,7 @@ export function CharacterDossier({ detail }: CharacterDossierProps) {
           </h1>
           <StatusIndicator status={character.status} />
 
-          <dl>
+          <dl className="max-w-md">
             <Field label="SPECIES">{character.species}</Field>
             <Field label="TYPE">{character.type || '—'}</Field>
             <Field label="GENDER">{character.gender}</Field>
@@ -78,6 +85,8 @@ export function CharacterDossier({ detail }: CharacterDossierProps) {
           </dl>
         </div>
       </div>
+
+      {children}
 
       <section className="space-y-3">
         <h2 className="font-mono text-xs tracking-widest text-muted">
