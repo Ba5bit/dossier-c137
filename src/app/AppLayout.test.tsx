@@ -1,10 +1,18 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeAll, afterEach, afterAll, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { SettingsProvider } from '../shared/settings/SettingsProvider'
 import { AppLayout } from './AppLayout'
+import { server } from '../test/msw'
+
+beforeAll(() => {
+  vi.stubEnv('VITE_API_BASE', 'https://api.test/api')
+  server.listen({ onUnhandledRequest: 'error' })
+})
+afterEach(() => server.resetHandlers())
+afterAll(() => server.close())
 
 function renderAt(path: string) {
   const client = new QueryClient({
@@ -90,5 +98,23 @@ describe('AppLayout', () => {
     // Focus that vanishes into the body strands a keyboard user where the
     // panel used to be.
     expect(gun).toHaveFocus()
+  })
+
+  it('opens the search overlay from the header button', async () => {
+    const user = userEvent.setup()
+    renderAt('/characters')
+
+    await user.click(screen.getByRole('button', { name: /search/i }))
+
+    expect(screen.getByRole('dialog', { name: /search/i })).toBeInTheDocument()
+  })
+
+  it('opens the search overlay with the keyboard shortcut', async () => {
+    const user = userEvent.setup()
+    renderAt('/characters')
+
+    await user.keyboard('{Control>}k{/Control}')
+
+    expect(screen.getByRole('dialog', { name: /search/i })).toBeInTheDocument()
   })
 })
