@@ -150,3 +150,25 @@ body {
 .portal-quote {
   animation: portal-quote-in 250ms ease-out both;
 }
+
+@keyframes portal-idle {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+.portal-idle {
+  animation: portal-idle 6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-idle,
+  .portal-vortex,
+  .dimension-wave {
+    animation: none;
+  }
+}
