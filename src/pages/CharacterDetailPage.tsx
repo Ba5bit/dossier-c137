@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom'
 import { useCharacter } from '../features/characters/useCharacter'
 import { CharacterDossier } from '../features/characters/CharacterDossier'
+import { DossierBlock } from '../features/ai/DossierBlock'
 import { ApiError } from '../shared/api/client'
 import { DetailSkeleton } from '../shared/ui/DetailSkeleton'
 import { DimensionNotFound } from '../shared/ui/DimensionNotFound'
@@ -25,7 +26,12 @@ export function CharacterDetailPage() {
           <ErrorState onRetry={() => refetch()} />
         ))}
 
-      {data && <CharacterDossier detail={data} />}
+      {data && (
+        <div className="space-y-8">
+          <CharacterDossier detail={data} />
+          <DossierBlock entityId={data.character.id} />
+        </div>
+      )}
     </main>
   )
 }
