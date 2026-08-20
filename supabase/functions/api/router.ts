@@ -73,10 +73,7 @@ const SSE_HEADERS = {
 }
 
 function frame(event: AskEvent): string {
-  return `event: ${event.type}
-data: ${JSON.stringify(event)}
-
-`
+  return `event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`
 }
 
 /**

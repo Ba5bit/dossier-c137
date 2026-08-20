@@ -1,4 +1,6 @@
 import type {
+  AskEvent,
+  AskRequest,
   Character,
   CharacterDetail,
   CharacterFilters,
@@ -9,6 +11,9 @@ import type {
   Location,
   LocationDetail,
   LocationFilters,
+  Dossier,
+  Persona,
+  SearchResponse,
   Stats,
 } from './types'
 
@@ -105,4 +110,96 @@ export function fetchEpisode(id: number): Promise<EpisodeDetail> {
 
 export function fetchStats(): Promise<Stats> {
   return get<Stats>('/stats')
+}
+
+export function fetchSearch(q: string): Promise<SearchResponse> {
+  return get<SearchResponse>(`/search?${toQuery({ q })}`)
+}
+
+export type DossierRequest = {
+  entityType: string
+  entityId: number
+  persona: Persona
+}
+
+async function post(path: string, body: unknown): Promise<Response> {
+  try {
+    return await fetch(`${baseUrl()}${path}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+  } catch (cause) {
+    throw new ApiError('NETWORK', (cause as Error).message)
+  }
+}
+
+async function raiseFor(response: Response): Promise<never> {
+  const payload = await response.json().catch(() => null)
+  throw new ApiError(
+    payload?.error?.code ?? 'UNKNOWN',
+    payload?.error?.message ?? `Request failed (${response.status})`,
+  )
+}
+
+export async function postDossier(body: DossierRequest): Promise<Dossier> {
+  const response = await post('/dossier', body)
+  if (!response.ok) await raiseFor(response)
+  return await response.json() as Dossier
+}
+
+function parseFrame(frame: string): AskEvent | null {
+  const dataLine = frame
+    .split('\n')
+    .find((line) => line.startsWith('data:'))
+  if (!dataLine) return null
+
+  try {
+    return JSON.parse(dataLine.slice('data:'.length).trim()) as AskEvent
+  } catch {
+    return null
+  }
+}
+
+/**
+ * EventSource cannot POST, and the question, the persona and the history all
+ * have to travel in a body — so the stream is read off fetch by hand. A
+ * network read is not a frame boundary, hence the buffer.
+ */
+export async function* streamAsk(
+  body: AskRequest,
+  signal?: AbortSignal,
+): AsyncGenerator<AskEvent> {
+  let response: Response
+  try {
+    response = await fetch(`${baseUrl()}/ask`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+      signal,
+    })
+  } catch (cause) {
+    throw new ApiError('NETWORK', (cause as Error).message)
+  }
+
+  if (!response.ok) await raiseFor(response)
+  if (!response.body) throw new ApiError('NETWORK', 'The stream carried no body')
+
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+
+    buffer += decoder.decode(value, { stream: true })
+    const frames = buffer.split('\n\n')
+    buffer = frames.pop() ?? ''
+
+    for (const frame of frames) {
+      const event = parseFrame(frame)
+      if (event) yield event
+    }
+  }
 }

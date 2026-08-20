@@ -137,6 +137,81 @@ export const handlers = [
       mortys: 53,
     }),
   ),
+
+  http.get(`${BASE}/search`, ({ request }) => {
+    const url = new URL(request.url)
+    const q = (url.searchParams.get('q') ?? '').toLowerCase()
+
+    if (q === 'nothing') {
+      return HttpResponse.json({
+        query: q,
+        groups: {
+          characters: { items: [], total: 0 },
+          locations: { items: [], total: 0 },
+          episodes: { items: [], total: 0 },
+        },
+      })
+    }
+
+    return HttpResponse.json({
+      query: q,
+      groups: {
+        characters: { items: [character(1, 'Rick Sanchez')], total: 107 },
+        locations: {
+          items: [
+            {
+              id: 3,
+              name: 'Citadel of Ricks',
+              type: 'Space station',
+              dimension: 'unknown',
+              residentCount: 100,
+            },
+          ],
+          total: 1,
+        },
+        episodes: {
+          items: [
+            {
+              id: 1,
+              name: 'Pilot',
+              airDate: 'December 2, 2013',
+              episode: 'S01E01',
+              characterCount: 19,
+            },
+          ],
+          total: 1,
+        },
+      },
+    })
+  }),
+
+  http.post(`${BASE}/dossier`, async ({ request }) => {
+    const body = await request.json() as { entityId: number; persona?: string }
+
+    if (body.entityId === 429) {
+      return HttpResponse.json(
+        { error: { code: 'RATE_LIMITED', message: 'Out of portal fluid for today.' } },
+        { status: 429 },
+      )
+    }
+
+    if (body.entityId === 502) {
+      return HttpResponse.json(
+        { error: { code: 'AI_UNAVAILABLE', message: 'Grok is having a day.' } },
+        { status: 502 },
+      )
+    }
+
+    return HttpResponse.json({
+      entityType: 'character',
+      entityId: body.entityId,
+      persona: body.persona ?? 'rick',
+      text: 'Subject drinks. *burp* Subject invents. Mostly in that order.',
+      model: 'grok-test',
+      promptVersion: 1,
+      cached: false,
+    })
+  }),
 ]
 
 export const server = setupServer(...handlers)
