@@ -1,10 +1,17 @@
 import { buildCacheKey, type Resolved } from '../lib/cache.ts'
-import { PAGE_SIZE, TTL_SECONDS, toRef } from './refs.ts'
-import type { RawCharacter, RmListResponse } from '../clients/rmClient.ts'
-import type { Character, CharacterQuery, ListResponse } from '../types.ts'
+import { PAGE_SIZE, TTL_SECONDS, idsFromUrls, toRef, toRelationRef } from './refs.ts'
+import type { RawCharacter, RawEpisode, RmListResponse } from '../clients/rmClient.ts'
+import type {
+  Character,
+  CharacterDetail,
+  CharacterQuery,
+  ListResponse,
+} from '../types.ts'
 
 type CharacterClient = {
   listCharacters(query: CharacterQuery): Promise<RmListResponse<RawCharacter>>
+  getCharacter(id: number): Promise<RawCharacter>
+  getEpisodesByIds(ids: number[]): Promise<RawEpisode[]>
 }
 
 type CacheLike = {
@@ -56,5 +63,24 @@ export function createCharacterService(client: CharacterClient, cache: CacheLike
     })
   }
 
-  return { listCharacters }
+  async function getCharacter(id: number): Promise<Resolved<CharacterDetail>> {
+    // A detail request carries no parameters, so the path alone is the key.
+    return await cache.resolve(`character/${id}`, TTL_SECONDS, async () => {
+      const raw = await client.getCharacter(id)
+      const episodes = await client.getEpisodesByIds(idsFromUrls(raw.episode))
+
+      return {
+        character: toCharacter(raw),
+        origin: toRelationRef(raw.origin),
+        location: toRelationRef(raw.location),
+        episodes: episodes.map((episode) => ({
+          id: episode.id,
+          name: episode.name,
+          episode: episode.episode,
+        })),
+      }
+    })
+  }
+
+  return { listCharacters, getCharacter }
 }
