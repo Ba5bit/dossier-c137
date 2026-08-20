@@ -10,6 +10,22 @@
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
+    <script>
+      // Applied before first paint. The settings provider sets the same
+      // attribute once React mounts; until then this is what stops a
+      // light-dimension visitor from seeing a dark flash on every load.
+      (function () {
+        try {
+          var raw = localStorage.getItem('citadel-settings')
+          if (!raw) return
+          var dimension = JSON.parse(raw).dimension
+          if (['c-137', 'citadel', 'cronenberg'].indexOf(dimension) === -1) return
+          document.documentElement.setAttribute('data-dimension', dimension)
+        } catch (error) {
+          // A corrupt entry is not worth a blank page.
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>
